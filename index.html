@@ -36,9 +36,11 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" value="water-warehouse-default" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
-<div style="display:flex;gap:10px;margin-top:12px;">
+<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
 <button onclick="uploadCloudFinal()" style="background:#2563eb;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">⬆️ 上傳雲端</button>
 <button onclick="downloadCloudFinal()" style="background:#16a34a;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">⬇️ 下載雲端</button>
+<button onclick="forceUploadFinal()" style="background:#dc2626;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">🔥 強制覆蓋雲端(用此裝置)</button>
+<button onclick="clearCloudFinal()" style="background:#000;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">🗑️ 清空雲端</button>
 </div>
 <div id="syncStatusFinal" style="margin-top:10px;font-size:13px;color:#2563eb;font-weight:700;">● 已綁定，準備自動同步</div>
 <label style="font-size:13px;margin-top:10px;display:flex;gap:8px;align-items:center;cursor:pointer;"><input type="checkbox" id="autoSyncCheck" checked> <b>開啟自動同步 (手機↔電腦自動互通)</b></label>
@@ -198,6 +200,62 @@ setInterval(()=>{
     }
   }
 }, 3000);
+</script>
+
+<script>
+// 覆蓋版邏輯
+async function clearCloudFinal(){
+  if(!confirm('確定要清空雲端上的12筆舊資料嗎？清空後只會保留此裝置目前的資料')) return;
+  var gasUrl=localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-default';
+  try{
+    await fetch(gasUrl+'?code='+encodeURIComponent(code), {method:'POST', body: JSON.stringify([])});
+    // 分段版也要清
+    await fetch(gasUrl+'?code='+encodeURIComponent(code)+'&clear=1', {method:'POST', body: '[]'});
+    alert('雲端已清空，現在只剩 []');
+    document.getElementById('syncStatusFinal').textContent='● 雲端已清空';
+  }catch(e){ alert('清空失敗:'+e.message); }
+}
+async function forceUploadFinal(){
+  var hist=getLocalHist();
+  if(!confirm('要用此裝置目前的 '+hist.length+' 筆強制覆蓋雲端嗎？雲端的12筆舊資料會被刪除')) return;
+  var gasUrl=localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-default';
+  try{
+    var res=await fetch(gasUrl+'?code='+encodeURIComponent(code), {method:'POST', body: JSON.stringify(hist)});
+    var txt=await res.text().catch(()=>'');
+    localStorage.setItem('lastUploadCount', hist.length.toString());
+    alert('已用 '+hist.length+' 筆強制覆蓋雲端，舊的12筆已刪除');
+    document.getElementById('syncStatusFinal').textContent='● 已強制覆蓋 '+hist.length+' 筆';
+  }catch(e){
+    // no-cors fallback
+    await fetch(gasUrl+'?code='+encodeURIComponent(code), {method:'POST', mode:'no-cors', body: JSON.stringify(hist)});
+    alert('已強制上傳 '+hist.length+' 筆 (no-cors)，請再按下載確認');
+  }
+}
+// 修改 download 為可選擇是否合併
+async function downloadCloudFinalForce(){
+  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-default';
+  var gasUrl=document.getElementById('gasUrlInput').value.trim()||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+  try{
+    var res=await fetch(gasUrl+'?code='+encodeURIComponent(code));
+    var cloudHist=await res.json();
+    if(!Array.isArray(cloudHist)){ alert('雲端無資料'); return; }
+    if(confirm('雲端有 '+cloudHist.length+' 筆，此裝置有 '+getLocalHist().length+' 筆\n按確定=用雲端覆蓋此裝置(刪除舊的)\n按取消=合併兩邊')){
+      setLocalHist(cloudHist);
+      alert('已用雲端 '+cloudHist.length+' 筆覆蓋此裝置');
+      location.reload();
+    }else{
+      var local=getLocalHist();
+      var map={}; var all=local.concat(cloudHist); for(var i=0;i<all.length;i++){ var h=all[i]; if(h&&h.id) map[h.id]=h; }
+      var merged=[]; for(var k in map) merged.push(map[k]);
+      merged.sort((a,b)=> (b.id||'').localeCompare(a.id||''));
+      setLocalHist(merged);
+      alert('已合併為 '+merged.length+' 筆');
+      location.reload();
+    }
+  }catch(e){ alert('下載失敗:'+e.message); }
+}
 </script>
 </body>
 </html>
