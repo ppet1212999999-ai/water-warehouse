@@ -86,7 +86,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.51 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.52 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
@@ -572,31 +572,26 @@ window.fetch = async function(url, opts){
 
 <style>
 #db-tab-btn{padding:10px 18px;border-radius:999px;font-size:14px;background:#fff;color:#666;border:1px solid #eee;cursor:pointer;margin-left:6px}
-#db-tab-btn.active{background:#111;color:#fff}
 #db-panel{display:none;position:fixed;inset:0;z-index:9999;background:#f5f5f3;overflow:auto;padding:20px}
 #db-panel.show{display:block}
-#db-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+#db-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:16px}
+#qr-progress{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:none;align-items:center;justify-content:center;flex-direction:column;color:#fff}
+#qr-progress.show{display:flex}
 </style>
+<div id="qr-progress"><div style="width:200px;height:6px;background:#333;border-radius:99px;overflow:hidden;margin-bottom:12px"><div id="qr-bar" style="height:100%;width:0%;background:#fff;transition:width 0.2s"></div></div><div id="qr-text" style="font-size:14px">產生真實QR中 0/918</div></div>
 <div id="db-panel">
   <div style="max-width:900px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h2 style="font-size:20px;font-weight:bold">📦 資料庫 - 真實QR標籤 (v7.4.51)</h2>
+      <h2 style="font-size:20px;font-weight:bold">📦 資料庫 - v7.4.52 修復跳窗版</h2>
       <button id="db-close" style="width:36px;height:36px;border-radius:50%;background:#111;color:#fff">✕</button>
     </div>
     <div id="db-card">
-      <h3 style="font-weight:bold;margin-bottom:8px">🖨️ 材料QR標籤 - 真實可掃</h3>
-      <p style="font-size:12px;color:#666;margin-bottom:12px">共 918 筆 · 採用 QRCode.js 真實編碼，掃碼槍可直接掃原始編號</p>
+      <h3 style="font-weight:bold;margin-bottom:8px">🖨️ 材料QR標籤 - 真實可掃 (先產生再列印，不會卡)</h3>
+      <p style="font-size:12px;color:#666;margin-bottom:12px">共 918 筆 · 點一下會先在主畫面產生，再跳一次列印窗</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button id="db-print-all" style="padding:12px 18px;background:#111;color:#fff;border-radius:999px;font-weight:bold">🖨️ 列印全部 (918) 真實QR</button>
-        <button id="db-print-water" style="padding:12px 18px;background:#0369a1;color:#fff;border-radius:999px">💧 水料真實QR</button>
-        <button id="db-print-electric" style="padding:12px 18px;background:#a16207;color:#fff;border-radius:999px">⚡ 電料真實QR</button>
-      </div>
-    </div>
-    <div id="db-card">
-      <h3 style="font-weight:bold">測試掃描</h3>
-      <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
-        <canvas id="test-qr"></canvas>
-        <div><div style="font-weight:bold">1-1 範例</div><div style="font-size:12px;color:#666">掃這個應該顯示 1-1</div><button id="test-btn" style="margin-top:6px;padding:6px 12px;background:#eee;border-radius:999px">重新產生</button></div>
+        <button id="db-print-all" style="padding:12px 18px;background:#111;color:#fff;border-radius:999px;font-weight:bold">🖨️ 列印全部 (918)</button>
+        <button id="db-print-water" style="padding:12px 18px;background:#0369a1;color:#fff;border-radius:999px">💧 水料</button>
+        <button id="db-print-electric" style="padding:12px 18px;background:#a16207;color:#fff;border-radius:999px">⚡ 電料 (402)</button>
       </div>
     </div>
   </div>
@@ -607,47 +602,45 @@ window.__EMBEDDED_MATERIALS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "�
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 (function(){
-  function isAdmin(){ try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return true;} }
+  let isGenerating=false;
   function getMats(){ return window.__EMBEDDED_MATERIALS__||[]; }
-  function openRealPrint(mats, title){
+  async function generateAndPrint(mats, title){
+    if(isGenerating){ alert('正在產生中，請稍候'); return; }
+    isGenerating=true;
+    let progress=document.getElementById('qr-progress');
+    let bar=document.getElementById('qr-bar');
+    let text=document.getElementById('qr-text');
+    progress.classList.add('show');
+    let htmlParts=[];
+    for(let i=0;i<mats.length;i++){
+      let m=mats[i];
+      let txt=String(m.orig_code||m.sku||'');
+      try{
+        let dataUrl = await new Promise((res,rej)=>{
+          QRCode.toDataURL(txt, {width:120, margin:1, errorCorrectionLevel:'H'}, (err,url)=>{ if(err) rej(err); else res(url); });
+        });
+        htmlParts.push(`<div class="label"><img src="${dataUrl}"><div class="num">${txt}</div><div class="sku">${m.sku||''}</div><div class="name">${(m.name||'').slice(0,12)}</div></div>`);
+      }catch(e){ 
+        htmlParts.push(`<div class="label"><div style="width:88px;height:88px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:10px">${txt}</div><div class="num">${txt}</div></div>`);
+      }
+      let pct=Math.round((i+1)/mats.length*100);
+      bar.style.width=pct+'%';
+      text.textContent=`產生真實QR中 ${i+1}/${mats.length} (${pct}%)`;
+      if(i%20===0) await new Promise(r=>setTimeout(r,10));
+    }
+    progress.classList.remove('show');
+    isGenerating=false;
     let w=window.open('','_blank');
-    if(!w){ alert('請允許彈出視窗'); return; }
-    let matsStr = JSON.stringify(mats).replace(/</g,'\u003c');
-    w.document.open();
+    if(!w){ alert('彈出視窗被阻擋，請點網址列允許'); return; }
     w.document.write(`
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>QR \${title}</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
 <style>
-@page{size:A4;margin:5mm} body{font-family:-apple-system,sans-serif;padding:8px} 
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.label{border:1px dashed #aaa;padding:4px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}
-.label canvas{width:88px;height:88px;margin:0 auto;display:block}
-.num{font-size:11px;font-weight:900;margin-top:2px}
-.sku{font-size:7px;color:#666}
-.name{font-size:7px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.no-print{margin-bottom:10px}
-@media print{.no-print{display:none} .grid{gap:4px}}
+@page{size:A4;margin:5mm} body{font-family:sans-serif;padding:8px} .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px} .label{border:1px dashed #aaa;padding:4px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff} .label img{width:88px;height:88px;margin:0 auto;display:block} .num{font-size:11px;font-weight:900;margin-top:2px} .sku{font-size:7px;color:#666} .name{font-size:7px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}
 </style></head><body>
-<div class="no-print"><button onclick="window.print()" style="padding:10px 18px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF - 真實QR可掃</button><span style="margin-left:8px;font-size:12px">共 \${mats.length} 張 - \${title} · 下方編號可對照</span></div>
-<div class="grid" id="grid"></div>
-<script>
-let mats = \${matsStr};
-let grid = document.getElementById('grid');
-mats.forEach(m=>{
-  let div=document.createElement('div'); div.className='label';
-  let canvas=document.createElement('canvas');
-  let txt=String(m.orig_code||m.sku||'');
-  QRCode.toCanvas(canvas, txt, {width:88, margin:1, errorCorrectionLevel:'H'}, function(err){ if(err) console.error(err); });
-  div.appendChild(canvas);
-  let num=document.createElement('div'); num.className='num'; num.textContent=txt;
-  let sku=document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
-  let name=document.createElement('div'); name.className='name'; name.textContent=m.name||'';
-  div.appendChild(num); div.appendChild(sku); div.appendChild(name);
-  grid.appendChild(div);
-});
-<\/script>
+<div class="no-print"><button onclick="window.print()" style="padding:10px 18px;background:#111;color:#fff;border-radius:999px">🖨️ 立即列印 / 存PDF - 共 ${mats.length} 張真實QR</button><span style="margin-left:8px;font-size:12px">${title}</span><button onclick="window.close()" style="margin-left:8px;padding:6px 12px;border-radius:999px;border:1px solid #ddd">關閉</button></div>
+<div class="grid">${htmlParts.join('')}</div>
 </body></html>
-`.replace('${mats.length}', mats.length).replace('${title}', title).replace('${matsStr}', matsStr));
+`);
     w.document.close();
   }
   function addTab(){
@@ -659,17 +652,14 @@ mats.forEach(m=>{
     btn.style.cssText='padding:10px 18px;border-radius:999px;font-size:14px;background:#fff;color:#666;border:1px solid #eee;cursor:pointer;margin-left:6px';
     btn.onclick=function(){ document.getElementById('db-panel').classList.add('show'); };
     parent.appendChild(btn);
-    // 測試QR
-    setTimeout(()=>{ let c=document.getElementById('test-qr'); if(c&&window.QRCode) QRCode.toCanvas(c, '1-1', {width:100, margin:1}, ()=>{}); },500);
   }
-  setInterval(addTab,1000); setTimeout(addTab,500);
+  setInterval(addTab,1500); setTimeout(addTab,800);
   document.addEventListener('click', function(e){
     if(e.target.id==='db-close') document.getElementById('db-panel').classList.remove('show');
-    if(e.target.id==='db-print-all') openRealPrint(getMats(), '全部材料');
-    if(e.target.id==='db-print-water'){ let all=getMats(); let f=all.filter(m=>String(m.sku).startsWith('W-')); openRealPrint(f, '水材料'); }
-    if(e.target.id==='db-print-electric'){ let all=getMats(); let f=all.filter(m=>String(m.sku).startsWith('E-')); openRealPrint(f, '電材料'); }
-    if(e.target.id==='test-btn'){ let c=document.getElementById('test-qr'); QRCode.toCanvas(c, '1-1', {width:100, margin:1}); }
-  });
+    if(e.target.id==='db-print-all') generateAndPrint(getMats(), '全部材料 '+getMats().length+'張');
+    if(e.target.id==='db-print-water'){ let all=getMats(); let f=all.filter(m=>String(m.sku).startsWith('W-')); generateAndPrint(f, '水材料 '+f.length+'張'); }
+    if(e.target.id==='db-print-electric'){ let all=getMats(); let f=all.filter(m=>String(m.sku).startsWith('E-')); generateAndPrint(f, '電材料 '+f.length+'張'); }
+  }, {once:false});
 })();
 </script>
 </body>
