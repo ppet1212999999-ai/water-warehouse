@@ -32,10 +32,10 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.24o 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.32 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
-<div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" value="water-warehouse-default" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
+<div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
 <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
 <button onclick="uploadCloudFinal()" style="background:#2563eb;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">⬆️ 上傳雲端</button>
 <button onclick="downloadCloudFinal()" style="background:#16a34a;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">⬇️ 下載雲端</button>
@@ -56,7 +56,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 <div id="floatingSyncBtnFinal" style="position:fixed;bottom:90px;right:20px;z-index:9999;background:#2563eb;color:white;padding:14px 20px;border-radius:28px;font-weight:900;box-shadow:0 6px 16px rgba(0,0,0,0.3);cursor:pointer;" onclick="openSyncModal()">☁️ 自動同步</div>
 <script>
 const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec";
-const DEFAULT_SYNC_CODE = "water-warehouse-default";
+const DEFAULT_SYNC_CODE = "water-warehouse-v2-0822";
 function openSyncModal(){ var m=document.getElementById('syncModal'); if(m){ m.style.display='flex'; renderSyncModal(); } }
 function closeSyncModal(){ var m=document.getElementById('syncModal'); if(m) m.style.display='none'; }
 function getLocalHist(){
@@ -207,22 +207,21 @@ setInterval(()=>{
 // 覆蓋版邏輯
 
 async function clearLocalFinal(){
-  if(!confirm('確定要把此裝置的13筆舊資料全部刪除嗎？刪除後此裝置會變0筆')) return;
-  try{
-    localStorage.setItem('v7_4_22', JSON.stringify({orders:[], personnel:[]}));
-  }catch(e){}
+  if(!confirm('確定要把此裝置的所有舊資料 (v7_4_22 + 舊版 v7_4_21/v7_4_20...) 全部刪除嗎？刪除後此裝置會變0筆，且不會再自動恢復')) return;
+  var keysToClear=["v7_4_22","v7_4_21","v7_4_20","v7_4_15","v7_4_14","v7_4_12","v7_hist","hist"];
+  keysToClear.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  try{ localStorage.setItem('v7_4_22', JSON.stringify({orders:[], personnel:JSON.parse(localStorage.getItem('v7_4_22')||'{}').personnel||[]})); }catch(e){ localStorage.setItem('v7_4_22', JSON.stringify({orders:[], personnel:[]})); }
   localStorage.setItem('hist', JSON.stringify([]));
-  localStorage.setItem('v7_hist', JSON.stringify([]));
   localStorage.setItem('lastUploadCount', '0');
-  alert('此裝置已清空為0筆，請再按 強制覆蓋雲端 把雲端也變0筆');
-  renderSyncModal();
+  localStorage.setItem('autoSyncEnabled', 'false');
+  alert('已刪除所有本地舊版，包含 v7_4_21 等，現在是0筆。按確定後網頁會重整，重整後再手動開啟自動同步');
   location.reload();
 }
 
 async function clearCloudFinal(){
   if(!confirm('確定要清空雲端上的12筆舊資料嗎？清空後只會保留此裝置目前的資料')) return;
   var gasUrl=localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
-  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-default';
+  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-v2-0822';
   try{
     await fetch(gasUrl+'?code='+encodeURIComponent(code), {method:'POST', body: JSON.stringify([])});
     // 分段版也要清
@@ -235,7 +234,7 @@ async function forceUploadFinal(){
   var hist=getLocalHist();
   if(!confirm('要用此裝置目前的 '+hist.length+' 筆強制覆蓋雲端嗎？雲端的12筆舊資料會被刪除')) return;
   var gasUrl=localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
-  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-default';
+  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-v2-0822';
   try{
     var res=await fetch(gasUrl+'?code='+encodeURIComponent(code), {method:'POST', body: JSON.stringify(hist)});
     var txt=await res.text().catch(()=>'');
@@ -250,7 +249,7 @@ async function forceUploadFinal(){
 }
 // 修改 download 為可選擇是否合併
 async function downloadCloudFinalForce(){
-  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-default';
+  var code=document.getElementById('syncCodeInput').value.trim()||'water-warehouse-v2-0822';
   var gasUrl=document.getElementById('gasUrlInput').value.trim()||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
   try{
     var res=await fetch(gasUrl+'?code='+encodeURIComponent(code));
@@ -272,5 +271,29 @@ async function downloadCloudFinalForce(){
   }catch(e){ alert('下載失敗:'+e.message); }
 }
 </script>
-</body>
+<script>
+// 封鎖舊13筆復活
+const OLD_IDS=["M-965838-59","M-870464-44","M-835105-38","M-123456","M-789012"];
+function isOldData(arr){
+  if(!Array.isArray(arr)) return false;
+  for(let o of arr){ if(OLD_IDS.some(id=> (o.id||'').includes(id.split('-')[0])) ) return true; 
+    if((o.applicant||'')==='林秋結' && (o.date||'').includes('2026/8/22')) return true;
+  }
+  return false;
+}
+const _origFetch = window.fetch;
+window.fetch = async function(url, opts){
+  try{
+    if(typeof url==='string' && url.includes('script.google.com') && opts && opts.method==='POST'){
+      let bodyStr = typeof opts.body==='string'? opts.body : '';
+      if(bodyStr.includes('M-965838-59') || bodyStr.includes('林秋結')){
+        console.warn('阻擋舊13筆上傳');
+        alert('偵測到舊的13筆 (林秋結) 想要復活，已自動阻擋上傳！請關掉其他分頁');
+        return { text: async()=> '{"ok":true,"blocked":true}', json: async()=> ({ok:true, blocked:true}) };
+      }
+    }
+  }catch(e){}
+  return _origFetch(url, opts);
+};
+</script></body>
 </html>
