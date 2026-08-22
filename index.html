@@ -34,7 +34,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.24o 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
-<div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycbxLO9cEhPMfbsIIZIMNKJ-xFX7VU5Zl5Uo8fB3al_lWTjYeLWNlANorf1fFTpA4SQvb/exec"></div>
+<div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" value="water-warehouse-default" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
 <div style="display:flex;gap:10px;margin-top:12px;">
 <button onclick="uploadCloudFinal()" style="background:#2563eb;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">⬆️ 上傳雲端</button>
@@ -52,7 +52,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 </div>
 <div id="floatingSyncBtnFinal" style="position:fixed;bottom:90px;right:20px;z-index:9999;background:#2563eb;color:white;padding:14px 20px;border-radius:28px;font-weight:900;box-shadow:0 6px 16px rgba(0,0,0,0.3);cursor:pointer;" onclick="openSyncModal()">☁️ 自動同步</div>
 <script>
-const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxLO9cEhPMfbsIIZIMNKJ-xFX7VU5Zl5Uo8fB3al_lWTjYeLWNlANorf1fFTpA4SQvb/exec";
+const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec";
 const DEFAULT_SYNC_CODE = "water-warehouse-default";
 function openSyncModal(){ var m=document.getElementById('syncModal'); if(m){ m.style.display='flex'; renderSyncModal(); } }
 function closeSyncModal(){ var m=document.getElementById('syncModal'); if(m) m.style.display='none'; }
@@ -178,5 +178,26 @@ localStorage.setItem = function(k,v){
 }
 </script>
 
+
+<script>
+// 強制綁定新 GAS
+localStorage.setItem('gasUrl', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
+console.log('GAS URL updated to', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
+// 加強版：每3秒檢查是否有新資料就上傳
+setInterval(()=>{
+  var hist=null;
+  try{ var raw=localStorage.getItem('v7_4_22'); if(raw){ var obj=JSON.parse(raw); if(obj && obj.orders) hist=obj.orders; } }catch(e){}
+  if(!hist) try{ hist=JSON.parse(localStorage.getItem('hist')||'[]'); }catch(e){}
+  if(hist && hist.length>0){
+    var lastUpload = parseInt(localStorage.getItem('lastUploadCount')||'0');
+    if(hist.length !== lastUpload){
+      console.log('檢測到新筆數', hist.length, '自動上傳');
+      // 呼叫 autoUpload
+      if(typeof autoUpload==='function') autoUpload();
+      localStorage.setItem('lastUploadCount', hist.length.toString());
+    }
+  }
+}, 3000);
+</script>
 </body>
 </html>
