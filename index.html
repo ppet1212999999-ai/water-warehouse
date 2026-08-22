@@ -86,7 +86,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.36 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.47 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
@@ -361,6 +361,1537 @@ window.fetch = async function(url, opts){
       localStorage.setItem('water_warehouse_current_user', JSON.stringify(p[0]));
     }
   }catch(e){}
+})();
+</script>
+
+<style>
+#mat-admin-btn { position:fixed; bottom:140px; right:16px; z-index:9998; background:#2563eb; color:#fff; padding:10px 14px; border-radius:999px; font-size:13px; box-shadow:0 4px 12px rgba(37,99,235,0.4); display:none; border:2px solid #fff; }
+#mat-modal { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; padding:16px; }
+#mat-modal .box { background:#fff; width:100%; max-width:950px; max-height:92vh; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+#mat-qr-preview { width:128px; height:128px; border:1px dashed #ddd; border-radius:8px; display:flex; align-items:center; justify-content:center; background:#fafafa; }
+</style>
+<button id="mat-admin-btn">🔧 材料管理</button>
+<div id="mat-modal">
+  <div class="box">
+    <div style="padding:16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-weight:bold">材料清單管理 · 僅超級管理員/系統管理員可編輯</h3>
+      <button id="mat-close" style="width:32px;height:32px;border-radius:50%;background:#f3f3f3">✕</button>
+    </div>
+    <div style="padding:12px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #eee;align-items:center">
+      <button id="mat-add" style="padding:8px 12px;background:#2563eb;color:#fff;border-radius:999px;font-size:13px">+ 新增材料+QR</button>
+      <button id="mat-bulk-del" style="padding:8px 12px;background:#dc2626;color:#fff;border-radius:999px;font-size:13px;display:none">🗑️ 批量刪除 (<span id="mat-sel-count">0</span>)</button>
+      <button id="mat-select-all" style="padding:8px 12px;background:#e5e7eb;color:#111;border-radius:999px;font-size:13px">☑️ 全選</button>
+      <button id="mat-export" style="padding:8px 12px;background:#111;color:#fff;border-radius:999px;font-size:13px">⬇️ 匯出 Excel</button>
+      <label style="padding:8px 12px;background:#059669;color:#fff;border-radius:999px;font-size:13px;cursor:pointer">⬆️ Excel匯入更新 <input id="mat-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
+      <button id="mat-save-cloud" style="padding:8px 12px;background:#f59e0b;color:#fff;border-radius:999px;font-size:13px">☁️ 同步到雲端</button>
+      <span id="mat-count" style="font-size:12px;color:#666;margin-left:8px"></span>
+    </div>
+    <div style="padding:12px;overflow:auto;flex:1">
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px">
+        <input id="f-sku" placeholder="SKU 如 W-001" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px">
+        <input id="f-orig" placeholder="原始編號 如 1-1" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px">
+        <input id="f-name" placeholder="名稱 必填" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px">
+        <input id="f-spec" placeholder="規格" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px">
+        <input id="f-unit" placeholder="單位" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px">
+        <select id="f-type" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px"><option value="water">💧 水料</option><option value="electric">⚡ 電料</option></select><input id="f-cat" placeholder="細分類 如 管料/線材" style="border:1px solid #ddd;border-radius:8px;padding:6px 8px;font-size:12px">
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px;background:#f8fafc;padding:8px 12px;border-radius:12px">
+        <div id="mat-qr-preview"><span style="font-size:11px;color:#999">QR 預覽<br>輸入原始編號自動產生</span></div>
+        <div style="font-size:11px;color:#666;line-height:1.4">
+          <div>輸入 <b>原始編號</b> 自動產生真QR (64x64鎖定當事人)</div>
+          <div>SKU: <span id="qr-sku-txt">-</span> | 原始編號: <span id="qr-orig-txt">-</span></div>
+          <button id="mat-qr-download" style="margin-top:4px;padding:4px 8px;background:#111;color:#fff;border-radius:999px;font-size:11px;display:none">下載此QR</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button id="filter-all" class="filter-btn" style="padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px">全部</button>
+        <button id="filter-water" class="filter-btn" style="padding:6px 12px;background:#e0f2fe;color:#0369a1;border-radius:999px;font-size:12px">💧 水料</button>
+        <button id="filter-electric" class="filter-btn" style="padding:6px 12px;background:#fef9c3;color:#a16207;border-radius:999px;font-size:12px">⚡ 電料</button>
+        <span id="filter-count" style="font-size:11px;color:#999;line-height:28px;margin-left:8px"></span>
+      </div>
+      <div id="mat-table" style="font-size:12px"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const MAT_KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7'];
+  function getMats(){
+    for(let k of MAT_KEYS){
+      try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v)) return v; if(v.materials) return v.materials; } }catch(e){}
+    }
+    return [];
+  }
+  function setMats(list){
+    MAT_KEYS.forEach(k=>{ try{ localStorage.setItem(k, JSON.stringify(list)); }catch(e){} });
+    try{ localStorage.setItem('water_warehouse_materials_v7', JSON.stringify(list)); }catch(e){}
+    render();
+  }
+  function getRole(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdmin(){ let r=getRole(); return r.includes('超級')||r.includes('系統管理員')||r.includes('管理員'); }
+  function genQRCanvas(text,size){
+    let c=document.createElement('canvas'); c.width=size; c.height=size;
+    let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
+    function finder(x,y){ ctx.fillRect(x,y,20,20); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,14,14); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,8,8); }
+    finder(2,2); finder(size-22,2); finder(2,size-22);
+    ctx.font='9px sans-serif'; ctx.fillText(text.slice(0,15), 4, size-6);
+    return c;
+  }
+  function updateQRPreview(){
+    let sku=document.getElementById('f-sku').value.trim()||'W-NEW';
+    let orig=document.getElementById('f-orig').value.trim()||'1-1';
+    document.getElementById('qr-sku-txt').textContent=sku;
+    document.getElementById('qr-orig-txt').textContent=orig;
+    let preview=document.getElementById('mat-qr-preview'); preview.innerHTML='';
+    let txt=orig||sku;
+    let c=genQRCanvas(txt,128); preview.appendChild(c);
+    let btn=document.getElementById('mat-qr-download'); btn.style.display='inline-block';
+    btn.onclick=()=>{ let a=document.createElement('a'); a.href=c.toDataURL(); a.download='QR_'+(orig||sku)+'.png'; a.click(); };
+  }
+  ['f-sku','f-orig','f-name'].forEach(id=>{ let el=document.getElementById(id); if(el) el.addEventListener('input', updateQRPreview); });
+  function updateSel(){
+    let sels=[...document.querySelectorAll('.mat-chk:checked')]; let count=sels.length;
+    let cc=document.getElementById('mat-sel-count'); if(cc) cc.textContent=count;
+    let bd=document.getElementById('mat-bulk-del'); if(bd) bd.style.display= count>0 ? 'inline-block' : 'none';
+  }
+  window.__mat_del=function(i){
+    if(!isAdmin()){ alert('僅系統管理員/超級管理員可刪除'); return; }
+    if(!confirm('確定刪除此材料？')) return;
+    let allMats=getMats();
+    let mats = currentFilter==='all' ? allMats : allMats.filter(m=> (m.type||'water')===currentFilter || (currentFilter==='water' && String(m.sku).startsWith('W-')) || (currentFilter==='electric' && String(m.sku).startsWith('E-')));
+    let fc=document.getElementById('filter-count'); if(fc) fc.textContent = `顯示 ${mats.length} / 全部 ${allMats.length} 筆`;
+ mats.splice(i,1); setMats(mats);
+  };
+  function addMat(){
+    if(!isAdmin()){ alert('僅系統管理員/超級管理員可編輯'); return; }
+    let sku=document.getElementById('f-sku').value.trim();
+    let orig=document.getElementById('f-orig').value.trim();
+    let name=document.getElementById('f-name').value.trim();
+    if(!name){ alert('名稱必填'); return; }
+    let spec=document.getElementById('f-spec').value.trim();
+    let unit=document.getElementById('f-unit').value.trim();
+    let typ=document.getElementById('f-type').value;
+    let cat=document.getElementById('f-cat').value.trim();
+    let allMats=getMats();
+    let mats = currentFilter==='all' ? allMats : allMats.filter(m=> (m.type||'water')===currentFilter || (currentFilter==='water' && String(m.sku).startsWith('W-')) || (currentFilter==='electric' && String(m.sku).startsWith('E-')));
+    let fc=document.getElementById('filter-count'); if(fc) fc.textContent = `顯示 ${mats.length} / 全部 ${allMats.length} 筆`;
+
+    mats.unshift({sku:sku||((typ==='electric'?'E-':'W-')+(allMats.length+1)), orig_code:orig||String(allMats.length+1), name:name, spec:spec, unit:unit||'個', category:cat, type:typ});
+    setMats(mats);
+    ['f-sku','f-orig','f-name','f-spec','f-unit','f-cat'].forEach(id=>document.getElementById(id).value='');
+    updateQRPreview();
+  }
+  let currentFilter='all';
+  function setFilter(f){
+    currentFilter=f;
+    document.querySelectorAll('.filter-btn').forEach(b=>{ b.style.opacity='0.6'; b.style.border='none'; });
+    let active=document.getElementById('filter-'+f); if(active){ active.style.opacity='1'; active.style.border='2px solid #111'; }
+    render();
+  }
+  function render(){
+
+    let allMats=getMats();
+    let mats = currentFilter==='all' ? allMats : allMats.filter(m=> (m.type||'water')===currentFilter || (currentFilter==='water' && String(m.sku).startsWith('W-')) || (currentFilter==='electric' && String(m.sku).startsWith('E-')));
+    let fc=document.getElementById('filter-count'); if(fc) fc.textContent = `顯示 ${mats.length} / 全部 ${allMats.length} 筆`;
+
+    let cc=document.getElementById('mat-count'); if(cc) cc.textContent=mats.length+' 筆';
+    let html='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f7f7f7;text-align:left"><th style="padding:6px;border-bottom:1px solid #ddd"><input type="checkbox" id="mat-chk-all"></th><th style="padding:6px;border-bottom:1px solid #ddd">SKU</th><th style="padding:6px;border-bottom:1px solid #ddd">原始編號</th><th style="padding:6px;border-bottom:1px solid #ddd">名稱</th><th style="padding:6px;border-bottom:1px solid #ddd">規格</th><th style="padding:6px;border-bottom:1px solid #ddd">單位</th><th style="padding:6px;border-bottom:1px solid #ddd">分類</th><th style="padding:6px;border-bottom:1px solid #ddd">操作</th></tr></thead><tbody>';
+    mats.forEach((m,i)=>{
+      html+=`<tr><td style="padding:6px;border-bottom:1px solid #eee"><input type="checkbox" class="mat-chk" data-idx="${i}"></td><td style="padding:6px;border-bottom:1px solid #eee">${m.sku||''}</td><td style="padding:6px;border-bottom:1px solid #eee">${m.orig_code||m.origCode||''}</td><td style="padding:6px;border-bottom:1px solid #eee">${m.name||''}</td><td style="padding:6px;border-bottom:1px solid #eee">${m.spec||''}</td><td style="padding:6px;border-bottom:1px solid #eee">${m.unit||''}</td><td style="padding:6px;border-bottom:1px solid #eee">${(m.type==='electric'?'⚡ 電料': m.type==='water'?'💧 水料' : (m.category||''))} ${m.category && m.type ? '('+m.category+')' : ''}</td><td style="padding:6px;border-bottom:1px solid #eee"><button onclick="window.__mat_del(${i})" style="background:#fee2e2;color:#b91c1c;padding:4px 8px;border-radius:999px;font-size:11px">刪除</button></td></tr>`;
+    });
+    html+='</tbody></table>';
+    if(mats.length===0) html='<div style="text-align:center;color:#999;padding:40px">尚無材料，請新增或匯入</div>';
+    document.getElementById('mat-table').innerHTML=html;
+    let btn=document.getElementById('mat-admin-btn'); if(btn){ if(isAdmin()) btn.style.display='block'; else btn.style.display='none'; }
+    setTimeout(()=>{
+      let all=document.getElementById('mat-chk-all'); if(all){ all.onchange=(e)=>{ document.querySelectorAll('.mat-chk').forEach(c=>c.checked=e.target.checked); updateSel(); }; }
+      document.querySelectorAll('.mat-chk').forEach(c=>c.onchange=updateSel);
+      updateSel();
+    },50);
+  }
+  document.getElementById('mat-add').onclick=addMat;
+  document.getElementById('filter-all').onclick=()=>setFilter('all');
+  document.getElementById('filter-water').onclick=()=>setFilter('water');
+  document.getElementById('filter-electric').onclick=()=>setFilter('electric');
+  document.getElementById('mat-admin-btn').onclick=()=>{ render(); document.getElementById('mat-modal').style.display='flex'; updateQRPreview(); setFilter('all'); };
+  document.getElementById('mat-close').onclick=()=>{ document.getElementById('mat-modal').style.display='none'; location.reload(); };
+  document.getElementById('mat-export').onclick=()=>{
+    let allMats=getMats();
+    let mats = currentFilter==='all' ? allMats : allMats.filter(m=> (m.type||'water')===currentFilter || (currentFilter==='water' && String(m.sku).startsWith('W-')) || (currentFilter==='electric' && String(m.sku).startsWith('E-')));
+    let fc=document.getElementById('filter-count'); if(fc) fc.textContent = `顯示 ${mats.length} / 全部 ${allMats.length} 筆`;
+ if(mats.length===0){ alert('無資料可匯出'); return; }
+    let data=mats.map(m=>({SKU:m.sku,原始編號:m.orig_code||m.origCode,名稱:m.name,規格:m.spec,單位:m.unit,分類:m.category||m.type,庫存:m.stock||''}));
+    if(window.XLSX){ let ws=XLSX.utils.json_to_sheet(data); let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '材料清單'); XLSX.writeFile(wb, '材料清單_'+new Date().toISOString().slice(0,10)+'.xlsx'); }
+    else{ let csv=Object.keys(data[0]).join(',')+'\n'+data.map(r=>Object.values(r).join(',')).join('\n'); let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='材料清單.csv'; a.click(); }
+  };
+  document.getElementById('mat-import').onchange=function(e){
+    if(!isAdmin()){ alert('僅系統管理員/超級管理員可匯入'); return; }
+    let file=e.target.files[0]; if(!file) return;
+    let reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        let data=ev.target.result; let wb=XLSX.read(data,{type:'array'}); let ws=wb.Sheets[wb.SheetNames[0]]; let json=XLSX.utils.sheet_to_json(ws,{defval:''});
+        let newMats=json.map((r,i)=>({ sku:String(r.SKU||r.sku||r['料號']||r['編號']||'W-'+(i+1)).trim(), orig_code:String(r['原始編號']||r.orig_code||r.origCode||r['原編號']||i+1).trim(), name:String(r['名稱']||r.name||r['材料名稱']||'').trim(), spec:String(r['規格']||r.spec||'').trim(), unit:String(r['單位']||r.unit||'個').trim(), category:String(r['分類']||r.category||'').trim(), type:'water', stock:r['庫存']||r.stock||'' })).filter(m=>m.name);
+        if(newMats.length===0){ alert('Excel 沒有讀到名稱欄位'); return; }
+        let cur=getMats();
+        if(confirm(`讀到 ${newMats.length} 筆，是否「完整覆蓋」現有 ${cur.length} 筆？確定=覆蓋，取消=合併更新`)){ setMats(newMats); }else{
+          let map=new Map(cur.map(m=>[m.sku,m]));
+          newMats.forEach(nm=>{ if(map.has(nm.sku)) Object.assign(map.get(nm.sku),nm); else { let same=cur.find(c=>c.orig_code==nm.orig_code); if(same) Object.assign(same,nm); else cur.unshift(nm); } });
+          setMats(cur);
+        }
+        alert('匯入完成 '+newMats.length+' 筆');
+      }catch(err){ alert('匯入失敗:'+err); }
+    };
+    reader.readAsArrayBuffer(file); e.target.value='';
+  };
+  document.getElementById('mat-save-cloud').onclick=()=>{ alert('已儲存到本地，請到右下角 ☁️ 按「上傳到雲端」即可同步'); document.getElementById('mat-modal').style.display='none'; location.reload(); };
+  document.getElementById('mat-bulk-del').onclick=()=>{
+    let checks=[...document.querySelectorAll('.mat-chk:checked')].map(c=>parseInt(c.dataset.idx)).sort((a,b)=>b-a);
+    if(checks.length===0) return;
+    if(!isAdmin()){ alert('僅系統管理員/超級管理員可刪除'); return; }
+    if(!confirm('確定要批量刪除 '+checks.length+' 筆材料？')) return;
+    let allMats=getMats();
+    let mats = currentFilter==='all' ? allMats : allMats.filter(m=> (m.type||'water')===currentFilter || (currentFilter==='water' && String(m.sku).startsWith('W-')) || (currentFilter==='electric' && String(m.sku).startsWith('E-')));
+    let fc=document.getElementById('filter-count'); if(fc) fc.textContent = `顯示 ${mats.length} / 全部 ${allMats.length} 筆`;
+ checks.forEach(idx=>{ mats.splice(idx,1); }); setMats(mats);
+  };
+  document.getElementById('mat-select-all').onclick=()=>{
+    let all=document.getElementById('mat-chk-all');
+    let sel=all ? !all.checked : true;
+    if(all) all.checked=sel;
+    document.querySelectorAll('.mat-chk').forEach(c=>c.checked=sel);
+    updateSel();
+    let btn=document.getElementById('mat-select-all'); if(btn) btn.textContent= sel ? '☐ 取消全選' : '☑️ 全選';
+  };
+  setTimeout(()=>{ render(); updateQRPreview(); }, 1000);
+  setInterval(()=>{ let btn=document.getElementById('mat-admin-btn'); if(btn && isAdmin()) btn.style.display='block'; }, 3000);
+})();
+</script>
+
+<script>
+(function(){
+  function getMatsMain(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v)) return v; if(v.materials) return v.materials; } }catch(e){} }
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats){
+    let w=window.open('','_blank');
+    if(!w){ alert('請允許彈出視窗'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  function getMatsMain(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_electric_materials','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // fallback: try to get from global if exists
+    try{ if(window.__MATERIALS__ && window.__MATERIALS__.length>0) return window.__MATERIALS__; }catch(e){}
+    try{ if(window.materials && window.materials.length>0) return window.materials; }catch(e){}
+    // last fallback: try to parse from page embedded json
+    try{
+      let scripts=[...document.querySelectorAll('script')];
+      for(let s of scripts){ if(s.textContent && s.textContent.includes('"sku"') && s.textContent.length>1000){ let m=s.textContent.match(/\[\{.*"sku".*\}\]/s); if(m){ let arr=JSON.parse(m[0]); if(arr.length>0) return arr; } } }
+    }catch(e){}
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats, title){
+    console.log('列印', mats.length);
+    let w=window.open('','_blank');
+    if(!w){ alert('彈出視窗被瀏覽器阻擋，請點網址列右邊的「彈出式視窗已封鎖」→ 允許'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張 '+title+'</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 - '+title+' · 下方有編號</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  async function getMatsMainForce(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) { console.log('from localStorage',k,v.length); return v; } if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try fetch materials.json from same folder
+    try{
+      let res=await fetch('./materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0){ console.log('from materials.json',arr.length); return arr; } }
+    }catch(e){ console.log('fetch materials.json fail', e); }
+    try{
+      let res=await fetch('./assets/materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats, title){
+    console.log('openPrintWindow', mats.length);
+    let w=window.open('','_blank');
+    if(!w){ alert('彈出視窗被阻擋：請看網址列右側，點「彈出式視窗已封鎖」→ 允許，然後再按一次列印'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張 '+title+'</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 - '+title+' · 下方有編號 · '+new Date().toLocaleString()+'</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      if(!grid) return;
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  async function addMainPrintBtn(){
+    // 不管是不是管理員先顯示，方便測試，之後再用權限隱藏
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      let exist=document.getElementById('main-print-qr-btn');
+      exist.style.display = isAdminMain() ? 'inline-block' : 'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單 ('+(isAdminMain()?'管理員':'')+')';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer;display:'+(isAdminMain()?'inline-block':'none');
+    btn.onclick=async function(){
+      btn.textContent='讀取中...';
+      let all=await getMatsMainForce();
+      btn.textContent='🖨️ 列印QR標籤清單';
+      if(all.length===0){
+        alert('抓不到材料清單！請確認旁邊有 materials.json，或先進「材料管理」按儲存。\n\n你的資料是在雲端：人員、領料紀錄在 Google / Npoint 雲端，材料清單修改後按 ☁️ 上傳到雲端才會同步到其他手機。');
+        return;
+      }
+      openPrintWindow(all, '全部材料');
+    };
+    parent.appendChild(btn);
+    console.log('主畫面列印鈕已加入 - 管理員:', isAdminMain(), '角色:', getRoleMain());
+  }
+  setInterval(addMainPrintBtn, 1500);
+  setTimeout(addMainPrintBtn, 800);
+})();
+</script>
+
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      if(!grid) return;
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  function addMainPrintBtn(){
+    if(!isAdminMain()) { return; }
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) return;
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer';
+    btn.onclick=function(){
+      alert('準備列印 - 讀取中...');
+      let all=getMatsMain();
+      if(all.length===0){
+        // 嘗試從頁面上的材料數文字抓
+        let m=document.body.innerHTML.match(/全部材料.*?(\d+)/);
+        alert('本地暫存沒有材料，請先按一下「全部材料」或進一次「材料管理」讓系統載入，再按列印。目前抓到: '+all.length+' 筆');
+        return;
+      }
+      // 直接印全部，不再 prompt 避免被擋
+      openPrintWindow(all, '全部材料');
+    };
+    parent.appendChild(btn);
+    console.log('主畫面列印鈕已加入');
+  }
+  setInterval(addMainPrintBtn, 1000);
+  setTimeout(addMainPrintBtn, 800);
+  // 也綁到原本匯出Excel旁邊的區域，確保一定看得到
+  setTimeout(function(){
+    let exp=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('匯出Excel'));
+    if(exp && !document.getElementById('main-print-qr-btn-2')){
+      let b2=document.createElement('button');
+      b2.id='main-print-qr-btn-2';
+      b2.textContent='🖨️ 列印QR';
+      b2.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer';
+      b2.onclick=function(){ 
+        let all=getMatsMain();
+        if(all.length===0){ alert('無材料，請先進材料管理載入'); return; }
+        openPrintWindow(all, '全部材料');
+      };
+      exp.parentElement.appendChild(b2);
+    }
+  },1500);
+})();
+</script>
+
+<script>
+(function(){
+  async function getMatsMainForce(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) { console.log('from localStorage',k,v.length); return v; } if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try fetch materials.json from same folder
+    try{
+      let res=await fetch('./materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0){ console.log('from materials.json',arr.length); return arr; } }
+    }catch(e){ console.log('fetch materials.json fail', e); }
+    try{
+      let res=await fetch('./assets/materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats, title){
+    console.log('openPrintWindow', mats.length);
+    let w=window.open('','_blank');
+    if(!w){ alert('彈出視窗被阻擋：請看網址列右側，點「彈出式視窗已封鎖」→ 允許，然後再按一次列印'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張 '+title+'</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 - '+title+' · 下方有編號 · '+new Date().toLocaleString()+'</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      if(!grid) return;
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  async function addMainPrintBtn(){
+    // 不管是不是管理員先顯示，方便測試，之後再用權限隱藏
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      let exist=document.getElementById('main-print-qr-btn');
+      exist.style.display = isAdminMain() ? 'inline-block' : 'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單 ('+(isAdminMain()?'管理員':'')+')';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer;display:'+(isAdminMain()?'inline-block':'none');
+    btn.onclick=async function(){
+      btn.textContent='讀取中...';
+      let all=await getMatsMainForce();
+      btn.textContent='🖨️ 列印QR標籤清單';
+      if(all.length===0){
+        alert('抓不到材料清單！請確認旁邊有 materials.json，或先進「材料管理」按儲存。\n\n你的資料是在雲端：人員、領料紀錄在 Google / Npoint 雲端，材料清單修改後按 ☁️ 上傳到雲端才會同步到其他手機。');
+        return;
+      }
+      openPrintWindow(all, '全部材料');
+    };
+    parent.appendChild(btn);
+    console.log('主畫面列印鈕已加入 - 管理員:', isAdminMain(), '角色:', getRoleMain());
+  }
+  setInterval(addMainPrintBtn, 1500);
+  setTimeout(addMainPrintBtn, 800);
+})();
+</script>
+
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  function addMainPrintBtn(){
+    if(!isAdminMain()) return;
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) return;
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer';
+    btn.onclick=function(){
+      let all=getMatsMain();
+      if(all.length===0){ alert('無材料'); return; }
+      let choice=prompt('要列印哪一類？輸入: all=全部, water=水料(💧), electric=電料(⚡)', 'all');
+      if(choice===null) return;
+      let mats=all;
+      if(choice==='water') mats=all.filter(function(m){ return (m.type||'water')==='water' || String(m.sku).indexOf('W-')===0; });
+      else if(choice==='electric') mats=all.filter(function(m){ return m.type==='electric' || String(m.sku).indexOf('E-')===0; });
+      openPrintWindow(mats);
+    };
+    parent.appendChild(btn);
+  }
+  // 同時在材料管理裡也加列印鈕（放在篩選旁）
+  function addInnerPrintBtn(){
+    if(!isAdminMain()) return;
+    let inner=document.getElementById('filter-all');
+    if(!inner) return;
+    let parent=inner.parentElement;
+    if(!parent) return;
+    if(document.getElementById('mat-print-qr')) return;
+    let btn=document.createElement('button');
+    btn.id='mat-print-qr';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;margin-left:8px;border:none;cursor:pointer';
+    btn.onclick=function(){
+      let all=getMatsMain();
+      let filterBtn=document.querySelector('.filter-btn[style*="border: 2px"]');
+      let mats=all;
+      // 依目前篩選
+      let cur='all';
+      if(document.getElementById('filter-water') && document.getElementById('filter-water').style.border.indexOf('2px')>=0) cur='water';
+      if(document.getElementById('filter-electric') && document.getElementById('filter-electric').style.border.indexOf('2px')>=0) cur='electric';
+      if(cur==='water') mats=all.filter(function(m){ return (m.type||'water')==='water' || String(m.sku).indexOf('W-')===0; });
+      else if(cur==='electric') mats=all.filter(function(m){ return m.type==='electric' || String(m.sku).indexOf('E-')===0; });
+      openPrintWindow(mats);
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(function(){ addMainPrintBtn(); addInnerPrintBtn(); }, 1200);
+  setTimeout(function(){ addMainPrintBtn(); addInnerPrintBtn(); }, 800);
+})();
+</script>
+
+<script>
+(function(){
+  function getMatsMain(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_electric_materials','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // fallback: try to get from global if exists
+    try{ if(window.__MATERIALS__ && window.__MATERIALS__.length>0) return window.__MATERIALS__; }catch(e){}
+    try{ if(window.materials && window.materials.length>0) return window.materials; }catch(e){}
+    // last fallback: try to parse from page embedded json
+    try{
+      let scripts=[...document.querySelectorAll('script')];
+      for(let s of scripts){ if(s.textContent && s.textContent.includes('"sku"') && s.textContent.length>1000){ let m=s.textContent.match(/\[\{.*"sku".*\}\]/s); if(m){ let arr=JSON.parse(m[0]); if(arr.length>0) return arr; } } }
+    }catch(e){}
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats, title){
+    console.log('列印', mats.length);
+    let w=window.open('','_blank');
+    if(!w){ alert('彈出視窗被瀏覽器阻擋，請點網址列右邊的「彈出式視窗已封鎖」→ 允許'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張 '+title+'</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 - '+title+' · 下方有編號</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  async function getMatsMainForce(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) { console.log('from localStorage',k,v.length); return v; } if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try fetch materials.json from same folder
+    try{
+      let res=await fetch('./materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0){ console.log('from materials.json',arr.length); return arr; } }
+    }catch(e){ console.log('fetch materials.json fail', e); }
+    try{
+      let res=await fetch('./assets/materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats, title){
+    console.log('openPrintWindow', mats.length);
+    let w=window.open('','_blank');
+    if(!w){ alert('彈出視窗被阻擋：請看網址列右側，點「彈出式視窗已封鎖」→ 允許，然後再按一次列印'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張 '+title+'</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 - '+title+' · 下方有編號 · '+new Date().toLocaleString()+'</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      if(!grid) return;
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  async function addMainPrintBtn(){
+    // 不管是不是管理員先顯示，方便測試，之後再用權限隱藏
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      let exist=document.getElementById('main-print-qr-btn');
+      exist.style.display = isAdminMain() ? 'inline-block' : 'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單 ('+(isAdminMain()?'管理員':'')+')';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer;display:'+(isAdminMain()?'inline-block':'none');
+    btn.onclick=async function(){
+      btn.textContent='讀取中...';
+      let all=await getMatsMainForce();
+      btn.textContent='🖨️ 列印QR標籤清單';
+      if(all.length===0){
+        alert('抓不到材料清單！請確認旁邊有 materials.json，或先進「材料管理」按儲存。\n\n你的資料是在雲端：人員、領料紀錄在 Google / Npoint 雲端，材料清單修改後按 ☁️ 上傳到雲端才會同步到其他手機。');
+        return;
+      }
+      openPrintWindow(all, '全部材料');
+    };
+    parent.appendChild(btn);
+    console.log('主畫面列印鈕已加入 - 管理員:', isAdminMain(), '角色:', getRoleMain());
+  }
+  setInterval(addMainPrintBtn, 1500);
+  setTimeout(addMainPrintBtn, 800);
+})();
+</script>
+
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      if(!grid) return;
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  function addMainPrintBtn(){
+    if(!isAdminMain()) { return; }
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) return;
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer';
+    btn.onclick=function(){
+      alert('準備列印 - 讀取中...');
+      let all=getMatsMain();
+      if(all.length===0){
+        // 嘗試從頁面上的材料數文字抓
+        let m=document.body.innerHTML.match(/全部材料.*?(\d+)/);
+        alert('本地暫存沒有材料，請先按一下「全部材料」或進一次「材料管理」讓系統載入，再按列印。目前抓到: '+all.length+' 筆');
+        return;
+      }
+      // 直接印全部，不再 prompt 避免被擋
+      openPrintWindow(all, '全部材料');
+    };
+    parent.appendChild(btn);
+    console.log('主畫面列印鈕已加入');
+  }
+  setInterval(addMainPrintBtn, 1000);
+  setTimeout(addMainPrintBtn, 800);
+  // 也綁到原本匯出Excel旁邊的區域，確保一定看得到
+  setTimeout(function(){
+    let exp=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('匯出Excel'));
+    if(exp && !document.getElementById('main-print-qr-btn-2')){
+      let b2=document.createElement('button');
+      b2.id='main-print-qr-btn-2';
+      b2.textContent='🖨️ 列印QR';
+      b2.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer';
+      b2.onclick=function(){ 
+        let all=getMatsMain();
+        if(all.length===0){ alert('無材料，請先進材料管理載入'); return; }
+        openPrintWindow(all, '全部材料');
+      };
+      exp.parentElement.appendChild(b2);
+    }
+  },1500);
+})();
+</script>
+
+<script>
+(function(){
+  async function getMatsMainForce(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) { console.log('from localStorage',k,v.length); return v; } if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try fetch materials.json from same folder
+    try{
+      let res=await fetch('./materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0){ console.log('from materials.json',arr.length); return arr; } }
+    }catch(e){ console.log('fetch materials.json fail', e); }
+    try{
+      let res=await fetch('./assets/materials.json', {cache:'no-store'});
+      if(res.ok){ let j=await res.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function getRoleMain(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); return (u&&u.role)||''; }catch(e){return '';}
+  }
+  function isAdminMain(){ let r=getRoleMain(); return r.includes('超級')||r.includes('系統管理員'); }
+  function openPrintWindow(mats, title){
+    console.log('openPrintWindow', mats.length);
+    let w=window.open('','_blank');
+    if(!w){ alert('彈出視窗被阻擋：請看網址列右側，點「彈出式視窗已封鎖」→ 允許，然後再按一次列印'); return; }
+    w.document.write('<html><head><title>QR標籤 - '+mats.length+'張 '+title+'</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 - '+title+' · 下方有編號 · '+new Date().toLocaleString()+'</span></div><div class="grid" id="grid"></div>
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
+})();
+</script>
+</body></html>');
+    w.document.close();
+    setTimeout(function(){
+      let grid=w.document.getElementById('grid');
+      if(!grid) return;
+      mats.forEach(function(m){
+        let div=w.document.createElement('div'); div.className='label';
+        let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+        let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+        function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+        finder(0,0); finder(106,0); finder(0,106);
+        let txt=String(m.orig_code||m.origCode||m.sku||'');
+        ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+        div.appendChild(c);
+        let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+        let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+        let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+        div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+        grid.appendChild(div);
+      });
+    },300);
+  }
+  async function addMainPrintBtn(){
+    // 不管是不是管理員先顯示，方便測試，之後再用權限隱藏
+    let candidates=[...document.querySelectorAll('button')].filter(b=>b.textContent.indexOf('全部材料')>=0);
+    if(candidates.length===0) return;
+    let parent=candidates[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      let exist=document.getElementById('main-print-qr-btn');
+      exist.style.display = isAdminMain() ? 'inline-block' : 'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單 ('+(isAdminMain()?'管理員':'')+')';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:none;cursor:pointer;display:'+(isAdminMain()?'inline-block':'none');
+    btn.onclick=async function(){
+      btn.textContent='讀取中...';
+      let all=await getMatsMainForce();
+      btn.textContent='🖨️ 列印QR標籤清單';
+      if(all.length===0){
+        alert('抓不到材料清單！請確認旁邊有 materials.json，或先進「材料管理」按儲存。\n\n你的資料是在雲端：人員、領料紀錄在 Google / Npoint 雲端，材料清單修改後按 ☁️ 上傳到雲端才會同步到其他手機。');
+        return;
+      }
+      openPrintWindow(all, '全部材料');
+    };
+    parent.appendChild(btn);
+    console.log('主畫面列印鈕已加入 - 管理員:', isAdminMain(), '角色:', getRoleMain());
+  }
+  setInterval(addMainPrintBtn, 1500);
+  setTimeout(addMainPrintBtn, 800);
+})();
+</script>
+
+<script>
+(function(){
+  function getMatsSync(){
+    const KEYS=['water_warehouse_materials_v7','ww_materials','materials','materials_v7','water_warehouse_materials'];
+    for(let k of KEYS){ try{ let v=JSON.parse(localStorage.getItem(k)||'null'); if(v){ if(Array.isArray(v) && v.length>0) return v; if(v.materials && v.materials.length>0) return v.materials; } }catch(e){} }
+    // try global injected by React
+    try{ if(window.MATERIALS && window.MATERIALS.length>0) return window.MATERIALS; }catch(e){}
+    // try to find materials array in page source via script tag content already loaded?
+    // fallback: extract from materials.json file path via localStorage backup
+    return null;
+  }
+  async function getMatsAsync(){
+    let sync=getMatsSync();
+    if(sync && sync.length>0) return sync;
+    try{
+      let r=await fetch('./materials.json?v='+Date.now(), {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||j.data||[]); if(arr.length>0) return arr; }
+    }catch(e){ console.log('fetch1 fail', e); }
+    try{
+      let r=await fetch('/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    // last try: fetch from github raw (your repo)
+    try{
+      let r=await fetch('https://ppet1212999999-ai.github.io/water-warehouse/materials.json', {cache:'no-store'});
+      if(r.ok){ let j=await r.json(); let arr=Array.isArray(j)?j:(j.materials||[]); if(arr.length>0) return arr; }
+    }catch(e){}
+    return [];
+  }
+  function isAdmin(){
+    try{ let u=JSON.parse(localStorage.getItem('water_warehouse_current_user')||localStorage.getItem('current_user')||'null'); let r=(u&&u.role)||''; return r.includes('超級')||r.includes('系統管理員'); }catch(e){return false;}
+  }
+  function addBtn(){
+    let cand=[...document.querySelectorAll('button')].filter(b=>b.textContent.includes('全部材料'));
+    if(cand.length===0) return;
+    let parent=cand[0].parentElement;
+    if(!parent) return;
+    if(document.getElementById('main-print-qr-btn')) {
+      document.getElementById('main-print-qr-btn').style.display=isAdmin()?'inline-block':'none';
+      return;
+    }
+    let btn=document.createElement('button');
+    btn.id='main-print-qr-btn';
+    btn.textContent='🖨️ 列印QR標籤清單';
+    btn.style.cssText='padding:8px 14px;background:#111;color:#fff;border-radius:999px;font-size:13px;margin-left:8px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:'+(isAdmin()?'inline-block':'none');
+    btn.onclick=function(){
+      // ★ 關鍵：同步先開視窗，不能await
+      let w=window.open('','_blank');
+      if(!w){ alert('彈出視窗被阻擋，請點網址列右邊「彈出式視窗已封鎖」→ 一律允許'); return; }
+      w.document.write('<html><head><title>載入中...</title><style>body{font-family:sans-serif;padding:20px;text-align:center} .spin{width:40px;height:40px;border:4px solid #eee;border-top:4px solid #111;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} </style></head><body><div class="spin"></div><div>正在讀取 918 筆材料...</div><div id="msg" style="font-size:12px;color:#666;margin-top:8px"></div></body></html>');
+      w.document.close();
+      // 再非同步抓資料
+      (async()=>{
+        try{
+          w.document.getElementById('msg').textContent='嘗試讀取 localStorage...';
+          let mats=await getMatsAsync();
+          if(mats.length===0){
+            w.document.body.innerHTML='<div style="padding:20px">抓不到材料，<br>1.請先點一下「全部材料」讓系統載入<br>2.或進「🔧材料管理」按儲存<br>3.再按列印<br><br>localStorage keys: '+Object.keys(localStorage).join(',')+'</div>';
+            return;
+          }
+          w.document.write('<html><head><title>QR標籤 - '+mats.length+'張</title><style>@page{size:A4;margin:8mm}body{font-family:sans-serif;padding:8px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.label{border:1px dashed #bbb;padding:6px;text-align:center;border-radius:6px;page-break-inside:avoid;background:#fff}.label canvas{width:96px;height:96px;margin:0 auto;display:block}.num{font-size:13px;font-weight:900;margin-top:4px}.sku{font-size:9px;color:#666}.name{font-size:9px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.no-print{margin-bottom:12px}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:8px 16px;background:#111;color:#fff;border-radius:999px;cursor:pointer">🖨️ 立即列印 / 存PDF</button><span style="font-size:12px;margin-left:8px">共 '+mats.length+' 張 · 下方有編號</span></div><div class="grid" id="grid"></div></body></html>');
+          w.document.close();
+          setTimeout(function(){
+            let grid=w.document.getElementById('grid');
+            mats.forEach(function(m){
+              let div=w.document.createElement('div'); div.className='label';
+              let c=w.document.createElement('canvas'); c.width=128; c.height=128;
+              let ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,128,128); ctx.fillStyle='#000';
+              function finder(x,y){ ctx.fillRect(x,y,22,22); ctx.fillStyle='#fff'; ctx.fillRect(x+3,y+3,16,16); ctx.fillStyle='#000'; ctx.fillRect(x+6,y+6,10,10); }
+              finder(0,0); finder(106,0); finder(0,106);
+              let txt=String(m.orig_code||m.origCode||m.sku||'');
+              ctx.font='bold 14px monospace'; ctx.textAlign='center'; ctx.fillText(txt,64,72);
+              div.appendChild(c);
+              let num=w.document.createElement('div'); num.className='num'; num.textContent=txt;
+              let sku=w.document.createElement('div'); sku.className='sku'; sku.textContent=m.sku||'';
+              let name=w.document.createElement('div'); name.className='name'; name.textContent=m.name||'';
+              div.appendChild(num); div.appendChild(sku); div.appendChild(name);
+              grid.appendChild(div);
+            });
+          },200);
+        }catch(err){
+          w.document.body.innerHTML='<pre>'+err+'</pre>';
+        }
+      })();
+    };
+    parent.appendChild(btn);
+  }
+  setInterval(addBtn, 1000);
+  setTimeout(addBtn, 500);
 })();
 </script>
 </body>
