@@ -41,6 +41,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 <button onclick="downloadCloudFinal()" style="background:#16a34a;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">⬇️ 下載雲端</button>
 <button onclick="forceUploadFinal()" style="background:#dc2626;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">🔥 強制覆蓋雲端(用此裝置)</button>
 <button onclick="clearCloudFinal()" style="background:#000;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">🗑️ 清空雲端</button>
+<button onclick="clearLocalFinal()" style="background:#f59e0b;color:white;padding:12px 22px;border-radius:8px;border:none;cursor:pointer;font-weight:800;">🧹 清空此裝置(13筆)</button>
 </div>
 <div id="syncStatusFinal" style="margin-top:10px;font-size:13px;color:#2563eb;font-weight:700;">● 已綁定，準備自動同步</div>
 <label style="font-size:13px;margin-top:10px;display:flex;gap:8px;align-items:center;cursor:pointer;"><input type="checkbox" id="autoSyncCheck" checked> <b>開啟自動同步 (手機↔電腦自動互通)</b></label>
@@ -204,6 +205,20 @@ setInterval(()=>{
 
 <script>
 // 覆蓋版邏輯
+
+async function clearLocalFinal(){
+  if(!confirm('確定要把此裝置的13筆舊資料全部刪除嗎？刪除後此裝置會變0筆')) return;
+  try{
+    localStorage.setItem('v7_4_22', JSON.stringify({orders:[], personnel:[]}));
+  }catch(e){}
+  localStorage.setItem('hist', JSON.stringify([]));
+  localStorage.setItem('v7_hist', JSON.stringify([]));
+  localStorage.setItem('lastUploadCount', '0');
+  alert('此裝置已清空為0筆，請再按 強制覆蓋雲端 把雲端也變0筆');
+  renderSyncModal();
+  location.reload();
+}
+
 async function clearCloudFinal(){
   if(!confirm('確定要清空雲端上的12筆舊資料嗎？清空後只會保留此裝置目前的資料')) return;
   var gasUrl=localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
