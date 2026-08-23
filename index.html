@@ -797,192 +797,90 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- removed old building injection -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- removed placeholder -->
+
 <script>
-// === v7.4.70 單位地點雙欄 - 強化版 ===
+// === v7.4.72 FIX: 設定鈕固定在工令單號必填旁 + 僅管理員 + 29棟 ===
 (function(){
   var KEY='unit_locations_v7';
-  var defaults=['1教','2教','3教','4教','1宿','2宿','3宿','辦公室','倉庫','水電間','圖書館','餐廳'];
-  function getLocs(){ try{var v=JSON.parse(localStorage.getItem(KEY)||'null'); if(v&&v.length) return v;}catch(e){} return defaults; }
-  function saveLocs(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+  var DEFAULTS=["新手術樓", "中正樓", "思源樓", "新長青樓", "精神樓", "正子中心", "動力中心", "醫護大樓", "北區職舍", "臨床中心", "懷恩-懷遠", "垃圾場", "忘憂湖", "一門診", "二門診", "三門診", "湖畔門診", "重粒子", "法定(2號門)停車場", "立體停車場", "3號停車場", "科技大樓", "神經再生", "致德樓", "東院宿舍", "福利社", "托兒所", "社工室", "舊資訊"];
 
-  function inject(){
-    // 找所有包含 單位地點 文字的容器，往下找 input
-    var all=[...document.querySelectorAll('*')].filter(function(el){
-      return el.childNodes.length===1 && el.childNodes[0].nodeType===3 && (el.textContent||'').trim()==='單位地點';
-    });
-    // 如果沒找到純文字，找包含該文字的 div
-    if(all.length===0){
-      all=[...document.querySelectorAll('div,span,label')].filter(function(el){ return (el.textContent||'').trim()==='單位地點'; });
-    }
-    all.forEach(function(label){
-      var container=label.closest('div');
-      if(!container) return;
-      // 往上找兩層，確保是表單區塊
-      var formBlock=container.parentElement;
-      if(formBlock && formBlock.querySelector('#unit-loc-select')) return; // 已注入
-
-      // 找這個區塊裡的所有 input / select
-      var inputs=[...formBlock.querySelectorAll('input')];
-      var targetInput=inputs.find(function(inp){
-        var ph=(inp.placeholder||'');
-        return ph.includes('地點') || inp.id.includes('loc') || true; // 取第一個
-      });
-      if(!targetInput) return;
-      if(formBlock.querySelector('#unit-loc-select')) return;
-
-      var oldVal=targetInput.value||'';
-      // 隱藏原本
-      targetInput.style.display='none';
-      // 建立雙欄
-      var wrap=document.createElement('div');
-      wrap.style.cssText='display:flex;gap:8px;margin-top:8px;width:100%';
-      wrap.innerHTML=`
-        <select id="unit-loc-select" style="flex:0 0 40%;padding:10px;border:1px solid #ddd;border-radius:10px">
-          <option value="">選擇地點</option>
-          ${getLocs().map(function(l){ return `<option value="${l}">${l}</option>`}).join('')}
-        </select>
-        <input id="unit-loc-manual" type="text" placeholder="手填 301室 / 2F" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:10px" value="${oldVal}">
-        <button id="unit-loc-manage" type="button" style="padding:8px 10px;border-radius:20px;background:#111;color:#fff;border:none">⚙️</button>
-      `;
-      targetInput.parentElement.insertBefore(wrap, targetInput.nextSibling);
-
-      // 同步回原 input
-      function sync(){
-        var s=document.getElementById('unit-loc-select');
-        var m=document.getElementById('unit-loc-manual');
-        targetInput.value=((s.value||'')+' '+(m.value||'')).trim();
-        targetInput.dispatchEvent(new Event('input',{bubbles:true}));
-        targetInput.dispatchEvent(new Event('change',{bubbles:true}));
-      }
-      wrap.querySelector('#unit-loc-select').addEventListener('change', sync);
-      wrap.querySelector('#unit-loc-manual').addEventListener('input', sync);
-
-      // 管理彈窗
-      wrap.querySelector('#unit-loc-manage').onclick=function(){
-        if(document.getElementById('unit-loc-panel')){ document.getElementById('unit-loc-panel').remove(); return; }
-        var locs=getLocs();
-        var panel=document.createElement('div');
-        panel.id='unit-loc-panel';
-        panel.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:16px;z-index:999999;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.3);max-height:80vh;overflow:auto';
-        panel.innerHTML=`
-          <div style="display:flex;justify-content:space-between;margin-bottom:10px"><b>📍 地點管理</b><button id="loc-close" style="width:30px;height:30px;border-radius:50%;background:#111;color:#fff;border:none">✕</button></div>
-          <div style="display:flex;gap:6px;margin-bottom:10px">
-            <button id="loc-export" style="padding:6px 12px;border-radius:20px;background:#0ea5e9;color:#fff;border:none">⬇️ 匯出Excel</button>
-            <label style="padding:6px 12px;border-radius:20px;background:#111;color:#fff;cursor:pointer">⬆️ 匯入Excel<input id="loc-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
-          </div>
-          <div id="loc-list">${locs.map(function(l,i){ return `<div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f5f5f5;border-radius:8px;margin-bottom:4px"><span>${l}</span><button data-i="${i}" style="background:#e11d48;color:#fff;border:none;border-radius:12px;padding:2px 8px">刪除</button></div>`}).join('')}</div>
-          <div style="display:flex;gap:6px;margin-top:10px"><input id="loc-new" placeholder="新增地點" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px"><button id="loc-add" style="padding:6px 12px;background:#111;color:#fff;border:none;border-radius:20px">新增</button></div>
-        `;
-        document.body.appendChild(panel);
-        panel.querySelector('#loc-close').onclick=function(){ panel.remove(); };
-        panel.querySelector('#loc-add').onclick=function(){
-          var v=panel.querySelector('#loc-new').value.trim(); if(!v) return;
-          var ls=getLocs(); if(!ls.includes(v)){ ls.push(v); saveLocs(ls); } panel.remove(); inject();
-        };
-        panel.querySelectorAll('[data-i]').forEach(function(b){ b.onclick=function(){ var ls=getLocs(); ls.splice(parseInt(b.getAttribute('data-i')),1); saveLocs(ls); panel.remove(); inject(); }; });
-        panel.querySelector('#loc-export').onclick=function(){
-          var ws=XLSX.utils.json_to_sheet(getLocs().map(function(l,i){ return {地點:l}; })); var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'地點'); XLSX.writeFile(wb,'單位地點.xlsx');
-        };
-        panel.querySelector('#loc-import').onchange=function(e){
-          var f=e.target.files[0]; if(!f) return;
-          var r=new FileReader(); r.onload=function(ev){
-            var wb=XLSX.read(ev.target.result,{type:'binary'}); var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            var newL=rows.map(function(row){ return row.地點||row.單位地點||Object.values(row)[0]; }).filter(Boolean).map(function(s){ return String(s).trim(); });
-            if(newL.length){ saveLocs(newL); alert('匯入 '+newL.length+' 筆'); panel.remove(); inject(); }
-          }; r.readAsBinaryString(f);
-        };
-      };
-    });
-  }
-
-  // 用 MutationObserver 監聽表單出現
-  var obs=new MutationObserver(function(){ inject(); });
-  obs.observe(document.body, {childList:true, subtree:true});
-  setInterval(inject, 1500);
-  setTimeout(inject, 1000);
-})();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script>
-// === v7.4.74 最終修復：保留你的大樓 + 拖曳記憶 + 設定鈕固定在工令號旁 ===
-(function(){
-  const DRAG_KEY='ww_drag_pos_v7_74';
-  const BUILD_KEYS=['ww_building_list_v7_70','ww_building_list','ww_building_list_v7_68','buildingList'];
-  
-  // 1. 保留大樓 - 絕不寫死，只從你現有資料讀
-  function getMyBuildings(){
-    for(const k of BUILD_KEYS){
-      try{
-        const v=localStorage.getItem(k);
-        if(!v) continue;
-        const arr=JSON.parse(v);
-        if(Array.isArray(arr) && arr.length>0){
-          // 過濾掉 1教 2教 這種假資料
-          const real = arr.filter(b=>{ const s=(typeof b==='string'?b:(b.name||'')); return s && !/^\d+教$/.test(s.trim()); });
-          if(real.length>0) return real;
-          // 如果只有假資料，但數量>0，還是先回傳避免0筆
-          if(arr.length>0 && real.length===0 && !arr.some(b=>/^\d+教$/.test(typeof b==='string'?b:b.name))) return arr;
-        }
-      }catch(e){}
-    }
-    return null;
-  }
-
-  // 2. 拖曳不回彈 - 記憶位置
-  let pos=null; try{ pos=JSON.parse(localStorage.getItem(DRAG_KEY)||'null'); }catch(e){}
-  const applyDragPos=()=>{
-    const modal=document.querySelector('[data-drag-modal], .draggable-modal, #materialModal, #buildingModal');
-    if(modal && pos && pos.x!=null){ modal.style.left=pos.x+'px'; modal.style.top=pos.y+'px'; modal.style.right='auto'; modal.style.bottom='auto'; modal.style.position='fixed'; }
-  };
-  // 簡單拖曳記憶
-  document.addEventListener('mousedown', (e)=>{
-    const h=e.target.closest('.modal-header, [data-drag-handle]');
-    if(!h) return;
-    const m=h.closest('[data-drag-modal], .draggable-modal, .modal, #materialModal, #buildingModal');
-    if(!m) return;
-    let sx=e.clientX, sy=e.clientY, ox=m.offsetLeft, oy=m.offsetTop;
-    const mm=(ev)=>{ const nx=ox+ev.clientX-sx, ny=oy+ev.clientY-sy; m.style.left=Math.round(nx/5)*5+'px'; m.style.top=Math.round(ny/5)*5+'px'; m.style.position='fixed'; m.style.right='auto'; m.style.bottom='auto'; };
-    const mu=(ev)=>{ const final={x:parseInt(m.style.left), y:parseInt(m.style.top)}; localStorage.setItem(DRAG_KEY, JSON.stringify(final)); document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
-    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
-  });
-  setTimeout(applyDragPos, 800);
-
-  // 3. 設定鈕固定在 工令號必填 旁 + 僅管理員
-  function fixSettingsBtn(){
+  function getLocs(){
     try{
-      const role=(window.currentUserRole||localStorage.getItem('user_role')||'').toUpperCase();
-      const isAdmin=['SYSTEM_ADMIN','SUPER_ADMIN','ADMIN','系統管理員'].includes(role) || localStorage.getItem('isAdmin')==='true';
-      // 找工令號標籤
-      const labels=[...document.querySelectorAll('label, span, div')].filter(el=> (el.textContent||'').includes('工令號必填'));
-      const woLabel=labels[0];
-      const setBtn=document.querySelector('#settingsBtn, [data-settings-btn], button:has(>i.fa-gear), .settings-btn');
-      // 如果找不到按鈕，試著找文字含設定的按鈕
-      let btn=setBtn;
-      if(!btn){ btn=[...document.querySelectorAll('button')].find(b=> (b.textContent||'').includes('設定')); }
-      if(!btn) return;
-      if(!isAdmin){ btn.style.display='none'; return; }
-      btn.style.display='inline-flex';
-      btn.style.marginLeft='8px';
-      btn.style.verticalAlign='middle';
-      if(woLabel && woLabel.parentElement && !woLabel.parentElement.contains(btn)){
-        woLabel.insertAdjacentElement('afterend', btn);
+      var v=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(v && v.length){
+        if(v.includes('1教')){ localStorage.setItem(KEY, JSON.stringify(DEFAULTS)); return DEFAULTS.slice(); }
+        return v;
       }
-      // 加小樣式讓它明顯在旁邊
-      btn.style.position='relative';
-      btn.style.top='-1px';
     }catch(e){}
+    localStorage.setItem(KEY, JSON.stringify(DEFAULTS));
+    return DEFAULTS.slice();
   }
-  setInterval(fixSettingsBtn, 1000);
-  setTimeout(fixSettingsBtn, 1500);
+  function saveLocs(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+  function getRole(){
+    try{
+      var u=JSON.parse(localStorage.getItem('v7_loginUser')||'null') || JSON.parse(localStorage.getItem('water_warehouse_current_user')||'null');
+      if(u && u.role) return u.role;
+    }catch(e){}
+    return '';
+  }
+  function isAdmin(){ var r=getRole(); return r.includes('超級')||r.includes('系統管理員'); }
 
-  // 4. 手機同步 - 如果是 1教 2教 就用你的真實大樓覆蓋
-  const myRealBuildings=getMyBuildings();
-  if(myRealBuildings){
-    // 把真實資料寫回到所有 key，確保手機下次不會再變 1教 2教
-    BUILD_KEYS.forEach(k=>{ try{ localStorage.setItem(k, JSON.stringify(myRealBuildings)); }catch(e){} });
-    if(window.__BUILDING_LIST__){ window.__BUILDING_LIST__=myRealBuildings; }
+  function injectDropdown(){
+    document.querySelectorAll('label').forEach(function(label){
+      if((label.textContent||'').trim()!=='單位地點') return;
+      var formBlock=label.closest('div')?.parentElement;
+      if(!formBlock || formBlock.querySelector('#unit-loc-select')) return;
+      var inputs=[...formBlock.querySelectorAll('input')];
+      var target=inputs.find(i=> i.placeholder && i.placeholder.includes('B棟')) || inputs[0];
+      if(!target || target.dataset.patched) return;
+      var wrap=document.createElement('div');
+      wrap.innerHTML=`<div style="display:flex;gap:6px;margin-top:6px"><select id="unit-loc-select" style="flex:0 0 44%;padding:10px;border:1px solid #ddd;border-radius:999px"><option value="">選擇大樓 (${getLocs().length}棟)</option>${getLocs().map(l=>`<option value="${l}">${l}</option>`).join('')}</select><input id="unit-loc-manual" placeholder="加填 301/2F" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:999px"></div>`;
+      var selWrap=wrap.firstChild;
+      target.parentElement.insertBefore(selWrap, target.nextSibling);
+      target.style.display='none'; target.dataset.patched='1';
+      function sync(){ var s=selWrap.querySelector('#unit-loc-select'); var m=selWrap.querySelector('#unit-loc-manual'); target.value=((s.value||'')+' '+(m.value||'')).trim(); target.dispatchEvent(new Event('input',{bubbles:true})); target.dispatchEvent(new Event('change',{bubbles:true})); }
+      selWrap.querySelector('#unit-loc-select').addEventListener('change', sync);
+      selWrap.querySelector('#unit-loc-manual').addEventListener('input', sync);
+    });
   }
-  console.log('[v7.4.74] 已套用，保留你的大樓數:', myRealBuildings?myRealBuildings.length:'未找到，將沿用原有');
+
+  function injectBtn(){
+    document.querySelectorAll('label').forEach(function(label){
+      if(!(label.textContent||'').includes('工令單號')) return;
+      if(!label.innerHTML.includes('必填')) return;
+      if(label.querySelector('#wo-setting-btn')){ label.querySelector('#wo-setting-btn').style.display=isAdmin()?'inline-flex':'none'; return; }
+      var btn=document.createElement('button');
+      btn.id='wo-setting-btn'; btn.type='button'; btn.textContent='⚙️ 設定';
+      btn.style.cssText='display:'+(isAdmin()?'inline-flex':'none')+';margin-left:8px;padding:4px 12px;border-radius:999px;background:#111;color:#fff;border:none;font-size:12px;font-weight:900;cursor:pointer;';
+      btn.onclick=function(e){ e.preventDefault(); if(!isAdmin()){alert('僅管理員'); return;} openPanel(); };
+      label.appendChild(btn);
+      label.style.display='flex'; label.style.alignItems='center';
+    });
+  }
+
+  function openPanel(){
+    if(document.getElementById('loc-panel')){ document.getElementById('loc-panel').remove(); return; }
+    var locs=getLocs();
+    var div=document.createElement('div');
+    div.id='loc-panel';
+    div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:20px;border-radius:20px;z-index:9999999;min-width:380px;max-width:95vw;max-height:88vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);border:3px solid #111';
+    div.innerHTML=`<div style="display:flex;justify-content:space-between"><b>📍 大樓管理 ${locs.length}棟</b><button id="lp-close" style="width:32px;height:32px;border-radius:50%;background:#111;color:#fff;border:none">✕</button></div><div style="margin:10px 0;display:flex;gap:6px"><button id="lp-export" style="padding:6px 12px;border-radius:999px;background:#0ea5e9;color:#fff;border:none">⬇️匯出</button><label style="padding:6px 12px;border-radius:999px;background:#111;color:#fff">⬆️匯入<input id="lp-import" type=file accept=.xlsx,.xls style=display:none></label><button id="lp-reset" style="padding:6px 12px;border-radius:999px;background:#f59e0b;color:#fff;border:none">↩️還原29棟</button></div><div id=lp-list>${locs.map((l,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f5f5f5;border-radius:10px;margin-bottom:4px"><span>${l}</span><button data-i="${i}" style="background:#e11d48;color:#fff;border:none;border-radius:999px;padding:2px 8px">刪除</button></div>`).join('')}</div><div style="display:flex;gap:6px;margin-top:10px"><input id=lp-new placeholder="新增大樓" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:999px"><button id=lp-add style="padding:8px 16px;background:#111;color:#fff;border:none;border-radius:999px">新增</button></div>`;
+    document.body.appendChild(div);
+    div.querySelector('#lp-close').onclick=()=>div.remove();
+    div.querySelector('#lp-add').onclick=()=>{ var v=div.querySelector('#lp-new').value.trim(); if(!v) return; var ls=getLocs(); if(!ls.includes(v)) ls.push(v); saveLocs(ls); div.remove(); };
+    div.querySelectorAll('[data-i]').forEach(b=> b.onclick=()=>{ var ls=getLocs(); ls.splice(parseInt(b.dataset.i),1); saveLocs(ls); div.remove(); });
+    div.querySelector('#lp-reset').onclick=()=>{ if(!confirm('還原29棟？')) return; saveLocs(DEFAULTS); div.remove(); };
+    div.querySelector('#lp-export').onclick=()=>{ var ws=XLSX.utils.json_to_sheet(getLocs().map(l=>({地點:l}))); var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'地點'); XLSX.writeFile(wb,'大樓29棟.xlsx'); };
+    div.querySelector('#lp-import').onchange=(e)=>{ var f=e.target.files[0]; if(!f) return; var r=new FileReader(); r.onload=(ev)=>{ var wb=XLSX.read(ev.target.result,{type:'binary'}); var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); var nl=rows.map(r=>r.地點||r.單位地點||Object.values(r)[0]).filter(Boolean).map(s=>String(s).trim()); if(nl.length){ saveLocs(nl); alert('匯入'+nl.length); div.remove(); } }; r.readAsBinaryString(f); };
+  }
+
+  getLocs();
+  new MutationObserver(()=>{ injectDropdown(); injectBtn(); }).observe(document.body,{childList:true, subtree:true});
+  setInterval(()=>{ injectDropdown(); injectBtn(); }, 1000);
+  setTimeout(()=>{ injectDropdown(); injectBtn(); }, 500);
 })();
 </script>
 </body>
