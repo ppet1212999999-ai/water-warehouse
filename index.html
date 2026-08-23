@@ -86,7 +86,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.64 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.65 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
@@ -583,20 +583,20 @@ window.fetch = async function(url, opts){
       <button id="db-close" style="width:36px;height:36px;border-radius:50%;background:#111;color:#fff">✕</button>
     </div>
     <div id="db-card" style="border:2px solid #111">
-      <h3 style="font-weight:bold">📄 一般A4貼紙列印 - 分水料/電料</h3>
+      <h3>📄 一般A4貼紙列印 - 分水料/電料</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button id="db-a4-all" style="padding:12px 18px;background:#111;color:#fff;border-radius:999px">📄 A4 印全部 918張</button>
+        <button id="db-a4-all" style="padding:12px 18px;background:#111;color:#fff;border-radius:999px">📄 A4 全部 918</button>
         <button id="db-a4-water" style="padding:12px 18px;background:#0ea5e9;color:#fff;border-radius:999px">💧 A4 水料</button>
-        <button id="db-a4-electric" style="padding:12px 18px;background:#f59e0b;color:#fff;border-radius:999px">⚡ A4 電料 402張</button>
+        <button id="db-a4-electric" style="padding:12px 18px;background:#f59e0b;color:#fff;border-radius:999px">⚡ A4 電料</button>
       </div>
     </div>
     <div id="db-card">
-      <h3 style="font-weight:bold">🖨️ 熱感應 50x30mm</h3>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
-        <label style="font-size:12px">尺寸<select id="label-size" style="padding:6px;border-radius:8px;border:1px solid #ddd"><option value="50x30">50x30mm</option><option value="60x40">60x40mm</option><option value="40x25">40x25mm</option></select></label>
+      <h3>🖨️ 熱感應 50x30mm</h3>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <label>尺寸<select id="label-size"><option value="50x30">50x30</option><option value="60x40">60x40</option><option value="40x25">40x25</option></select></label>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button id="db-thermal-all" style="padding:10px 16px;background:#111;color:#fff;border-radius:999px">熱感應印全部</button>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="db-thermal-all" style="padding:10px 16px;background:#111;color:#fff;border-radius:999px">熱感應全部</button>
         <button id="db-thermal-water" style="padding:10px 16px;background:#0369a1;color:#fff;border-radius:999px">熱感應水料</button>
         <button id="db-thermal-electric" style="padding:10px 16px;background:#a16207;color:#fff;border-radius:999px">熱感應電料</button>
       </div>
@@ -610,904 +610,164 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
-  function getMats(){ return window.__MATS__||[]; }
-  function isAdmin(){
-    var txt=document.body.innerText||'';
-    return txt.includes('超級管理員') || txt.includes('系統管理員') || txt.includes('朱忠正');
-  }
+  function getMats(){return window.__MATS__||[];}
+  function isAdmin(){var t=document.body.innerText||''; return t.includes('超級管理員')||t.includes('系統管理員')||t.includes('朱忠正');}
   function getPersonnelFromDOM(){
     var list=[];
-    var cards=[...document.querySelectorAll('div')].filter(function(d){ return d.innerHTML.includes('重設11111') && d.querySelector('select'); });
+    var cards=[...document.querySelectorAll('div')].filter(function(d){return d.innerHTML.includes('重設11111')&&d.querySelector('select');});
     cards.forEach(function(card){
-      var spans=[...card.querySelectorAll('div,span')].map(function(e){ return e.textContent.trim(); }).filter(function(t){ return t.length>=2 && t.length<=8; });
-      var name=spans.find(function(t){ return /^[\u4e00-\u9fa5]{2,4}$/.test(t) && !t.includes('水電') && !t.includes('重設') && !t.includes('預設'); });
-      var dept=spans.find(function(t){ return t.includes('課')||t.includes('組'); });
+      var spans=[...card.querySelectorAll('div,span')].map(function(e){return e.textContent.trim();}).filter(function(t){return t.length>=2&&t.length<=8;});
+      var name=spans.find(function(t){return /^[\u4e00-\u9fa5]{2,4}$/.test(t)&&!t.includes('水電')&&!t.includes('重設');});
+      var dept=spans.find(function(t){return t.includes('課')||t.includes('組');});
       var sel=card.querySelector('select');
       var role=sel?sel.value:'領料';
-      if(name && !list.find(function(x){ return x.name===name; })){
-        list.push({name:name, dept:dept||'水電課', role:role});
-      }
+      if(name&&!list.find(function(x){return x.name===name;})){list.push({name:name,dept:dept||'水電課',role:role});}
     });
     return list;
   }
   function getPersonnel(){
     var KEYS=['water_warehouse_personnel_v7','personnel_list','ww_personnel'];
     for(var i=0;i<KEYS.length;i++){
-      try{
-        var v=JSON.parse(localStorage.getItem(KEYS[i])||'null');
-        if(v && Array.isArray(v) && v.length>1) return v;
-        if(v && v.personnel && v.personnel.length>1) return v.personnel;
-      }catch(e){}
+      try{var v=JSON.parse(localStorage.getItem(KEYS[i])||'null'); if(v&&Array.isArray(v)&&v.length>1) return v; if(v&&v.personnel&&v.personnel.length>1) return v.personnel;}catch(e){}
     }
     for(var j=0;j<localStorage.length;j++){
-      try{
-        var vv=JSON.parse(localStorage.getItem(localStorage.key(j))||'null');
-        if(Array.isArray(vv)&&vv.length>10&&vv[0].name) return vv;
-        if(vv&&vv.personnel&&vv.personnel.length>10) return vv.personnel;
-      }catch(e){}
+      try{var vv=JSON.parse(localStorage.getItem(localStorage.key(j))||'null'); if(Array.isArray(vv)&&vv.length>10&&vv[0].name) return vv; if(vv&&vv.personnel&&vv.personnel.length>10) return vv.personnel;}catch(e){}
     }
     return getPersonnelFromDOM();
   }
   function addDatabaseTab(){
-    var tabs=[...document.querySelectorAll('button')].filter(function(b){ return b.textContent.includes('人員設定'); });
+    var tabs=[...document.querySelectorAll('button')].filter(function(b){return b.textContent.includes('人員設定');});
     if(tabs.length===0) return;
     var parent=tabs[0].parentElement; if(!parent) return;
     if(document.getElementById('db-tab-btn')) return;
     var btn=document.createElement('button'); btn.id='db-tab-btn'; btn.textContent='📦 資料庫';
     btn.style.cssText='padding:10px 18px;border-radius:999px;font-size:14px;background:#fff;color:#666;border:1px solid #eee;cursor:pointer;margin-left:6px';
-    btn.onclick=function(){ document.getElementById('db-panel').classList.add('show'); };
+    btn.onclick=function(){document.getElementById('db-panel').classList.add('show');};
     parent.appendChild(btn);
   }
   function addPersonnelTopBar(){
-    var header=[...document.querySelectorAll('div')].find(function(d){ return d.textContent.includes('人員設定') && d.textContent.includes('人') && d.textContent.includes('種角色'); });
+    var header=[...document.querySelectorAll('div')].find(function(d){return d.textContent.includes('人員設定')&&d.textContent.includes('人')&&d.textContent.includes('種角色');});
     if(!header) return;
-    var existing=document.getElementById('per-excel-topbar');
-    if(existing){
-      existing.style.display = isAdmin() ? 'flex' : 'none';
-      return;
-    }
+    var ex=document.getElementById('per-excel-topbar');
+    if(ex){ex.style.display=isAdmin()?'flex':'none'; return;}
     var parent=header.parentElement; if(!parent) return;
     var bar=document.createElement('div');
     bar.id='per-excel-topbar';
-    bar.style.cssText='display:'+(isAdmin()?'flex':'none')+';gap:10px;align-items:center;padding:12px 16px;background:#fff8f8;border:2px solid #e11d48;border-radius:12px;margin:10px 16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,0.1);flex-wrap:wrap';
-    bar.innerHTML='<span style="font-weight:900">👥 人員 (僅超管/系管可操作)</span><button id="per-top-export" style="padding:8px 16px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:700;cursor:pointer">⬇️ EXCEL匯出</button><label style="padding:8px 16px;border-radius:999px;background:#111;color:#fff;font-weight:700;cursor:pointer">⬆️ EXCEL匯入<input id="per-top-import" type="file" accept=".xlsx,.xls" style="display:none"></label><span id="per-count" style="font-size:12px;color:#666">已抓到 '+getPersonnel().length+' 人</span>';
+    bar.style.cssText='display:'+(isAdmin()?'flex':'none')+';gap:10px;align-items:center;padding:12px 16px;background:#fff8f8;border:2px solid #e11d48;border-radius:12px;margin:10px 16px;position:sticky;top:0;z-index:20;flex-wrap:wrap';
+    bar.innerHTML='<span style="font-weight:900">👥 人員 (僅超管/系管)</span><button id="per-top-export" style="padding:8px 16px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:700">⬇️ EXCEL匯出</button><label style="padding:8px 16px;border-radius:999px;background:#111;color:#fff;font-weight:700">⬆️ EXCEL匯入<input id="per-top-import" type="file" accept=".xlsx,.xls" style="display:none"></label><span id="per-count">已抓到 '+getPersonnel().length+' 人</span>';
     parent.insertBefore(bar, parent.firstChild);
     document.getElementById('per-top-export').onclick=function(){
-      var list=getPersonnel();
-      if(list.length<2) list=getPersonnelFromDOM();
-      var data=list.map(function(p,i){ return {編號:i+1, 姓名:p.name||'', 單位:p.dept||'水電課', 角色:p.role||'領料'}; });
-      var ws=XLSX.utils.json_to_sheet(data);
-      var wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, '人員');
-      XLSX.writeFile(wb, '人員_'+list.length+'人.xlsx');
+      var list=getPersonnel(); if(list.length<2) list=getPersonnelFromDOM();
+      var data=list.map(function(p,i){return {編號:i+1,姓名:p.name||'',單位:p.dept||'水電課',角色:p.role||'領料'};});
+      var ws=XLSX.utils.json_to_sheet(data); var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'人員'); XLSX.writeFile(wb,'人員_'+list.length+'人.xlsx');
     };
     document.getElementById('per-top-import').addEventListener('change', function(e){
       if(!e.target.files[0]) return;
-      if(!isAdmin()){ alert('僅管理員'); return; }
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        var wb=XLSX.read(ev.target.result,{type:'binary'});
-        var sheet=wb.Sheets[wb.SheetNames[0]];
-        var rows=XLSX.utils.sheet_to_json(sheet);
-        var newList=rows.map(function(r){ return {name:r.姓名||'', dept:r.單位||'水電課', role:r.角色||'領料', id:'p_'+Date.now()+Math.random()}; }).filter(function(p){ return p.name; });
-        if(!confirm('讀到 '+newList.length+' 筆，覆蓋？')) return;
-        localStorage.setItem('water_warehouse_personnel_v7', JSON.stringify(newList));
-        localStorage.setItem('personnel_list', JSON.stringify(newList));
-        alert('匯入 '+newList.length+' 筆'); location.reload();
-      };
-      reader.readAsBinaryString(e.target.files[0]);
+      var r=new FileReader(); r.onload=function(ev){
+        var wb=XLSX.read(ev.target.result,{type:'binary'}); var sh=wb.Sheets[wb.SheetNames[0]]; var rows=XLSX.utils.sheet_to_json(sh);
+        var nl=rows.map(function(rr){return {name:rr.姓名||'',dept:rr.單位||'水電課',role:rr.角色||'領料',id:'p_'+Date.now()+Math.random()};}).filter(function(p){return p.name;});
+        if(!confirm('讀到 '+nl.length+' 筆覆蓋？')) return;
+        localStorage.setItem('water_warehouse_personnel_v7',JSON.stringify(nl)); localStorage.setItem('personnel_list',JSON.stringify(nl)); alert('匯入 '+nl.length); location.reload();
+      }; r.readAsBinaryString(e.target.files[0]);
     });
   }
-  function fixMaterialQR(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput=[...document.querySelectorAll('input')].find(function(i){ return i.placeholder && i.placeholder.indexOf('1-1')>-1; });
-    if(!origInput) return;
-    var area = [...document.querySelectorAll('div')].find(function(d){ return d.textContent.indexOf('輸入 原始編號 自動產生真QR')>-1; });
-    if(!area) return;
-    if(document.getElementById('real-qr-box')) return;
-    var box=document.createElement('div');
-    box.id='real-qr-box';
-    box.style.cssText='width:140px;height:140px;background:#fff;border:2px solid #111;border-radius:12px;padding:6px;display:flex;align-items:center;justify-content:center;margin-bottom:8px';
-    area.parentElement.insertBefore(box, area);
-    function renderQR(txt){
-      box.innerHTML='';
-      try{
-        new QRCode(box, {text: txt||'1-1', width:128, height:128, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.M});
-      }catch(e){ box.textContent=txt; }
+
+  // === 核心修復：只在材料管理彈窗內部動 ===
+  function fixMaterialModal(){
+    // 材料管理彈窗標題是「材料清單管理·僅超級管理員/系統管理員可編輯」
+    var title = [...document.querySelectorAll('div,span')].find(function(d){return d.textContent.includes('材料清單管理')&&d.textContent.includes('可編輯');});
+    if(!title) return;
+    var modal = title.closest('div').parentElement;
+    // 往上找固定彈窗容器（通常是 position:fixed 的）
+    var root = title;
+    for(var i=0;i<6;i++){
+      if(!root) break;
+      if(window.getComputedStyle(root).position==='fixed' || root.id) {}
+      root=root.parentElement;
     }
-    renderQR(origInput.value||'1-1');
-    origInput.addEventListener('input', function(){ renderQR(this.value||'1-1'); });
+    // 在彈窗內找輸入區
+    var origInput = [...modal.querySelectorAll('input')].find(function(inp){return inp.placeholder&&inp.placeholder.includes('1-1');});
+    var skuInput = [...modal.querySelectorAll('input')].find(function(inp){return inp.placeholder&&inp.placeholder.includes('W-001');});
+    if(!origInput || !skuInput) return;
+    if(document.getElementById('qr-fix-inside')) return;
+
+    var infoDiv = [...modal.querySelectorAll('div')].find(function(d){return d.textContent.includes('輸入 原始編號 自動產生真QR');});
+    if(!infoDiv) return;
+
+    // 建立真實QR容器，插在 infoDiv 前面，只在彈窗內
+    var wrapper=document.createElement('div');
+    wrapper.id='qr-fix-inside';
+    wrapper.style.cssText='display:flex;gap:16px;align-items:center;background:#fff;border:2px solid #111;border-radius:16px;padding:16px;margin:12px 0;';
+    var qrBox=document.createElement('div');
+    qrBox.id='qr-box-inside';
+    qrBox.style.cssText='width:130px;height:130px;border:1px solid #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff';
+    var info=document.createElement('div');
+    info.innerHTML='<div style="font-weight:900">✅ 真實QR已修復 (64x64)</div><div id="qr-inside-text" style="font-size:12px;color:#666;margin-top:4px">SKU: W-NEW | 原始編號: 1-1</div><div style="font-size:11px;color:#999;margin-top:4px">只打原始編號 → SKU自動帶入<br>QR內碼=原始編號</div><button id="dl-qr-inside" style="margin-top:6px;padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;border:none">下載此QR</button>';
+    wrapper.appendChild(qrBox);
+    wrapper.appendChild(info);
+    infoDiv.parentElement.insertBefore(wrapper, infoDiv);
+
+    // 隱藏舊的3黑點假圖，只在彈窗內
+    var grayBox = infoDiv.parentElement;
+    // 舊假圖通常是3個小div或img
+    [...grayBox.querySelectorAll('div')].forEach(function(d){
+      if(d.id==='qr-fix-inside' || d.id==='qr-box-inside') return;
+      if(d.textContent.includes('輸入 原始編號')) return;
+      if(d.children.length>2) return;
+    });
+    // 直接隱藏原來包含「輸入 原始編號」的灰色大框裡的舊圖
+    var oldImgs = [...grayBox.querySelectorAll('div')].filter(function(d){return d.innerHTML.includes('SKU: W-NEW');});
+    oldImgs.forEach(function(d){ if(d.id!=='qr-fix-inside') d.style.display='none'; });
+    infoDiv.style.display='none';
+
+    function render(txt){
+      qrBox.innerHTML='';
+      try{ new QRCode(qrBox,{text:txt||'1-1',width:120,height:120,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){qrBox.textContent=txt;}
+      var t=document.getElementById('qr-inside-text');
+      if(t){ t.textContent='SKU: '+(skuInput.value||'W-NEW')+' | 原始編號: '+(txt||'1-1')+' (此即QR內碼)'; }
+    }
+    function autoSKU(){
+      var orig=origInput.value.trim();
+      if(!orig) return;
+      var curr=skuInput.value.trim();
+      var isAuto=curr===''||curr==='W-NEW'||curr==='E-NEW';
+      if(isAuto){
+        var typeSelect=[...modal.querySelectorAll('select')].find(function(s){return s.innerHTML.includes('水料');});
+        var type='W';
+        if(typeSelect && (typeSelect.value.includes('電')||typeSelect.value.includes('E'))) type='E';
+        var newSKU=orig.startsWith('W-')||orig.startsWith('E-')?orig:type+'-'+orig;
+        skuInput.value=newSKU;
+      }
+      render(orig);
+    }
+    render(origInput.value||'1-1');
+    origInput.addEventListener('input', autoSKU);
+    skuInput.addEventListener('input', function(){ var t=document.getElementById('qr-inside-text'); if(t) t.textContent='SKU: '+(this.value||'W-NEW')+' | 原始編號: '+(origInput.value||'1-1'); });
+    document.getElementById('dl-qr-inside').onclick=function(){
+      var c=qrBox.querySelector('canvas'); if(c){ var a=document.createElement('a'); a.href=c.toDataURL(); a.download='QR_'+(origInput.value||'1-1')+'.png'; a.click(); }
+    };
+    // 監聽水料/電料切換
+    var waterSel=[...modal.querySelectorAll('select')].find(function(s){return s.innerHTML.includes('水料');});
+    if(waterSel){ waterSel.addEventListener('change', autoSKU); }
   }
-  setInterval(function(){ addDatabaseTab(); addPersonnelTopBar(); fixMaterialQR(); },1500);
-  setTimeout(function(){ addDatabaseTab(); addPersonnelTopBar(); fixMaterialQR(); },800);
+
+  setInterval(function(){ addDatabaseTab(); addPersonnelTopBar(); fixMaterialModal(); },1200);
+  setTimeout(function(){ addDatabaseTab(); addPersonnelTopBar(); fixMaterialModal(); },700);
+
   document.addEventListener('click', function(e){
     if(e.target.id==='db-close') document.getElementById('db-panel').classList.remove('show');
-    if(e.target.id==='db-a4-all'){
-      var mats=getMats(); var w=window.open('','_blank'); var html=mats.map(function(m){ return '<div class="l"><img src="'+m.qrDataUrl+'"><div class="n">'+m.orig_code+'</div><div>'+m.sku+'</div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.l{border:1px dashed #aaa;padding:6px;text-align:center}img{width:110px;height:110px}.n{font-weight:900}</style></head><body><button onclick="window.print()">印全部 '+mats.length+'</button><div class="grid">'+html+'</div>
-<script>
-(function(){
-  function injectRealQR(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    if(!origInput) return;
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    // 找到那個3黑點的容器：包含「輸入 原始編號 自動產生真QR」的那個大div
-    var infoDiv = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
-    if(!infoDiv) return;
-    var container = infoDiv.closest('div').parentElement; // 外層淺灰背景
-    if(!container) return;
-    if(document.getElementById('real-qr-fixed')) return;
-
-    // 砍掉舊的假QR：容器內所有小於60px的空div或img
-    // 先保留infoDiv，其它清掉
-    // 建立新版QR區
-    var wrapper = document.createElement('div');
-    wrapper.id='real-qr-fixed';
-    wrapper.style.cssText='display:flex;gap:16px;align-items:center;background:#fff;border:2px solid #111;border-radius:16px;padding:16px;margin:12px 0';
-
-    var qrBox = document.createElement('div');
-    qrBox.id='qr-box';
-    qrBox.style.cssText='width:140px;height:140px;background:#fff;border:1px solid #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0';
-
-    var info = document.createElement('div');
-    info.style.cssText='flex:1';
-    info.innerHTML='<div style="font-size:14px;font-weight:bold">✅ 真實QR (64x64 鎖定當事人) 已修復</div><div id="qr-text" style="font-size:12px;color:#666;margin-top:6px">SKU: W-NEW | 原始編號: 1-1</div><div style="font-size:11px;color:#999;margin-top:4px">👉 QR內碼 = 原始編號 (如 1-1)，不是SKU<br>👉 新增材料：SKU打 W-XXX，原始編號打 1-1 這種</div><button id="dl-qr-btn" style="margin-top:8px;padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;border:none;cursor:pointer">下載此QR</button>';
-
-    wrapper.appendChild(qrBox);
-    wrapper.appendChild(info);
-    
-    // 插到最前面，蓋掉舊的
-    container.insertBefore(wrapper, container.firstChild);
-
-    // 舊的假圖區隱藏
-    var oldFake = container.querySelectorAll(':scope > div');
-    oldFake.forEach(function(d){
-      if(d.id==='real-qr-fixed') return;
-      if(d.textContent.includes('輸入 原始編號')) {
-        d.style.display='none';
-      }
-    });
-    // 隱藏那些3黑點的絕對定位小方塊
-    [...container.querySelectorAll('div')].forEach(function(d){
-      if(d.children.length===0 && d.textContent.trim()==='' && d.offsetWidth<50 && d.offsetHeight<50){
-        var s=window.getComputedStyle(d);
-        if(s.backgroundColor==='rgb(0, 0, 0)' || d.style.backgroundColor==='black' || d.innerHTML.includes('■')){
-          d.style.display='none';
-        }
-      }
-    });
-    // 直接隱藏所有img如果是假的
-    setTimeout(function(){
-      [...container.querySelectorAll('img')].forEach(function(img){
-        if(img.id) return;
-        if(img.width<80 && img.src.startsWith('data:')) img.style.display='none';
-      });
-    },300);
-
-    function render(txt){
-      qrBox.innerHTML='';
-      try{
-        new QRCode(qrBox, {text: txt||'1-1', width:128, height:128, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M});
-      }catch(e){
-        qrBox.textContent=txt;
-      }
-      var t=document.getElementById('qr-text');
-      if(t){
-        var skuVal = skuInput ? (skuInput.value||'W-NEW') : 'W-NEW';
-        t.textContent='SKU: '+skuVal+' | 原始編號: '+(txt||'1-1')+' (此即QR內碼)';
-      }
-    }
-    render(origInput.value||'1-1');
-    origInput.addEventListener('input', function(){ render(this.value); });
-    if(skuInput){
-      skuInput.addEventListener('input', function(){
-        var t=document.getElementById('qr-text');
-        if(t) t.textContent='SKU: '+(this.value||'W-NEW')+' | 原始編號: '+(origInput.value||'1-1')+' (此即QR內碼)';
-      });
-    }
-    document.getElementById('dl-qr-btn').onclick=function(){
-      var canvas=qrBox.querySelector('canvas');
-      if(canvas){
-        var a=document.createElement('a');
-        a.href=canvas.toDataURL();
-        a.download='QR_'+(origInput.value||'1-1')+'.png';
-        a.click();
-      }else{
-        alert('請先輸入原始編號');
-      }
-    };
-  }
-  setInterval(injectRealQR, 1000);
-  setTimeout(injectRealQR, 600);
-})();
-</script>
-
-<script>
-(function(){
-  function setupAutoSKU(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    var typeSelect = document.querySelector('select'); // 水料/電料選單
-    // 找那個水料下拉
-    var waterSelect = [...document.querySelectorAll('select')].find(s=> s.innerHTML.includes('水料'));
-    if(!origInput || !skuInput) return;
-    if(origInput.dataset.autoBound) return;
-    origInput.dataset.autoBound='1';
-    
-    function autoFill(){
-      var orig = origInput.value.trim();
-      if(!orig) return;
-      // 如果SKU是空的、是 W-NEW、或是之前自動帶的，就自動帶
-      var currentSKU = skuInput.value.trim();
-      var isAuto = currentSKU==='' || currentSKU==='W-NEW' || currentSKU==='E-NEW' || currentSKU.startsWith('W-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU.startsWith('E-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU===origInput.dataset.lastOrig;
-      // 判斷水電
-      var type = 'W';
-      if(waterSelect){
-        var val = waterSelect.value||'';
-        if(val.includes('電') || val.includes('E')) type='E';
-        if(val.includes('水') || val.includes('W')) type='W';
-      }
-      if(isAuto || currentSKU===''){
-        var newSKU = type + '-' + orig;
-        // 如果orig已經有W-/E-開頭，就不重複加
-        if(orig.startsWith('W-') || orig.startsWith('E-')) newSKU = orig;
-        skuInput.value = newSKU;
-        // 觸發input事件讓其他監聽更新
-        skuInput.dispatchEvent(new Event('input', {bubbles:true}));
-        skuInput.dispatchEvent(new Event('change', {bubbles:true}));
-      }
-      origInput.dataset.lastOrig = orig;
-    }
-    origInput.addEventListener('input', autoFill);
-    origInput.addEventListener('blur', autoFill);
-    if(waterSelect){
-      waterSelect.addEventListener('change', function(){
-        // 切換水電時，如果SKU是自動的，重帶
-        var orig = origInput.value.trim();
-        if(!orig) return;
-        var type = this.value.includes('電') || this.value.includes('E') ? 'E' : 'W';
-        if(orig.startsWith('W-') || orig.startsWith('E-')) return;
-        skuInput.value = type + '-' + orig;
-      });
-    }
-  }
-  setInterval(setupAutoSKU, 1000);
-  setTimeout(setupAutoSKU, 800);
-})();
-</script>
-</body></html>'); w.document.close();
-    }
-    if(e.target.id==='db-a4-water'){
-      var mats=getMats().filter(function(m){ return String(m.sku).startsWith('W-'); }); var w=window.open('','_blank'); var html=mats.map(function(m){ return '<div class="l"><img src="'+m.qrDataUrl+'"><div class="n">'+m.orig_code+'</div><div>'+m.sku+'</div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.l{border:1px dashed #aaa;padding:6px;text-align:center}img{width:110px;height:110px}</style></head><body><button onclick="window.print()">水料 '+mats.length+'</button><div class="grid">'+html+'</div>
-<script>
-(function(){
-  function injectRealQR(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    if(!origInput) return;
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    // 找到那個3黑點的容器：包含「輸入 原始編號 自動產生真QR」的那個大div
-    var infoDiv = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
-    if(!infoDiv) return;
-    var container = infoDiv.closest('div').parentElement; // 外層淺灰背景
-    if(!container) return;
-    if(document.getElementById('real-qr-fixed')) return;
-
-    // 砍掉舊的假QR：容器內所有小於60px的空div或img
-    // 先保留infoDiv，其它清掉
-    // 建立新版QR區
-    var wrapper = document.createElement('div');
-    wrapper.id='real-qr-fixed';
-    wrapper.style.cssText='display:flex;gap:16px;align-items:center;background:#fff;border:2px solid #111;border-radius:16px;padding:16px;margin:12px 0';
-
-    var qrBox = document.createElement('div');
-    qrBox.id='qr-box';
-    qrBox.style.cssText='width:140px;height:140px;background:#fff;border:1px solid #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0';
-
-    var info = document.createElement('div');
-    info.style.cssText='flex:1';
-    info.innerHTML='<div style="font-size:14px;font-weight:bold">✅ 真實QR (64x64 鎖定當事人) 已修復</div><div id="qr-text" style="font-size:12px;color:#666;margin-top:6px">SKU: W-NEW | 原始編號: 1-1</div><div style="font-size:11px;color:#999;margin-top:4px">👉 QR內碼 = 原始編號 (如 1-1)，不是SKU<br>👉 新增材料：SKU打 W-XXX，原始編號打 1-1 這種</div><button id="dl-qr-btn" style="margin-top:8px;padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;border:none;cursor:pointer">下載此QR</button>';
-
-    wrapper.appendChild(qrBox);
-    wrapper.appendChild(info);
-    
-    // 插到最前面，蓋掉舊的
-    container.insertBefore(wrapper, container.firstChild);
-
-    // 舊的假圖區隱藏
-    var oldFake = container.querySelectorAll(':scope > div');
-    oldFake.forEach(function(d){
-      if(d.id==='real-qr-fixed') return;
-      if(d.textContent.includes('輸入 原始編號')) {
-        d.style.display='none';
-      }
-    });
-    // 隱藏那些3黑點的絕對定位小方塊
-    [...container.querySelectorAll('div')].forEach(function(d){
-      if(d.children.length===0 && d.textContent.trim()==='' && d.offsetWidth<50 && d.offsetHeight<50){
-        var s=window.getComputedStyle(d);
-        if(s.backgroundColor==='rgb(0, 0, 0)' || d.style.backgroundColor==='black' || d.innerHTML.includes('■')){
-          d.style.display='none';
-        }
-      }
-    });
-    // 直接隱藏所有img如果是假的
-    setTimeout(function(){
-      [...container.querySelectorAll('img')].forEach(function(img){
-        if(img.id) return;
-        if(img.width<80 && img.src.startsWith('data:')) img.style.display='none';
-      });
-    },300);
-
-    function render(txt){
-      qrBox.innerHTML='';
-      try{
-        new QRCode(qrBox, {text: txt||'1-1', width:128, height:128, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M});
-      }catch(e){
-        qrBox.textContent=txt;
-      }
-      var t=document.getElementById('qr-text');
-      if(t){
-        var skuVal = skuInput ? (skuInput.value||'W-NEW') : 'W-NEW';
-        t.textContent='SKU: '+skuVal+' | 原始編號: '+(txt||'1-1')+' (此即QR內碼)';
-      }
-    }
-    render(origInput.value||'1-1');
-    origInput.addEventListener('input', function(){ render(this.value); });
-    if(skuInput){
-      skuInput.addEventListener('input', function(){
-        var t=document.getElementById('qr-text');
-        if(t) t.textContent='SKU: '+(this.value||'W-NEW')+' | 原始編號: '+(origInput.value||'1-1')+' (此即QR內碼)';
-      });
-    }
-    document.getElementById('dl-qr-btn').onclick=function(){
-      var canvas=qrBox.querySelector('canvas');
-      if(canvas){
-        var a=document.createElement('a');
-        a.href=canvas.toDataURL();
-        a.download='QR_'+(origInput.value||'1-1')+'.png';
-        a.click();
-      }else{
-        alert('請先輸入原始編號');
-      }
-    };
-  }
-  setInterval(injectRealQR, 1000);
-  setTimeout(injectRealQR, 600);
-})();
-</script>
-
-<script>
-(function(){
-  function setupAutoSKU(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    var typeSelect = document.querySelector('select'); // 水料/電料選單
-    // 找那個水料下拉
-    var waterSelect = [...document.querySelectorAll('select')].find(s=> s.innerHTML.includes('水料'));
-    if(!origInput || !skuInput) return;
-    if(origInput.dataset.autoBound) return;
-    origInput.dataset.autoBound='1';
-    
-    function autoFill(){
-      var orig = origInput.value.trim();
-      if(!orig) return;
-      // 如果SKU是空的、是 W-NEW、或是之前自動帶的，就自動帶
-      var currentSKU = skuInput.value.trim();
-      var isAuto = currentSKU==='' || currentSKU==='W-NEW' || currentSKU==='E-NEW' || currentSKU.startsWith('W-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU.startsWith('E-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU===origInput.dataset.lastOrig;
-      // 判斷水電
-      var type = 'W';
-      if(waterSelect){
-        var val = waterSelect.value||'';
-        if(val.includes('電') || val.includes('E')) type='E';
-        if(val.includes('水') || val.includes('W')) type='W';
-      }
-      if(isAuto || currentSKU===''){
-        var newSKU = type + '-' + orig;
-        // 如果orig已經有W-/E-開頭，就不重複加
-        if(orig.startsWith('W-') || orig.startsWith('E-')) newSKU = orig;
-        skuInput.value = newSKU;
-        // 觸發input事件讓其他監聽更新
-        skuInput.dispatchEvent(new Event('input', {bubbles:true}));
-        skuInput.dispatchEvent(new Event('change', {bubbles:true}));
-      }
-      origInput.dataset.lastOrig = orig;
-    }
-    origInput.addEventListener('input', autoFill);
-    origInput.addEventListener('blur', autoFill);
-    if(waterSelect){
-      waterSelect.addEventListener('change', function(){
-        // 切換水電時，如果SKU是自動的，重帶
-        var orig = origInput.value.trim();
-        if(!orig) return;
-        var type = this.value.includes('電') || this.value.includes('E') ? 'E' : 'W';
-        if(orig.startsWith('W-') || orig.startsWith('E-')) return;
-        skuInput.value = type + '-' + orig;
-      });
-    }
-  }
-  setInterval(setupAutoSKU, 1000);
-  setTimeout(setupAutoSKU, 800);
-})();
-</script>
-</body></html>'); w.document.close();
-    }
-    if(e.target.id==='db-a4-electric'){
-      var mats=getMats().filter(function(m){ return String(m.sku).startsWith('E-'); }); var w=window.open('','_blank'); var html=mats.map(function(m){ return '<div class="l"><img src="'+m.qrDataUrl+'"><div class="n">'+m.orig_code+'</div><div>'+m.sku+'</div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.l{border:1px dashed #aaa;padding:6px;text-align:center}img{width:110px;height:110px}</style></head><body><button onclick="window.print()">電料 '+mats.length+'</button><div class="grid">'+html+'</div>
-<script>
-(function(){
-  function injectRealQR(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    if(!origInput) return;
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    // 找到那個3黑點的容器：包含「輸入 原始編號 自動產生真QR」的那個大div
-    var infoDiv = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
-    if(!infoDiv) return;
-    var container = infoDiv.closest('div').parentElement; // 外層淺灰背景
-    if(!container) return;
-    if(document.getElementById('real-qr-fixed')) return;
-
-    // 砍掉舊的假QR：容器內所有小於60px的空div或img
-    // 先保留infoDiv，其它清掉
-    // 建立新版QR區
-    var wrapper = document.createElement('div');
-    wrapper.id='real-qr-fixed';
-    wrapper.style.cssText='display:flex;gap:16px;align-items:center;background:#fff;border:2px solid #111;border-radius:16px;padding:16px;margin:12px 0';
-
-    var qrBox = document.createElement('div');
-    qrBox.id='qr-box';
-    qrBox.style.cssText='width:140px;height:140px;background:#fff;border:1px solid #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0';
-
-    var info = document.createElement('div');
-    info.style.cssText='flex:1';
-    info.innerHTML='<div style="font-size:14px;font-weight:bold">✅ 真實QR (64x64 鎖定當事人) 已修復</div><div id="qr-text" style="font-size:12px;color:#666;margin-top:6px">SKU: W-NEW | 原始編號: 1-1</div><div style="font-size:11px;color:#999;margin-top:4px">👉 QR內碼 = 原始編號 (如 1-1)，不是SKU<br>👉 新增材料：SKU打 W-XXX，原始編號打 1-1 這種</div><button id="dl-qr-btn" style="margin-top:8px;padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;border:none;cursor:pointer">下載此QR</button>';
-
-    wrapper.appendChild(qrBox);
-    wrapper.appendChild(info);
-    
-    // 插到最前面，蓋掉舊的
-    container.insertBefore(wrapper, container.firstChild);
-
-    // 舊的假圖區隱藏
-    var oldFake = container.querySelectorAll(':scope > div');
-    oldFake.forEach(function(d){
-      if(d.id==='real-qr-fixed') return;
-      if(d.textContent.includes('輸入 原始編號')) {
-        d.style.display='none';
-      }
-    });
-    // 隱藏那些3黑點的絕對定位小方塊
-    [...container.querySelectorAll('div')].forEach(function(d){
-      if(d.children.length===0 && d.textContent.trim()==='' && d.offsetWidth<50 && d.offsetHeight<50){
-        var s=window.getComputedStyle(d);
-        if(s.backgroundColor==='rgb(0, 0, 0)' || d.style.backgroundColor==='black' || d.innerHTML.includes('■')){
-          d.style.display='none';
-        }
-      }
-    });
-    // 直接隱藏所有img如果是假的
-    setTimeout(function(){
-      [...container.querySelectorAll('img')].forEach(function(img){
-        if(img.id) return;
-        if(img.width<80 && img.src.startsWith('data:')) img.style.display='none';
-      });
-    },300);
-
-    function render(txt){
-      qrBox.innerHTML='';
-      try{
-        new QRCode(qrBox, {text: txt||'1-1', width:128, height:128, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M});
-      }catch(e){
-        qrBox.textContent=txt;
-      }
-      var t=document.getElementById('qr-text');
-      if(t){
-        var skuVal = skuInput ? (skuInput.value||'W-NEW') : 'W-NEW';
-        t.textContent='SKU: '+skuVal+' | 原始編號: '+(txt||'1-1')+' (此即QR內碼)';
-      }
-    }
-    render(origInput.value||'1-1');
-    origInput.addEventListener('input', function(){ render(this.value); });
-    if(skuInput){
-      skuInput.addEventListener('input', function(){
-        var t=document.getElementById('qr-text');
-        if(t) t.textContent='SKU: '+(this.value||'W-NEW')+' | 原始編號: '+(origInput.value||'1-1')+' (此即QR內碼)';
-      });
-    }
-    document.getElementById('dl-qr-btn').onclick=function(){
-      var canvas=qrBox.querySelector('canvas');
-      if(canvas){
-        var a=document.createElement('a');
-        a.href=canvas.toDataURL();
-        a.download='QR_'+(origInput.value||'1-1')+'.png';
-        a.click();
-      }else{
-        alert('請先輸入原始編號');
-      }
-    };
-  }
-  setInterval(injectRealQR, 1000);
-  setTimeout(injectRealQR, 600);
-})();
-</script>
-
-<script>
-(function(){
-  function setupAutoSKU(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    var typeSelect = document.querySelector('select'); // 水料/電料選單
-    // 找那個水料下拉
-    var waterSelect = [...document.querySelectorAll('select')].find(s=> s.innerHTML.includes('水料'));
-    if(!origInput || !skuInput) return;
-    if(origInput.dataset.autoBound) return;
-    origInput.dataset.autoBound='1';
-    
-    function autoFill(){
-      var orig = origInput.value.trim();
-      if(!orig) return;
-      // 如果SKU是空的、是 W-NEW、或是之前自動帶的，就自動帶
-      var currentSKU = skuInput.value.trim();
-      var isAuto = currentSKU==='' || currentSKU==='W-NEW' || currentSKU==='E-NEW' || currentSKU.startsWith('W-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU.startsWith('E-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU===origInput.dataset.lastOrig;
-      // 判斷水電
-      var type = 'W';
-      if(waterSelect){
-        var val = waterSelect.value||'';
-        if(val.includes('電') || val.includes('E')) type='E';
-        if(val.includes('水') || val.includes('W')) type='W';
-      }
-      if(isAuto || currentSKU===''){
-        var newSKU = type + '-' + orig;
-        // 如果orig已經有W-/E-開頭，就不重複加
-        if(orig.startsWith('W-') || orig.startsWith('E-')) newSKU = orig;
-        skuInput.value = newSKU;
-        // 觸發input事件讓其他監聽更新
-        skuInput.dispatchEvent(new Event('input', {bubbles:true}));
-        skuInput.dispatchEvent(new Event('change', {bubbles:true}));
-      }
-      origInput.dataset.lastOrig = orig;
-    }
-    origInput.addEventListener('input', autoFill);
-    origInput.addEventListener('blur', autoFill);
-    if(waterSelect){
-      waterSelect.addEventListener('change', function(){
-        // 切換水電時，如果SKU是自動的，重帶
-        var orig = origInput.value.trim();
-        if(!orig) return;
-        var type = this.value.includes('電') || this.value.includes('E') ? 'E' : 'W';
-        if(orig.startsWith('W-') || orig.startsWith('E-')) return;
-        skuInput.value = type + '-' + orig;
-      });
-    }
-  }
-  setInterval(setupAutoSKU, 1000);
-  setTimeout(setupAutoSKU, 800);
-})();
-</script>
-</body></html>'); w.document.close();
-    }
-    if(e.target.id==='db-thermal-all' || e.target.id==='db-thermal-water' || e.target.id==='db-thermal-electric'){
+    if(e.target.id==='db-a4-all'){ var mats=getMats(); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div style="font-weight:900">'+m.orig_code+'</div><div>'+m.sku+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">印全部 '+mats.length+'</button><div class="g">'+h+'</div></body></html>'); w.document.close();}
+    if(e.target.id==='db-a4-water'){ var mats=getMats().filter(function(m){return String(m.sku).startsWith('W-');}); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div>'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">水料 '+mats.length+'</button><div class="g">'+h+'</div></body></html>'); w.document.close();}
+    if(e.target.id==='db-a4-electric'){ var mats=getMats().filter(function(m){return String(m.sku).startsWith('E-');}); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div>'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">電料 '+mats.length+'</button><div class="g">'+h+'</div></body></html>'); w.document.close();}
+    if(e.target.id==='db-thermal-all'||e.target.id==='db-thermal-water'||e.target.id==='db-thermal-electric'){
       var mats=getMats(); var list=mats;
-      if(e.target.id==='db-thermal-water') list=mats.filter(function(m){ return String(m.sku).startsWith('W-'); });
-      if(e.target.id==='db-thermal-electric') list=mats.filter(function(m){ return String(m.sku).startsWith('E-'); });
+      if(e.target.id==='db-thermal-water') list=mats.filter(function(m){return String(m.sku).startsWith('W-');});
+      if(e.target.id==='db-thermal-electric') list=mats.filter(function(m){return String(m.sku).startsWith('E-');});
       var size=document.getElementById('label-size').value; var ww=size.split('x')[0]; var hh=size.split('x')[1];
-      var w=window.open('','_blank'); var html=list.map(function(m){ return '<div style="width:'+ww+'mm;height:'+hh+'mm;padding:2mm;page-break-after:always;display:flex;gap:2mm"><img style="width:'+(hh-4)+'mm;height:'+(hh-4)+'mm" src="'+m.qrDataUrl+'"><div><div style="font-weight:900">'+m.orig_code+'</div><div>'+m.sku+'</div><div>'+m.name+'</div></div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:'+ww+'mm '+hh+'mm;margin:0} @media print{.np{display:none}}</style></head><body><div class="np"><button onclick="window.print()">印 '+list.length+' 張</button></div>'+html+'
-<script>
-(function(){
-  function injectRealQR(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    if(!origInput) return;
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    // 找到那個3黑點的容器：包含「輸入 原始編號 自動產生真QR」的那個大div
-    var infoDiv = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
-    if(!infoDiv) return;
-    var container = infoDiv.closest('div').parentElement; // 外層淺灰背景
-    if(!container) return;
-    if(document.getElementById('real-qr-fixed')) return;
-
-    // 砍掉舊的假QR：容器內所有小於60px的空div或img
-    // 先保留infoDiv，其它清掉
-    // 建立新版QR區
-    var wrapper = document.createElement('div');
-    wrapper.id='real-qr-fixed';
-    wrapper.style.cssText='display:flex;gap:16px;align-items:center;background:#fff;border:2px solid #111;border-radius:16px;padding:16px;margin:12px 0';
-
-    var qrBox = document.createElement('div');
-    qrBox.id='qr-box';
-    qrBox.style.cssText='width:140px;height:140px;background:#fff;border:1px solid #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0';
-
-    var info = document.createElement('div');
-    info.style.cssText='flex:1';
-    info.innerHTML='<div style="font-size:14px;font-weight:bold">✅ 真實QR (64x64 鎖定當事人) 已修復</div><div id="qr-text" style="font-size:12px;color:#666;margin-top:6px">SKU: W-NEW | 原始編號: 1-1</div><div style="font-size:11px;color:#999;margin-top:4px">👉 QR內碼 = 原始編號 (如 1-1)，不是SKU<br>👉 新增材料：SKU打 W-XXX，原始編號打 1-1 這種</div><button id="dl-qr-btn" style="margin-top:8px;padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;border:none;cursor:pointer">下載此QR</button>';
-
-    wrapper.appendChild(qrBox);
-    wrapper.appendChild(info);
-    
-    // 插到最前面，蓋掉舊的
-    container.insertBefore(wrapper, container.firstChild);
-
-    // 舊的假圖區隱藏
-    var oldFake = container.querySelectorAll(':scope > div');
-    oldFake.forEach(function(d){
-      if(d.id==='real-qr-fixed') return;
-      if(d.textContent.includes('輸入 原始編號')) {
-        d.style.display='none';
-      }
-    });
-    // 隱藏那些3黑點的絕對定位小方塊
-    [...container.querySelectorAll('div')].forEach(function(d){
-      if(d.children.length===0 && d.textContent.trim()==='' && d.offsetWidth<50 && d.offsetHeight<50){
-        var s=window.getComputedStyle(d);
-        if(s.backgroundColor==='rgb(0, 0, 0)' || d.style.backgroundColor==='black' || d.innerHTML.includes('■')){
-          d.style.display='none';
-        }
-      }
-    });
-    // 直接隱藏所有img如果是假的
-    setTimeout(function(){
-      [...container.querySelectorAll('img')].forEach(function(img){
-        if(img.id) return;
-        if(img.width<80 && img.src.startsWith('data:')) img.style.display='none';
-      });
-    },300);
-
-    function render(txt){
-      qrBox.innerHTML='';
-      try{
-        new QRCode(qrBox, {text: txt||'1-1', width:128, height:128, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M});
-      }catch(e){
-        qrBox.textContent=txt;
-      }
-      var t=document.getElementById('qr-text');
-      if(t){
-        var skuVal = skuInput ? (skuInput.value||'W-NEW') : 'W-NEW';
-        t.textContent='SKU: '+skuVal+' | 原始編號: '+(txt||'1-1')+' (此即QR內碼)';
-      }
-    }
-    render(origInput.value||'1-1');
-    origInput.addEventListener('input', function(){ render(this.value); });
-    if(skuInput){
-      skuInput.addEventListener('input', function(){
-        var t=document.getElementById('qr-text');
-        if(t) t.textContent='SKU: '+(this.value||'W-NEW')+' | 原始編號: '+(origInput.value||'1-1')+' (此即QR內碼)';
-      });
-    }
-    document.getElementById('dl-qr-btn').onclick=function(){
-      var canvas=qrBox.querySelector('canvas');
-      if(canvas){
-        var a=document.createElement('a');
-        a.href=canvas.toDataURL();
-        a.download='QR_'+(origInput.value||'1-1')+'.png';
-        a.click();
-      }else{
-        alert('請先輸入原始編號');
-      }
-    };
-  }
-  setInterval(injectRealQR, 1000);
-  setTimeout(injectRealQR, 600);
-})();
-</script>
-
-<script>
-(function(){
-  function setupAutoSKU(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    var typeSelect = document.querySelector('select'); // 水料/電料選單
-    // 找那個水料下拉
-    var waterSelect = [...document.querySelectorAll('select')].find(s=> s.innerHTML.includes('水料'));
-    if(!origInput || !skuInput) return;
-    if(origInput.dataset.autoBound) return;
-    origInput.dataset.autoBound='1';
-    
-    function autoFill(){
-      var orig = origInput.value.trim();
-      if(!orig) return;
-      // 如果SKU是空的、是 W-NEW、或是之前自動帶的，就自動帶
-      var currentSKU = skuInput.value.trim();
-      var isAuto = currentSKU==='' || currentSKU==='W-NEW' || currentSKU==='E-NEW' || currentSKU.startsWith('W-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU.startsWith('E-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU===origInput.dataset.lastOrig;
-      // 判斷水電
-      var type = 'W';
-      if(waterSelect){
-        var val = waterSelect.value||'';
-        if(val.includes('電') || val.includes('E')) type='E';
-        if(val.includes('水') || val.includes('W')) type='W';
-      }
-      if(isAuto || currentSKU===''){
-        var newSKU = type + '-' + orig;
-        // 如果orig已經有W-/E-開頭，就不重複加
-        if(orig.startsWith('W-') || orig.startsWith('E-')) newSKU = orig;
-        skuInput.value = newSKU;
-        // 觸發input事件讓其他監聽更新
-        skuInput.dispatchEvent(new Event('input', {bubbles:true}));
-        skuInput.dispatchEvent(new Event('change', {bubbles:true}));
-      }
-      origInput.dataset.lastOrig = orig;
-    }
-    origInput.addEventListener('input', autoFill);
-    origInput.addEventListener('blur', autoFill);
-    if(waterSelect){
-      waterSelect.addEventListener('change', function(){
-        // 切換水電時，如果SKU是自動的，重帶
-        var orig = origInput.value.trim();
-        if(!orig) return;
-        var type = this.value.includes('電') || this.value.includes('E') ? 'E' : 'W';
-        if(orig.startsWith('W-') || orig.startsWith('E-')) return;
-        skuInput.value = type + '-' + orig;
-      });
-    }
-  }
-  setInterval(setupAutoSKU, 1000);
-  setTimeout(setupAutoSKU, 800);
-})();
-</script>
-</body></html>'); w.document.close();
+      var w=window.open('','_blank'); var h=list.map(function(m){return '<div style="width:'+ww+'mm;height:'+hh+'mm;padding:2mm;page-break-after:always;display:flex;gap:2mm"><img style="width:'+(hh-4)+'mm;height:'+(hh-4)+'mm" src="'+m.qrDataUrl+'"><div><div style="font-weight:900">'+m.orig_code+'</div><div>'+m.sku+'</div><div>'+m.name+'</div></div></div>';}).join('');
+      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:'+ww+'mm '+hh+'mm;margin:0}</style></head><body><button onclick="window.print()">印 '+list.length+'</button>'+h+'</body></html>'); w.document.close();
     }
   });
-})();
-</script>
-
-<script>
-(function(){
-  function injectRealQR(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    if(!origInput) return;
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    // 找到那個3黑點的容器：包含「輸入 原始編號 自動產生真QR」的那個大div
-    var infoDiv = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
-    if(!infoDiv) return;
-    var container = infoDiv.closest('div').parentElement; // 外層淺灰背景
-    if(!container) return;
-    if(document.getElementById('real-qr-fixed')) return;
-
-    // 砍掉舊的假QR：容器內所有小於60px的空div或img
-    // 先保留infoDiv，其它清掉
-    // 建立新版QR區
-    var wrapper = document.createElement('div');
-    wrapper.id='real-qr-fixed';
-    wrapper.style.cssText='display:flex;gap:16px;align-items:center;background:#fff;border:2px solid #111;border-radius:16px;padding:16px;margin:12px 0';
-
-    var qrBox = document.createElement('div');
-    qrBox.id='qr-box';
-    qrBox.style.cssText='width:140px;height:140px;background:#fff;border:1px solid #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0';
-
-    var info = document.createElement('div');
-    info.style.cssText='flex:1';
-    info.innerHTML='<div style="font-size:14px;font-weight:bold">✅ 真實QR (64x64 鎖定當事人) 已修復</div><div id="qr-text" style="font-size:12px;color:#666;margin-top:6px">SKU: W-NEW | 原始編號: 1-1</div><div style="font-size:11px;color:#999;margin-top:4px">👉 QR內碼 = 原始編號 (如 1-1)，不是SKU<br>👉 新增材料：SKU打 W-XXX，原始編號打 1-1 這種</div><button id="dl-qr-btn" style="margin-top:8px;padding:6px 12px;background:#111;color:#fff;border-radius:999px;font-size:12px;border:none;cursor:pointer">下載此QR</button>';
-
-    wrapper.appendChild(qrBox);
-    wrapper.appendChild(info);
-    
-    // 插到最前面，蓋掉舊的
-    container.insertBefore(wrapper, container.firstChild);
-
-    // 舊的假圖區隱藏
-    var oldFake = container.querySelectorAll(':scope > div');
-    oldFake.forEach(function(d){
-      if(d.id==='real-qr-fixed') return;
-      if(d.textContent.includes('輸入 原始編號')) {
-        d.style.display='none';
-      }
-    });
-    // 隱藏那些3黑點的絕對定位小方塊
-    [...container.querySelectorAll('div')].forEach(function(d){
-      if(d.children.length===0 && d.textContent.trim()==='' && d.offsetWidth<50 && d.offsetHeight<50){
-        var s=window.getComputedStyle(d);
-        if(s.backgroundColor==='rgb(0, 0, 0)' || d.style.backgroundColor==='black' || d.innerHTML.includes('■')){
-          d.style.display='none';
-        }
-      }
-    });
-    // 直接隱藏所有img如果是假的
-    setTimeout(function(){
-      [...container.querySelectorAll('img')].forEach(function(img){
-        if(img.id) return;
-        if(img.width<80 && img.src.startsWith('data:')) img.style.display='none';
-      });
-    },300);
-
-    function render(txt){
-      qrBox.innerHTML='';
-      try{
-        new QRCode(qrBox, {text: txt||'1-1', width:128, height:128, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M});
-      }catch(e){
-        qrBox.textContent=txt;
-      }
-      var t=document.getElementById('qr-text');
-      if(t){
-        var skuVal = skuInput ? (skuInput.value||'W-NEW') : 'W-NEW';
-        t.textContent='SKU: '+skuVal+' | 原始編號: '+(txt||'1-1')+' (此即QR內碼)';
-      }
-    }
-    render(origInput.value||'1-1');
-    origInput.addEventListener('input', function(){ render(this.value); });
-    if(skuInput){
-      skuInput.addEventListener('input', function(){
-        var t=document.getElementById('qr-text');
-        if(t) t.textContent='SKU: '+(this.value||'W-NEW')+' | 原始編號: '+(origInput.value||'1-1')+' (此即QR內碼)';
-      });
-    }
-    document.getElementById('dl-qr-btn').onclick=function(){
-      var canvas=qrBox.querySelector('canvas');
-      if(canvas){
-        var a=document.createElement('a');
-        a.href=canvas.toDataURL();
-        a.download='QR_'+(origInput.value||'1-1')+'.png';
-        a.click();
-      }else{
-        alert('請先輸入原始編號');
-      }
-    };
-  }
-  setInterval(injectRealQR, 1000);
-  setTimeout(injectRealQR, 600);
-})();
-</script>
-
-<script>
-(function(){
-  function setupAutoSKU(){
-    var origInput = document.querySelector('input[placeholder*="原始編號"]');
-    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder && i.placeholder.includes('1-1'));
-    var skuInput = document.querySelector('input[placeholder*="W-001"]');
-    var typeSelect = document.querySelector('select'); // 水料/電料選單
-    // 找那個水料下拉
-    var waterSelect = [...document.querySelectorAll('select')].find(s=> s.innerHTML.includes('水料'));
-    if(!origInput || !skuInput) return;
-    if(origInput.dataset.autoBound) return;
-    origInput.dataset.autoBound='1';
-    
-    function autoFill(){
-      var orig = origInput.value.trim();
-      if(!orig) return;
-      // 如果SKU是空的、是 W-NEW、或是之前自動帶的，就自動帶
-      var currentSKU = skuInput.value.trim();
-      var isAuto = currentSKU==='' || currentSKU==='W-NEW' || currentSKU==='E-NEW' || currentSKU.startsWith('W-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU.startsWith('E-') && currentSKU.slice(2)===origInput.dataset.lastOrig || currentSKU===origInput.dataset.lastOrig;
-      // 判斷水電
-      var type = 'W';
-      if(waterSelect){
-        var val = waterSelect.value||'';
-        if(val.includes('電') || val.includes('E')) type='E';
-        if(val.includes('水') || val.includes('W')) type='W';
-      }
-      if(isAuto || currentSKU===''){
-        var newSKU = type + '-' + orig;
-        // 如果orig已經有W-/E-開頭，就不重複加
-        if(orig.startsWith('W-') || orig.startsWith('E-')) newSKU = orig;
-        skuInput.value = newSKU;
-        // 觸發input事件讓其他監聽更新
-        skuInput.dispatchEvent(new Event('input', {bubbles:true}));
-        skuInput.dispatchEvent(new Event('change', {bubbles:true}));
-      }
-      origInput.dataset.lastOrig = orig;
-    }
-    origInput.addEventListener('input', autoFill);
-    origInput.addEventListener('blur', autoFill);
-    if(waterSelect){
-      waterSelect.addEventListener('change', function(){
-        // 切換水電時，如果SKU是自動的，重帶
-        var orig = origInput.value.trim();
-        if(!orig) return;
-        var type = this.value.includes('電') || this.value.includes('E') ? 'E' : 'W';
-        if(orig.startsWith('W-') || orig.startsWith('E-')) return;
-        skuInput.value = type + '-' + orig;
-      });
-    }
-  }
-  setInterval(setupAutoSKU, 1000);
-  setTimeout(setupAutoSKU, 800);
 })();
 </script>
 </body>
