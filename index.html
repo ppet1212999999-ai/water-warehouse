@@ -771,5 +771,48 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   setTimeout(fixMat, 500);
 })();
 </script>
+<script>
+// === 浮動按鈕可拖曳 (手機/電腦都可用) ===
+(function(){
+  function makeDrag(){
+    var fabs=document.querySelectorAll('div[style*="position:fixed"]');
+    fabs.forEach(function(fab){
+      if((fab.innerHTML.includes('材料管理')||fab.innerHTML.includes('自動同步')||fab.innerHTML.includes('材料清單')) &&!fab.dataset.drag){
+        fab.dataset.drag='1';
+        fab.style.touchAction='none';
+        fab.style.cursor='grab';
+        fab.style.zIndex='99999';
+        var dragging=false,sx,sy,ox,oy;
+        fab.addEventListener('mousedown',function(e){
+          dragging=true; sx=e.clientX; sy=e.clientY;
+          var r=fab.getBoundingClientRect(); ox=r.left; oy=r.top;
+          fab.style.transition='none';
+        });
+        document.addEventListener('mousemove',function(e){
+          if(!dragging) return;
+          var nx=Math.max(0,Math.min(innerWidth-fab.offsetWidth, ox+e.clientX-sx));
+          var ny=Math.max(0,Math.min(innerHeight-fab.offsetHeight, oy+e.clientY-sy));
+          fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
+        });
+        document.addEventListener('mouseup',function(){ dragging=false; fab.style.transition='all 0.2s'; });
+        fab.addEventListener('touchstart',function(e){
+          var t=e.touches[0]; dragging=true; sx=t.clientX; sy=t.clientY;
+          var r=fab.getBoundingClientRect(); ox=r.left; oy=r.top;
+        },{passive:false});
+        document.addEventListener('touchmove',function(e){
+          if(!dragging) return; e.preventDefault();
+          var t=e.touches[0];
+          var nx=Math.max(0,Math.min(innerWidth-fab.offsetWidth, ox+t.clientX-sx));
+          var ny=Math.max(0,Math.min(innerHeight-fab.offsetHeight, oy+t.clientY-sy));
+          fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
+        },{passive:false});
+        document.addEventListener('touchend',function(){ dragging=false; });
+      }
+    });
+  }
+  setInterval(makeDrag,1000);
+  setTimeout(makeDrag,800);
+})();
+</script>
 </body>
 </html>
