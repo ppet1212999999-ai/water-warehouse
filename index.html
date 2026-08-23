@@ -86,7 +86,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.66 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.67 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
@@ -666,16 +666,520 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   setTimeout(function(){addDatabaseTab(); addPersonnelTopBar();},700);
   document.addEventListener('click', function(e){
     if(e.target.id==='db-close') document.getElementById('db-panel').classList.remove('show');
-    if(e.target.id==='db-a4-all'){var mats=getMats(); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div style="font-weight:900">'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">全部 '+mats.length+'</button><div class="g">'+h+'</div></body></html>'); w.document.close();}
-    if(e.target.id==='db-a4-water'){var mats=getMats().filter(function(m){return String(m.sku).startsWith('W-');}); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div>'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">水料 '+mats.length+'</button><div class="g">'+h+'</div></body></html>'); w.document.close();}
-    if(e.target.id==='db-a4-electric'){var mats=getMats().filter(function(m){return String(m.sku).startsWith('E-');}); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div>'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">電料 '+mats.length+'</button><div class="g">'+h+'</div></body></html>'); w.document.close();}
+    if(e.target.id==='db-a4-all'){var mats=getMats(); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div style="font-weight:900">'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">全部 '+mats.length+'</button><div class="g">'+h+'</div>
+<script>
+(function(){
+  function waitForInputs(){
+    var fOrig = document.getElementById('f-orig');
+    var fName = document.getElementById('f-name');
+    var fSpec = document.getElementById('f-spec');
+    var fUnit = document.getElementById('f-unit');
+    var fCat = document.getElementById('f-cat');
+    var fType = document.getElementById('f-type');
+    var fSku = document.getElementById('f-sku');
+    if(!fOrig || !fName) return;
+
+    if(fOrig.dataset.lookupBound) return;
+    fOrig.dataset.lookupBound='1';
+
+    // 建立 orig_code -> material map，從 window.__MATS__ 和 localStorage 材料
+    function getAllMats(){
+      var list = [];
+      try{
+        if(window.__MATS__ && window.__MATS__.length) list = window.__MATS__;
+      }catch(e){}
+      // 再從 localStorage 拿最新材料
+      var keys=['water_warehouse_materials_v7','ww_materials','materials'];
+      for(var i=0;i<keys.length;i++){
+        try{
+          var v=JSON.parse(localStorage.getItem(keys[i])||'null');
+          if(v){
+            if(Array.isArray(v) && v.length>list.length) list=v;
+            if(v.materials && v.materials.length>list.length) list=v.materials;
+          }
+        }catch(e){}
+      }
+      return list;
+    }
+
+    function findMatByOrig(orig){
+      var mats=getAllMats();
+      orig=(orig||'').trim();
+      if(!orig) return null;
+      // 精準匹配 orig_code 或 sku
+      var found = mats.find(function(m){
+        return (m.orig_code && String(m.orig_code).trim()===orig) || (m.sku && String(m.sku).trim()===orig);
+      });
+      if(found) return found;
+      // 模糊：去掉 W-/E- 前綴再比
+      var cleanOrig = orig.replace(/^W-|^E-/,'').trim();
+      found = mats.find(function(m){
+        var oc = (m.orig_code||'').toString().replace(/^W-|^E-/,'').trim();
+        return oc===cleanOrig;
+      });
+      return found||null;
+    }
+
+    function clearFields(){
+      fName.value='';
+      fSpec.value='';
+      fUnit.value='';
+      if(fCat) fCat.value='';
+      // 不清SKU和類型，讓自動帶入邏輯處理
+    }
+
+    function fillFields(mat){
+      if(!mat){
+        clearFields();
+        // 提示是新增
+        var previewInfo=document.getElementById('qr-inside-text')||document.getElementById('qr-text');
+        // 可選：顯示狀態
+        return;
+      }
+      // 帶出
+      if(fName) fName.value = mat.name||'';
+      if(fSpec) fSpec.value = mat.spec||mat.規格||'';
+      if(fUnit) fUnit.value = mat.unit||mat.單位||'個';
+      if(fCat) fCat.value = mat.category||mat.cat||mat.細分類||'';
+      // 類型也帶
+      if(fType){
+        var sku=(mat.sku||'').toString();
+        if(sku.startsWith('W-') || (mat.type&&mat.type.includes('水'))) fType.value='water';
+        if(sku.startsWith('E-') || (mat.type&&mat.type.includes('電'))) fType.value='electric';
+      }
+      // SKU也帶？如果SKU空的才帶，避免覆蓋自動的
+      if(fSku && (fSku.value==='' || fSku.value==='W-NEW' || fSku.dataset.auto==='1')){
+        if(mat.sku) fSku.value=mat.sku;
+      }
+    }
+
+    // 監聽原始編號輸入
+    var debounceTimer=null;
+    fOrig.addEventListener('input', function(){
+      var orig=this.value.trim();
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){
+        if(!orig){
+          clearFields();
+          return;
+        }
+        var mat=findMatByOrig(orig);
+        if(mat){
+          fillFields(mat);
+          // 顯示找到提示
+          console.log('找到舊材料', mat);
+        }else{
+          // 沒找到 = 新增，清空後面
+          clearFields();
+        }
+      },300);
+    });
+
+    // Enter 鍵也觸發
+    fOrig.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){
+        var mat=findMatByOrig(this.value.trim());
+        if(mat){
+          fillFields(mat);
+        }else{
+          clearFields();
+        }
+      }
+    });
+  }
+
+  setInterval(waitForInputs, 1000);
+  setTimeout(waitForInputs, 800);
+})();
+</script>
+</body></html>'); w.document.close();}
+    if(e.target.id==='db-a4-water'){var mats=getMats().filter(function(m){return String(m.sku).startsWith('W-');}); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div>'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">水料 '+mats.length+'</button><div class="g">'+h+'</div>
+<script>
+(function(){
+  function waitForInputs(){
+    var fOrig = document.getElementById('f-orig');
+    var fName = document.getElementById('f-name');
+    var fSpec = document.getElementById('f-spec');
+    var fUnit = document.getElementById('f-unit');
+    var fCat = document.getElementById('f-cat');
+    var fType = document.getElementById('f-type');
+    var fSku = document.getElementById('f-sku');
+    if(!fOrig || !fName) return;
+
+    if(fOrig.dataset.lookupBound) return;
+    fOrig.dataset.lookupBound='1';
+
+    // 建立 orig_code -> material map，從 window.__MATS__ 和 localStorage 材料
+    function getAllMats(){
+      var list = [];
+      try{
+        if(window.__MATS__ && window.__MATS__.length) list = window.__MATS__;
+      }catch(e){}
+      // 再從 localStorage 拿最新材料
+      var keys=['water_warehouse_materials_v7','ww_materials','materials'];
+      for(var i=0;i<keys.length;i++){
+        try{
+          var v=JSON.parse(localStorage.getItem(keys[i])||'null');
+          if(v){
+            if(Array.isArray(v) && v.length>list.length) list=v;
+            if(v.materials && v.materials.length>list.length) list=v.materials;
+          }
+        }catch(e){}
+      }
+      return list;
+    }
+
+    function findMatByOrig(orig){
+      var mats=getAllMats();
+      orig=(orig||'').trim();
+      if(!orig) return null;
+      // 精準匹配 orig_code 或 sku
+      var found = mats.find(function(m){
+        return (m.orig_code && String(m.orig_code).trim()===orig) || (m.sku && String(m.sku).trim()===orig);
+      });
+      if(found) return found;
+      // 模糊：去掉 W-/E- 前綴再比
+      var cleanOrig = orig.replace(/^W-|^E-/,'').trim();
+      found = mats.find(function(m){
+        var oc = (m.orig_code||'').toString().replace(/^W-|^E-/,'').trim();
+        return oc===cleanOrig;
+      });
+      return found||null;
+    }
+
+    function clearFields(){
+      fName.value='';
+      fSpec.value='';
+      fUnit.value='';
+      if(fCat) fCat.value='';
+      // 不清SKU和類型，讓自動帶入邏輯處理
+    }
+
+    function fillFields(mat){
+      if(!mat){
+        clearFields();
+        // 提示是新增
+        var previewInfo=document.getElementById('qr-inside-text')||document.getElementById('qr-text');
+        // 可選：顯示狀態
+        return;
+      }
+      // 帶出
+      if(fName) fName.value = mat.name||'';
+      if(fSpec) fSpec.value = mat.spec||mat.規格||'';
+      if(fUnit) fUnit.value = mat.unit||mat.單位||'個';
+      if(fCat) fCat.value = mat.category||mat.cat||mat.細分類||'';
+      // 類型也帶
+      if(fType){
+        var sku=(mat.sku||'').toString();
+        if(sku.startsWith('W-') || (mat.type&&mat.type.includes('水'))) fType.value='water';
+        if(sku.startsWith('E-') || (mat.type&&mat.type.includes('電'))) fType.value='electric';
+      }
+      // SKU也帶？如果SKU空的才帶，避免覆蓋自動的
+      if(fSku && (fSku.value==='' || fSku.value==='W-NEW' || fSku.dataset.auto==='1')){
+        if(mat.sku) fSku.value=mat.sku;
+      }
+    }
+
+    // 監聽原始編號輸入
+    var debounceTimer=null;
+    fOrig.addEventListener('input', function(){
+      var orig=this.value.trim();
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){
+        if(!orig){
+          clearFields();
+          return;
+        }
+        var mat=findMatByOrig(orig);
+        if(mat){
+          fillFields(mat);
+          // 顯示找到提示
+          console.log('找到舊材料', mat);
+        }else{
+          // 沒找到 = 新增，清空後面
+          clearFields();
+        }
+      },300);
+    });
+
+    // Enter 鍵也觸發
+    fOrig.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){
+        var mat=findMatByOrig(this.value.trim());
+        if(mat){
+          fillFields(mat);
+        }else{
+          clearFields();
+        }
+      }
+    });
+  }
+
+  setInterval(waitForInputs, 1000);
+  setTimeout(waitForInputs, 800);
+})();
+</script>
+</body></html>'); w.document.close();}
+    if(e.target.id==='db-a4-electric'){var mats=getMats().filter(function(m){return String(m.sku).startsWith('E-');}); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div>'+m.orig_code+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">電料 '+mats.length+'</button><div class="g">'+h+'</div>
+<script>
+(function(){
+  function waitForInputs(){
+    var fOrig = document.getElementById('f-orig');
+    var fName = document.getElementById('f-name');
+    var fSpec = document.getElementById('f-spec');
+    var fUnit = document.getElementById('f-unit');
+    var fCat = document.getElementById('f-cat');
+    var fType = document.getElementById('f-type');
+    var fSku = document.getElementById('f-sku');
+    if(!fOrig || !fName) return;
+
+    if(fOrig.dataset.lookupBound) return;
+    fOrig.dataset.lookupBound='1';
+
+    // 建立 orig_code -> material map，從 window.__MATS__ 和 localStorage 材料
+    function getAllMats(){
+      var list = [];
+      try{
+        if(window.__MATS__ && window.__MATS__.length) list = window.__MATS__;
+      }catch(e){}
+      // 再從 localStorage 拿最新材料
+      var keys=['water_warehouse_materials_v7','ww_materials','materials'];
+      for(var i=0;i<keys.length;i++){
+        try{
+          var v=JSON.parse(localStorage.getItem(keys[i])||'null');
+          if(v){
+            if(Array.isArray(v) && v.length>list.length) list=v;
+            if(v.materials && v.materials.length>list.length) list=v.materials;
+          }
+        }catch(e){}
+      }
+      return list;
+    }
+
+    function findMatByOrig(orig){
+      var mats=getAllMats();
+      orig=(orig||'').trim();
+      if(!orig) return null;
+      // 精準匹配 orig_code 或 sku
+      var found = mats.find(function(m){
+        return (m.orig_code && String(m.orig_code).trim()===orig) || (m.sku && String(m.sku).trim()===orig);
+      });
+      if(found) return found;
+      // 模糊：去掉 W-/E- 前綴再比
+      var cleanOrig = orig.replace(/^W-|^E-/,'').trim();
+      found = mats.find(function(m){
+        var oc = (m.orig_code||'').toString().replace(/^W-|^E-/,'').trim();
+        return oc===cleanOrig;
+      });
+      return found||null;
+    }
+
+    function clearFields(){
+      fName.value='';
+      fSpec.value='';
+      fUnit.value='';
+      if(fCat) fCat.value='';
+      // 不清SKU和類型，讓自動帶入邏輯處理
+    }
+
+    function fillFields(mat){
+      if(!mat){
+        clearFields();
+        // 提示是新增
+        var previewInfo=document.getElementById('qr-inside-text')||document.getElementById('qr-text');
+        // 可選：顯示狀態
+        return;
+      }
+      // 帶出
+      if(fName) fName.value = mat.name||'';
+      if(fSpec) fSpec.value = mat.spec||mat.規格||'';
+      if(fUnit) fUnit.value = mat.unit||mat.單位||'個';
+      if(fCat) fCat.value = mat.category||mat.cat||mat.細分類||'';
+      // 類型也帶
+      if(fType){
+        var sku=(mat.sku||'').toString();
+        if(sku.startsWith('W-') || (mat.type&&mat.type.includes('水'))) fType.value='water';
+        if(sku.startsWith('E-') || (mat.type&&mat.type.includes('電'))) fType.value='electric';
+      }
+      // SKU也帶？如果SKU空的才帶，避免覆蓋自動的
+      if(fSku && (fSku.value==='' || fSku.value==='W-NEW' || fSku.dataset.auto==='1')){
+        if(mat.sku) fSku.value=mat.sku;
+      }
+    }
+
+    // 監聽原始編號輸入
+    var debounceTimer=null;
+    fOrig.addEventListener('input', function(){
+      var orig=this.value.trim();
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){
+        if(!orig){
+          clearFields();
+          return;
+        }
+        var mat=findMatByOrig(orig);
+        if(mat){
+          fillFields(mat);
+          // 顯示找到提示
+          console.log('找到舊材料', mat);
+        }else{
+          // 沒找到 = 新增，清空後面
+          clearFields();
+        }
+      },300);
+    });
+
+    // Enter 鍵也觸發
+    fOrig.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){
+        var mat=findMatByOrig(this.value.trim());
+        if(mat){
+          fillFields(mat);
+        }else{
+          clearFields();
+        }
+      }
+    });
+  }
+
+  setInterval(waitForInputs, 1000);
+  setTimeout(waitForInputs, 800);
+})();
+</script>
+</body></html>'); w.document.close();}
     if(e.target.id==='db-thermal-all'||e.target.id==='db-thermal-water'||e.target.id==='db-thermal-electric'){
       var mats=getMats(); var list=mats;
       if(e.target.id==='db-thermal-water') list=mats.filter(function(m){return String(m.sku).startsWith('W-');});
       if(e.target.id==='db-thermal-electric') list=mats.filter(function(m){return String(m.sku).startsWith('E-');});
       var size=document.getElementById('label-size').value; var ww=size.split('x')[0]; var hh=size.split('x')[1];
       var w=window.open('','_blank'); var h=list.map(function(m){return '<div style="width:'+ww+'mm;height:'+hh+'mm;padding:2mm;page-break-after:always;display:flex;gap:2mm"><img style="width:'+(hh-4)+'mm;height:'+(hh-4)+'mm" src="'+m.qrDataUrl+'"><div><div style="font-weight:900">'+m.orig_code+'</div><div>'+m.sku+'</div></div></div>';}).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:'+ww+'mm '+hh+'mm;margin:0}</style></head><body><button onclick="window.print()">印 '+list.length+'</button>'+h+'</body></html>'); w.document.close();
+      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:'+ww+'mm '+hh+'mm;margin:0}</style></head><body><button onclick="window.print()">印 '+list.length+'</button>'+h+'
+<script>
+(function(){
+  function waitForInputs(){
+    var fOrig = document.getElementById('f-orig');
+    var fName = document.getElementById('f-name');
+    var fSpec = document.getElementById('f-spec');
+    var fUnit = document.getElementById('f-unit');
+    var fCat = document.getElementById('f-cat');
+    var fType = document.getElementById('f-type');
+    var fSku = document.getElementById('f-sku');
+    if(!fOrig || !fName) return;
+
+    if(fOrig.dataset.lookupBound) return;
+    fOrig.dataset.lookupBound='1';
+
+    // 建立 orig_code -> material map，從 window.__MATS__ 和 localStorage 材料
+    function getAllMats(){
+      var list = [];
+      try{
+        if(window.__MATS__ && window.__MATS__.length) list = window.__MATS__;
+      }catch(e){}
+      // 再從 localStorage 拿最新材料
+      var keys=['water_warehouse_materials_v7','ww_materials','materials'];
+      for(var i=0;i<keys.length;i++){
+        try{
+          var v=JSON.parse(localStorage.getItem(keys[i])||'null');
+          if(v){
+            if(Array.isArray(v) && v.length>list.length) list=v;
+            if(v.materials && v.materials.length>list.length) list=v.materials;
+          }
+        }catch(e){}
+      }
+      return list;
+    }
+
+    function findMatByOrig(orig){
+      var mats=getAllMats();
+      orig=(orig||'').trim();
+      if(!orig) return null;
+      // 精準匹配 orig_code 或 sku
+      var found = mats.find(function(m){
+        return (m.orig_code && String(m.orig_code).trim()===orig) || (m.sku && String(m.sku).trim()===orig);
+      });
+      if(found) return found;
+      // 模糊：去掉 W-/E- 前綴再比
+      var cleanOrig = orig.replace(/^W-|^E-/,'').trim();
+      found = mats.find(function(m){
+        var oc = (m.orig_code||'').toString().replace(/^W-|^E-/,'').trim();
+        return oc===cleanOrig;
+      });
+      return found||null;
+    }
+
+    function clearFields(){
+      fName.value='';
+      fSpec.value='';
+      fUnit.value='';
+      if(fCat) fCat.value='';
+      // 不清SKU和類型，讓自動帶入邏輯處理
+    }
+
+    function fillFields(mat){
+      if(!mat){
+        clearFields();
+        // 提示是新增
+        var previewInfo=document.getElementById('qr-inside-text')||document.getElementById('qr-text');
+        // 可選：顯示狀態
+        return;
+      }
+      // 帶出
+      if(fName) fName.value = mat.name||'';
+      if(fSpec) fSpec.value = mat.spec||mat.規格||'';
+      if(fUnit) fUnit.value = mat.unit||mat.單位||'個';
+      if(fCat) fCat.value = mat.category||mat.cat||mat.細分類||'';
+      // 類型也帶
+      if(fType){
+        var sku=(mat.sku||'').toString();
+        if(sku.startsWith('W-') || (mat.type&&mat.type.includes('水'))) fType.value='water';
+        if(sku.startsWith('E-') || (mat.type&&mat.type.includes('電'))) fType.value='electric';
+      }
+      // SKU也帶？如果SKU空的才帶，避免覆蓋自動的
+      if(fSku && (fSku.value==='' || fSku.value==='W-NEW' || fSku.dataset.auto==='1')){
+        if(mat.sku) fSku.value=mat.sku;
+      }
+    }
+
+    // 監聽原始編號輸入
+    var debounceTimer=null;
+    fOrig.addEventListener('input', function(){
+      var orig=this.value.trim();
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){
+        if(!orig){
+          clearFields();
+          return;
+        }
+        var mat=findMatByOrig(orig);
+        if(mat){
+          fillFields(mat);
+          // 顯示找到提示
+          console.log('找到舊材料', mat);
+        }else{
+          // 沒找到 = 新增，清空後面
+          clearFields();
+        }
+      },300);
+    });
+
+    // Enter 鍵也觸發
+    fOrig.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){
+        var mat=findMatByOrig(this.value.trim());
+        if(mat){
+          fillFields(mat);
+        }else{
+          clearFields();
+        }
+      }
+    });
+  }
+
+  setInterval(waitForInputs, 1000);
+  setTimeout(waitForInputs, 800);
+})();
+</script>
+</body></html>'); w.document.close();
     }
   });
 })();
@@ -798,6 +1302,132 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
   setInterval(waitForMatModal, 800);
   setTimeout(waitForMatModal, 500);
+})();
+</script>
+
+<script>
+(function(){
+  function waitForInputs(){
+    var fOrig = document.getElementById('f-orig');
+    var fName = document.getElementById('f-name');
+    var fSpec = document.getElementById('f-spec');
+    var fUnit = document.getElementById('f-unit');
+    var fCat = document.getElementById('f-cat');
+    var fType = document.getElementById('f-type');
+    var fSku = document.getElementById('f-sku');
+    if(!fOrig || !fName) return;
+
+    if(fOrig.dataset.lookupBound) return;
+    fOrig.dataset.lookupBound='1';
+
+    // 建立 orig_code -> material map，從 window.__MATS__ 和 localStorage 材料
+    function getAllMats(){
+      var list = [];
+      try{
+        if(window.__MATS__ && window.__MATS__.length) list = window.__MATS__;
+      }catch(e){}
+      // 再從 localStorage 拿最新材料
+      var keys=['water_warehouse_materials_v7','ww_materials','materials'];
+      for(var i=0;i<keys.length;i++){
+        try{
+          var v=JSON.parse(localStorage.getItem(keys[i])||'null');
+          if(v){
+            if(Array.isArray(v) && v.length>list.length) list=v;
+            if(v.materials && v.materials.length>list.length) list=v.materials;
+          }
+        }catch(e){}
+      }
+      return list;
+    }
+
+    function findMatByOrig(orig){
+      var mats=getAllMats();
+      orig=(orig||'').trim();
+      if(!orig) return null;
+      // 精準匹配 orig_code 或 sku
+      var found = mats.find(function(m){
+        return (m.orig_code && String(m.orig_code).trim()===orig) || (m.sku && String(m.sku).trim()===orig);
+      });
+      if(found) return found;
+      // 模糊：去掉 W-/E- 前綴再比
+      var cleanOrig = orig.replace(/^W-|^E-/,'').trim();
+      found = mats.find(function(m){
+        var oc = (m.orig_code||'').toString().replace(/^W-|^E-/,'').trim();
+        return oc===cleanOrig;
+      });
+      return found||null;
+    }
+
+    function clearFields(){
+      fName.value='';
+      fSpec.value='';
+      fUnit.value='';
+      if(fCat) fCat.value='';
+      // 不清SKU和類型，讓自動帶入邏輯處理
+    }
+
+    function fillFields(mat){
+      if(!mat){
+        clearFields();
+        // 提示是新增
+        var previewInfo=document.getElementById('qr-inside-text')||document.getElementById('qr-text');
+        // 可選：顯示狀態
+        return;
+      }
+      // 帶出
+      if(fName) fName.value = mat.name||'';
+      if(fSpec) fSpec.value = mat.spec||mat.規格||'';
+      if(fUnit) fUnit.value = mat.unit||mat.單位||'個';
+      if(fCat) fCat.value = mat.category||mat.cat||mat.細分類||'';
+      // 類型也帶
+      if(fType){
+        var sku=(mat.sku||'').toString();
+        if(sku.startsWith('W-') || (mat.type&&mat.type.includes('水'))) fType.value='water';
+        if(sku.startsWith('E-') || (mat.type&&mat.type.includes('電'))) fType.value='electric';
+      }
+      // SKU也帶？如果SKU空的才帶，避免覆蓋自動的
+      if(fSku && (fSku.value==='' || fSku.value==='W-NEW' || fSku.dataset.auto==='1')){
+        if(mat.sku) fSku.value=mat.sku;
+      }
+    }
+
+    // 監聽原始編號輸入
+    var debounceTimer=null;
+    fOrig.addEventListener('input', function(){
+      var orig=this.value.trim();
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(function(){
+        if(!orig){
+          clearFields();
+          return;
+        }
+        var mat=findMatByOrig(orig);
+        if(mat){
+          fillFields(mat);
+          // 顯示找到提示
+          console.log('找到舊材料', mat);
+        }else{
+          // 沒找到 = 新增，清空後面
+          clearFields();
+        }
+      },300);
+    });
+
+    // Enter 鍵也觸發
+    fOrig.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){
+        var mat=findMatByOrig(this.value.trim());
+        if(mat){
+          fillFields(mat);
+        }else{
+          clearFields();
+        }
+      }
+    });
+  }
+
+  setInterval(waitForInputs, 1000);
+  setTimeout(waitForInputs, 800);
 })();
 </script>
 </body>
