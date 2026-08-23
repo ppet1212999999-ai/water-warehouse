@@ -904,8 +904,86 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-// === v7.4.71 最終修復：拖曳記憶 + 大樓雙機同步 + 匯出匯入 ===
-...最新的那段...
+// === v7.4.74 最終修復：保留你的大樓 + 拖曳記憶 + 設定鈕固定在工令號旁 ===
+(function(){
+  const DRAG_KEY='ww_drag_pos_v7_74';
+  const BUILD_KEYS=['ww_building_list_v7_70','ww_building_list','ww_building_list_v7_68','buildingList'];
+  
+  // 1. 保留大樓 - 絕不寫死，只從你現有資料讀
+  function getMyBuildings(){
+    for(const k of BUILD_KEYS){
+      try{
+        const v=localStorage.getItem(k);
+        if(!v) continue;
+        const arr=JSON.parse(v);
+        if(Array.isArray(arr) && arr.length>0){
+          // 過濾掉 1教 2教 這種假資料
+          const real = arr.filter(b=>{ const s=(typeof b==='string'?b:(b.name||'')); return s && !/^\d+教$/.test(s.trim()); });
+          if(real.length>0) return real;
+          // 如果只有假資料，但數量>0，還是先回傳避免0筆
+          if(arr.length>0 && real.length===0 && !arr.some(b=>/^\d+教$/.test(typeof b==='string'?b:b.name))) return arr;
+        }
+      }catch(e){}
+    }
+    return null;
+  }
+
+  // 2. 拖曳不回彈 - 記憶位置
+  let pos=null; try{ pos=JSON.parse(localStorage.getItem(DRAG_KEY)||'null'); }catch(e){}
+  const applyDragPos=()=>{
+    const modal=document.querySelector('[data-drag-modal], .draggable-modal, #materialModal, #buildingModal');
+    if(modal && pos && pos.x!=null){ modal.style.left=pos.x+'px'; modal.style.top=pos.y+'px'; modal.style.right='auto'; modal.style.bottom='auto'; modal.style.position='fixed'; }
+  };
+  // 簡單拖曳記憶
+  document.addEventListener('mousedown', (e)=>{
+    const h=e.target.closest('.modal-header, [data-drag-handle]');
+    if(!h) return;
+    const m=h.closest('[data-drag-modal], .draggable-modal, .modal, #materialModal, #buildingModal');
+    if(!m) return;
+    let sx=e.clientX, sy=e.clientY, ox=m.offsetLeft, oy=m.offsetTop;
+    const mm=(ev)=>{ const nx=ox+ev.clientX-sx, ny=oy+ev.clientY-sy; m.style.left=Math.round(nx/5)*5+'px'; m.style.top=Math.round(ny/5)*5+'px'; m.style.position='fixed'; m.style.right='auto'; m.style.bottom='auto'; };
+    const mu=(ev)=>{ const final={x:parseInt(m.style.left), y:parseInt(m.style.top)}; localStorage.setItem(DRAG_KEY, JSON.stringify(final)); document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
+  });
+  setTimeout(applyDragPos, 800);
+
+  // 3. 設定鈕固定在 工令號必填 旁 + 僅管理員
+  function fixSettingsBtn(){
+    try{
+      const role=(window.currentUserRole||localStorage.getItem('user_role')||'').toUpperCase();
+      const isAdmin=['SYSTEM_ADMIN','SUPER_ADMIN','ADMIN','系統管理員'].includes(role) || localStorage.getItem('isAdmin')==='true';
+      // 找工令號標籤
+      const labels=[...document.querySelectorAll('label, span, div')].filter(el=> (el.textContent||'').includes('工令號必填'));
+      const woLabel=labels[0];
+      const setBtn=document.querySelector('#settingsBtn, [data-settings-btn], button:has(>i.fa-gear), .settings-btn');
+      // 如果找不到按鈕，試著找文字含設定的按鈕
+      let btn=setBtn;
+      if(!btn){ btn=[...document.querySelectorAll('button')].find(b=> (b.textContent||'').includes('設定')); }
+      if(!btn) return;
+      if(!isAdmin){ btn.style.display='none'; return; }
+      btn.style.display='inline-flex';
+      btn.style.marginLeft='8px';
+      btn.style.verticalAlign='middle';
+      if(woLabel && woLabel.parentElement && !woLabel.parentElement.contains(btn)){
+        woLabel.insertAdjacentElement('afterend', btn);
+      }
+      // 加小樣式讓它明顯在旁邊
+      btn.style.position='relative';
+      btn.style.top='-1px';
+    }catch(e){}
+  }
+  setInterval(fixSettingsBtn, 1000);
+  setTimeout(fixSettingsBtn, 1500);
+
+  // 4. 手機同步 - 如果是 1教 2教 就用你的真實大樓覆蓋
+  const myRealBuildings=getMyBuildings();
+  if(myRealBuildings){
+    // 把真實資料寫回到所有 key，確保手機下次不會再變 1教 2教
+    BUILD_KEYS.forEach(k=>{ try{ localStorage.setItem(k, JSON.stringify(myRealBuildings)); }catch(e){} });
+    if(window.__BUILDING_LIST__){ window.__BUILDING_LIST__=myRealBuildings; }
+  }
+  console.log('[v7.4.74] 已套用，保留你的大樓數:', myRealBuildings?myRealBuildings.length:'未找到，將沿用原有');
+})();
 </script>
 </body>
 </html>
