@@ -2545,6 +2545,32 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   console.log('v7.5.7 兩顆可拖且固定130x36已載入');
 })();
 </script>
+<script>
+// === v7.5.8 方案A：只有超級管理員能重設密碼 ===
+(function(){
+  function getRole(){
+    try{
+      var u = JSON.parse(localStorage.getItem('v7_loginUser')||'null');
+      if(u && u.role) return u.role;
+    }catch(e){}
+    return '';
+  }
+  function isSuper(){ return getRole().includes('超級'); }
+  function enforce(){
+    if(!isSuper()){
+      document.querySelectorAll('button').forEach(b=>{
+        var t=(b.textContent||'').trim();
+        if(t.includes('重設') && t.includes('11111')){
+          b.style.display='none';
+          b.disabled=true;
+        }
+      });
+    }
+  }
+  setInterval(enforce, 1000);
+  setTimeout(enforce, 500);
+})();
+</script>
 </body>
 </body>
 </html>
