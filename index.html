@@ -1362,5 +1362,115 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 })();
 </script>
 </body>
+
+<script>
+// === 電腦版同步權限：僅系統管理員+超級管理員可操作 ===
+(function(){
+  function getCurrentRole(){
+    try{
+      // 嘗試多種儲存位置
+      var u = null;
+      try{ u = JSON.parse(localStorage.getItem('v7_loginUser')||'null'); }catch(e){}
+      if(!u){ try{ u = JSON.parse(localStorage.getItem('water_warehouse_current_user')||'null'); }catch(e){} }
+      if(!u){ try{ u = JSON.parse(localStorage.getItem('currentUser')||'null'); }catch(e){} }
+      if(u && u.role) return u.role;
+      if(u && u.user && u.user.role) return u.user.role;
+      // 從頁面上找
+      var el = document.querySelector('[class*="超級"] , [class*="系統管理員"]');
+      if(el) return el.textContent;
+    }catch(e){}
+    return '';
+  }
+  function isAdminRole(){
+    var r = getCurrentRole();
+    return r.includes('超級') || r.includes('系統管理員');
+  }
+
+  // 攔截 openSyncModal
+  var origOpenSync = window.openSyncModal;
+  window.openSyncModal = function(){
+    var role = getCurrentRole();
+    var isAdmin = isAdminRole();
+    console.log('開啟同步，角色:', role, '是否管理員:', isAdmin);
+    if(!isAdmin){
+      // 非管理員：禁止進入，或只允許查看但不能操作危險按鈕
+      if(!confirm('⚠️ 同步設定僅限 系統管理員 / 超級管理員 操作\n\n你的角色：'+(role||'一般人員')+'\n\n確定要以「僅檢視」模式進入嗎？ (危險按鈕將隱藏)')){
+        return;
+      }
+    }
+    if(origOpenSync) origOpenSync.apply(this, arguments);
+    setTimeout(function(){
+      var modal = document.getElementById('syncModal');
+      if(!modal) return;
+      var isAdminNow = isAdminRole();
+      if(!isAdminNow){
+        // 隱藏危險操作
+        var btns = modal.querySelectorAll('button');
+        btns.forEach(function(b){
+          var txt = (b.textContent||'').trim();
+          if(txt.includes('清空雲端') || txt.includes('強制覆蓋') || txt.includes('清空此裝置')){
+            b.style.display = 'none';
+          }
+          if(txt.includes('下載雲端')){
+            // 一般人員可下載但不能清空
+            b.style.opacity = '0.5';
+          }
+        });
+        // 禁用自動同步勾選
+        var autoCheck = document.getElementById('autoSyncCheck');
+        if(autoCheck){
+          autoCheck.disabled = true;
+          var label = autoCheck.closest('label');
+          if(label){
+            label.title = '僅管理員可設定';
+            label.style.opacity = '0.5';
+          }
+        }
+        var statusEl = document.getElementById('syncStatusFinal');
+        if(statusEl){
+          statusEl.textContent = '● 檢視模式 (非管理員，危險操作已隱藏)';
+          statusEl.style.color = '#f59e0b';
+        }
+      } else {
+        // 管理員：顯示完整
+        var statusEl2 = document.getElementById('syncStatusFinal');
+        if(statusEl2 && !statusEl2.textContent.includes('管理員')){
+          statusEl2.textContent += ' (管理員模式)';
+        }
+      }
+    }, 150);
+  };
+
+  // 也攔截直接呼叫的危險函式
+  var origClearCloud = window.clearCloudFinal;
+  window.clearCloudFinal = function(){
+    if(!isAdminRole()){
+      alert('⛔ 僅 系統管理員 / 超級管理員 可清空雲端');
+      return;
+    }
+    if(origClearCloud) return origClearCloud.apply(this, arguments);
+  };
+  var origForceUpload = window.forceUploadFinal;
+  window.forceUploadFinal = function(){
+    if(!isAdminRole()){
+      alert('⛔ 僅 系統管理員 / 超級管理員 可強制覆蓋雲端');
+      return;
+    }
+    if(origForceUpload) return origForceUpload.apply(this, arguments);
+  };
+  var origClearLocal = window.clearLocalFinal;
+  window.clearLocalFinal = function(){
+    // 清空此裝置允許一般人員（手機版需要），但電腦版非管理員也提醒
+    var isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent) || window.innerWidth < 768;
+    if(!isMobile && !isAdminRole()){
+      if(!confirm('確定要清空此裝置的資料嗎？ (非管理員)')) return;
+    }
+    if(origClearLocal) return origClearLocal.apply(this, arguments);
+  };
+
+  console.log('同步權限控管已啟用：僅管理員可操作危險功能');
+})();
+</script>
+</body>
 </body>
 </html>
