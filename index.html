@@ -86,7 +86,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.58 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.59 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
@@ -674,7 +674,182 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     let html=mats.map(m=>`<div class="label"><img src="${m.qrDataUrl}"><div class="num">${m.orig_code||m.sku}</div><div class="sku">${m.sku}</div><div class="name">${(m.name||'').slice(0,14).replace(/</g,'&lt;')}</div></div>`).join('');
     w.document.write(`<html><head><meta charset="utf-8"><title>${title}</title><style>@page{size:A4;margin:5mm} body{font-family:sans-serif;padding:8px} .grid{display:grid;grid-template-columns:repeat(${
       perRow||4
-    },1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center;border-radius:8px;page-break-inside:avoid;background:#fff} .label img{width:110px;height:110px;display:block;margin:0 auto;image-rendering:pixelated} .num{font-weight:900;margin-top:4px;font-size:14px} .sku{font-size:9px;color:#666} .name{font-size:9px} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:12px 20px;background:#111;color:#fff;border-radius:999px;font-weight:bold">📄 立即列印 / 存PDF - ${title} 共 ${mats.length} 張 (真實QR)</button></div><div class="grid">${html}</div></body></html>`);
+    },1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center;border-radius:8px;page-break-inside:avoid;background:#fff} .label img{width:110px;height:110px;display:block;margin:0 auto;image-rendering:pixelated} .num{font-weight:900;margin-top:4px;font-size:14px} .sku{font-size:9px;color:#666} .name{font-size:9px} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:12px 20px;background:#111;color:#fff;border-radius:999px;font-weight:bold">📄 立即列印 / 存PDF - ${title} 共 ${mats.length} 張 (真實QR)</button></div><div class="grid">${html}</div>
+<script>
+(function(){
+  function getPersonnelFromDOM(){
+    let list=[];
+    // 抓畫面上所有人員卡片：有頭像圓圈 + 姓名
+    // 結構：div 裡有 鄭逸沂 + 水電課 + 領料下拉
+    let rows=[...document.querySelectorAll('div')].filter(d=> d.querySelector('select') && d.textContent.includes('水電課') );
+    // 更準：找所有包含重設11111的行的前一個兄弟
+    let allCards=[...document.querySelectorAll('div')].filter(el=>{
+      return el.textContent.includes('重設11111') && el.querySelector('select');
+    });
+    // 直接抓顯示的人員區塊：從你的截圖，每一列是 鄭逸沂 水電課 領料
+    // 我們抓所有有 "水電課" 的文字節點的父層
+    let persons=[...document.querySelectorAll('*')].filter(el=>{
+      let t=el.textContent||'';
+      // 避免抓到外層大容器，只抓小卡
+      return (t.trim().length<30) && (t.includes('水電課')||t.includes('機電')||t.includes('課')) && el.children.length===0;
+    });
+    // 另一招：直接從頁面原始JS裡找 personnel 陣列
+    try{
+      let scripts=[...document.querySelectorAll('script')].map(s=>s.textContent).join('\n');
+      let m=scripts.match(/personnel\s*[:=]\s*\[(.*?)\]/s);
+    }catch(e){}
+    
+    // 最穩：掃描所有按鈕區前的姓名
+    let nameEls=[...document.querySelectorAll('div')].filter(d=>{
+      let txt=d.textContent.trim();
+      // 姓名 3字，旁邊有水電課
+      return /^[一-龥]{2,4}$/.test(txt) && d.nextElementSibling && d.nextElementSibling.textContent.includes('水電課');
+    });
+    
+    // 實際做法：抓畫面左側藍框區域內所有人名
+    let container=document.querySelector('#per-excel-topbar')?.parentElement?.parentElement;
+    // 直接從 localStorage 全掃
+    let lsAll=[];
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      try{
+        let v=JSON.parse(localStorage.getItem(k));
+        if(Array.isArray(v) && v.length>10 && v[0].name){
+          lsAll=v;
+          break;
+        }
+        if(v && Array.isArray(v.personnel) && v.personnel.length>10){
+          lsAll=v.personnel;
+          break;
+        }
+        if(v && typeof v==='object'){
+          // 掃深層
+          for(let kk in v){
+            if(Array.isArray(v[kk]) && v[kk].length>10 && v[kk][0] && v[kk][0].name){
+              lsAll=v[kk];
+              break;
+            }
+          }
+        }
+      }catch(e){}
+    }
+    if(lsAll.length>0) return lsAll;
+
+    // fallback DOM scrape: 抓所有顯示的人名行
+    let domList=[];
+    [...document.querySelectorAll('div')].forEach(div=>{
+      // 每個人的卡片裡會有兩個文字：姓名 和 單位
+      if(div.children.length>=2) return;
+      // 找姓名 + 單位在一起的父層
+    });
+    // 終極：直接抓所有 包含水電課的父容器裡的姓名
+    let cards=[...document.querySelectorAll('div')].filter(d=> d.innerHTML.includes('水電課') && d.querySelector('select'));
+    cards.forEach(card=>{
+      let texts=[...card.querySelectorAll('div,span')].map(e=>e.textContent.trim()).filter(t=>t.length>=2 && t.length<=6);
+      let name=texts.find(t=>/^[\u4e00-\u9fa5]{2,4}$/.test(t) && !t.includes('水電'));
+      let dept=[...card.querySelectorAll('div,span')].map(e=>e.textContent.trim()).find(t=>t.includes('課')||t.includes('組'));
+      let roleSel=card.querySelector('select');
+      let role=roleSel?roleSel.value:'';
+      if(name){
+        domList.push({name:name, dept:dept||'水電課', role:role, title:'', account:'', phone:'', note:''});
+      }
+    });
+    return domList;
+  }
+
+  function getPersonnel(){
+    // 先試 localStorage
+    const KEYS=['water_warehouse_personnel_v7','personnel_list','ww_personnel','personnel','water_warehouse_personnel','water-warehouse-personnel'];
+    for(let k of KEYS){
+      try{
+        let v=JSON.parse(localStorage.getItem(k)||'null');
+        if(v){
+          if(Array.isArray(v)&&v.length>1) return v;
+          if(v.personnel&&v.personnel.length>1) return v.personnel;
+        }
+      }catch(e){}
+    }
+    // 再試全掃 localStorage 找超過10人的陣列
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      try{
+        let v=JSON.parse(localStorage.getItem(k));
+        if(Array.isArray(v)&&v.length>10&&v[0].name) return v;
+        if(v&&v.personnel&&v.personnel.length>10) return v.personnel;
+      }catch(e){}
+    }
+    // 最後抓畫面
+    return getPersonnelFromDOM();
+  }
+
+  function addTopBar(){
+    // 找到人員設定分頁的容器，最上方插入操作列
+    let header=[...document.querySelectorAll('div')].find(d=> d.textContent.includes('人員設定') && d.textContent.includes('人') && d.textContent.includes('種角色'));
+    if(!header) return;
+    let parent=header.parentElement;
+    if(!parent) return;
+    if(document.getElementById('per-excel-topbar')) return;
+    
+    let bar=document.createElement('div');
+    bar.id='per-excel-topbar';
+    bar.style.cssText='display:flex;gap:10px;align-items:center;padding:12px 16px;background:#fff;border:1.5px solid #e11d48;border-radius:12px;margin:10px 16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.08)';
+    bar.innerHTML=`
+      <span style="font-weight:900;color:#111">👥 人員 59 人管理</span>
+      <button id="per-top-export" style="padding:8px 16px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:700;cursor:pointer">⬇️ 匯出Excel (抓畫面59人)</button>
+      <label style="padding:8px 16px;border-radius:999px;background:#059669;color:#fff;font-weight:700;cursor:pointer">⬆️ 匯入Excel<input id="per-top-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
+      <span id="per-count" style="font-size:12px;color:#666;margin-left:8px">目前偵測到 0 人</span>
+      <button id="per-refresh-count" style="margin-left:auto;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #ddd;font-size:12px">🔄 重新抓取</button>
+    `;
+    parent.insertBefore(bar, parent.firstChild);
+
+    function updateCount(){
+      let list=getPersonnel();
+      let el=document.getElementById('per-count');
+      if(el) el.textContent=`目前偵測到 ${list.length} 人 | 來源：${list.length>10?'人員設定':'畫面抓取'}`;
+    }
+    setTimeout(updateCount,1000);
+    document.getElementById('per-refresh-count').onclick=updateCount;
+    document.getElementById('per-top-export').onclick=function(){
+      let list=getPersonnel();
+      if(list.length<=1){
+        // 強制再抓DOM一次
+        list=getPersonnelFromDOM();
+      }
+      if(list.length===0){ alert('還是抓不到，請先點一下「人員設定」分頁，讓59人名單跑出來，再按匯出'); return; }
+      let data=list.map((p,i)=>({編號:i+1, 姓名:p.name||p.姓名||'', 單位:p.dept||p.單位||p.unit||'水電課', 職稱:p.title||p.職稱||'', 角色:p.role||p.權限||'領料', 帳號:p.account||'', 電話:p.phone||'', 備註:p.note||''}));
+      let ws=XLSX.utils.json_to_sheet(data);
+      let wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '人員清單');
+      XLSX.writeFile(wb, '人員清單_'+list.length+'人_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    };
+    document.getElementById('per-top-import').addEventListener('change', function(e){
+      if(!e.target.files[0]) return;
+      let file=e.target.files[0];
+      let reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          let wb=XLSX.read(ev.target.result,{type:'binary'});
+          let sheet=wb.Sheets[wb.SheetNames[0]];
+          let rows=XLSX.utils.sheet_to_json(sheet);
+          let newList=rows.map(r=>({name:r.姓名||r.name||'', dept:r.單位||r.dept||'水電課', title:r.職稱||r.title||'', role:r.角色||r.role||'領料', account:r.帳號||r.account||'', phone:r.電話||r.phone||'', note:r.備註||r.note||'', id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)})).filter(p=>p.name);
+          if(newList.length===0){ alert('沒抓到姓名'); return; }
+          let mode=confirm(`讀到 ${newList.length} 筆\n確定=覆蓋，取消=附加`);
+          let old=getPersonnel();
+          let finalList=mode?newList:[...old, ...newList];
+          ['water_warehouse_personnel_v7','personnel_list','ww_personnel'].forEach(k=>{ try{ localStorage.setItem(k, JSON.stringify(finalList)); }catch(e){} });
+          alert('已匯入 '+newList.length+' 筆，請重新整理');
+          location.reload();
+        }catch(err){ alert('失敗:'+err.message); }
+      };
+      reader.readAsBinaryString(file);
+    });
+  }
+
+  setInterval(addTopBar,1000);
+  setTimeout(addTopBar,800);
+})();
+</script>
+</body></html>`);
     w.document.close();
   }
   function printThermal(mats, title){
@@ -684,7 +859,182 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     let w=window.open('','_blank');
     if(!w){ alert('請允許彈出視窗'); return; }
     let html=mats.map(m=>`<div class="label"><div class="row"><img src="${m.qrDataUrl}"><div class="text"><div class="num">${m.orig_code||m.sku}</div><div class="sku">${m.sku}</div><div class="name">${(m.name||'').replace(/</g,'&lt;')}</div></div></div></div>`).join('');
-    w.document.write(`<html><head><meta charset="utf-8"><title>${title} ${size}</title><style>@page{size:${ww}mm ${hh}mm;margin:0}*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif}.label{width:${ww}mm;height:${hh}mm;padding:2mm;display:flex;align-items:center;page-break-after:always}.row{display:flex;gap:2mm;width:100%}img{width:${hh-4}mm;height:${hh-4}mm} .num{font-size:12px;font-weight:900} .sku{font-size:7px;color:#666} .name{font-size:8px} .no-print{position:fixed;top:0;left:0;right:0;background:#111;color:#fff;padding:10px;text-align:center}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:10px 18px;background:#fff;color:#111;border-radius:999px">🖨️ 列印到標籤機 - ${title} ${size} 共 ${mats.length}張</button></div>${html}</body></html>`);
+    w.document.write(`<html><head><meta charset="utf-8"><title>${title} ${size}</title><style>@page{size:${ww}mm ${hh}mm;margin:0}*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif}.label{width:${ww}mm;height:${hh}mm;padding:2mm;display:flex;align-items:center;page-break-after:always}.row{display:flex;gap:2mm;width:100%}img{width:${hh-4}mm;height:${hh-4}mm} .num{font-size:12px;font-weight:900} .sku{font-size:7px;color:#666} .name{font-size:8px} .no-print{position:fixed;top:0;left:0;right:0;background:#111;color:#fff;padding:10px;text-align:center}@media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()" style="padding:10px 18px;background:#fff;color:#111;border-radius:999px">🖨️ 列印到標籤機 - ${title} ${size} 共 ${mats.length}張</button></div>${html}
+<script>
+(function(){
+  function getPersonnelFromDOM(){
+    let list=[];
+    // 抓畫面上所有人員卡片：有頭像圓圈 + 姓名
+    // 結構：div 裡有 鄭逸沂 + 水電課 + 領料下拉
+    let rows=[...document.querySelectorAll('div')].filter(d=> d.querySelector('select') && d.textContent.includes('水電課') );
+    // 更準：找所有包含重設11111的行的前一個兄弟
+    let allCards=[...document.querySelectorAll('div')].filter(el=>{
+      return el.textContent.includes('重設11111') && el.querySelector('select');
+    });
+    // 直接抓顯示的人員區塊：從你的截圖，每一列是 鄭逸沂 水電課 領料
+    // 我們抓所有有 "水電課" 的文字節點的父層
+    let persons=[...document.querySelectorAll('*')].filter(el=>{
+      let t=el.textContent||'';
+      // 避免抓到外層大容器，只抓小卡
+      return (t.trim().length<30) && (t.includes('水電課')||t.includes('機電')||t.includes('課')) && el.children.length===0;
+    });
+    // 另一招：直接從頁面原始JS裡找 personnel 陣列
+    try{
+      let scripts=[...document.querySelectorAll('script')].map(s=>s.textContent).join('\n');
+      let m=scripts.match(/personnel\s*[:=]\s*\[(.*?)\]/s);
+    }catch(e){}
+    
+    // 最穩：掃描所有按鈕區前的姓名
+    let nameEls=[...document.querySelectorAll('div')].filter(d=>{
+      let txt=d.textContent.trim();
+      // 姓名 3字，旁邊有水電課
+      return /^[一-龥]{2,4}$/.test(txt) && d.nextElementSibling && d.nextElementSibling.textContent.includes('水電課');
+    });
+    
+    // 實際做法：抓畫面左側藍框區域內所有人名
+    let container=document.querySelector('#per-excel-topbar')?.parentElement?.parentElement;
+    // 直接從 localStorage 全掃
+    let lsAll=[];
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      try{
+        let v=JSON.parse(localStorage.getItem(k));
+        if(Array.isArray(v) && v.length>10 && v[0].name){
+          lsAll=v;
+          break;
+        }
+        if(v && Array.isArray(v.personnel) && v.personnel.length>10){
+          lsAll=v.personnel;
+          break;
+        }
+        if(v && typeof v==='object'){
+          // 掃深層
+          for(let kk in v){
+            if(Array.isArray(v[kk]) && v[kk].length>10 && v[kk][0] && v[kk][0].name){
+              lsAll=v[kk];
+              break;
+            }
+          }
+        }
+      }catch(e){}
+    }
+    if(lsAll.length>0) return lsAll;
+
+    // fallback DOM scrape: 抓所有顯示的人名行
+    let domList=[];
+    [...document.querySelectorAll('div')].forEach(div=>{
+      // 每個人的卡片裡會有兩個文字：姓名 和 單位
+      if(div.children.length>=2) return;
+      // 找姓名 + 單位在一起的父層
+    });
+    // 終極：直接抓所有 包含水電課的父容器裡的姓名
+    let cards=[...document.querySelectorAll('div')].filter(d=> d.innerHTML.includes('水電課') && d.querySelector('select'));
+    cards.forEach(card=>{
+      let texts=[...card.querySelectorAll('div,span')].map(e=>e.textContent.trim()).filter(t=>t.length>=2 && t.length<=6);
+      let name=texts.find(t=>/^[\u4e00-\u9fa5]{2,4}$/.test(t) && !t.includes('水電'));
+      let dept=[...card.querySelectorAll('div,span')].map(e=>e.textContent.trim()).find(t=>t.includes('課')||t.includes('組'));
+      let roleSel=card.querySelector('select');
+      let role=roleSel?roleSel.value:'';
+      if(name){
+        domList.push({name:name, dept:dept||'水電課', role:role, title:'', account:'', phone:'', note:''});
+      }
+    });
+    return domList;
+  }
+
+  function getPersonnel(){
+    // 先試 localStorage
+    const KEYS=['water_warehouse_personnel_v7','personnel_list','ww_personnel','personnel','water_warehouse_personnel','water-warehouse-personnel'];
+    for(let k of KEYS){
+      try{
+        let v=JSON.parse(localStorage.getItem(k)||'null');
+        if(v){
+          if(Array.isArray(v)&&v.length>1) return v;
+          if(v.personnel&&v.personnel.length>1) return v.personnel;
+        }
+      }catch(e){}
+    }
+    // 再試全掃 localStorage 找超過10人的陣列
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      try{
+        let v=JSON.parse(localStorage.getItem(k));
+        if(Array.isArray(v)&&v.length>10&&v[0].name) return v;
+        if(v&&v.personnel&&v.personnel.length>10) return v.personnel;
+      }catch(e){}
+    }
+    // 最後抓畫面
+    return getPersonnelFromDOM();
+  }
+
+  function addTopBar(){
+    // 找到人員設定分頁的容器，最上方插入操作列
+    let header=[...document.querySelectorAll('div')].find(d=> d.textContent.includes('人員設定') && d.textContent.includes('人') && d.textContent.includes('種角色'));
+    if(!header) return;
+    let parent=header.parentElement;
+    if(!parent) return;
+    if(document.getElementById('per-excel-topbar')) return;
+    
+    let bar=document.createElement('div');
+    bar.id='per-excel-topbar';
+    bar.style.cssText='display:flex;gap:10px;align-items:center;padding:12px 16px;background:#fff;border:1.5px solid #e11d48;border-radius:12px;margin:10px 16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.08)';
+    bar.innerHTML=`
+      <span style="font-weight:900;color:#111">👥 人員 59 人管理</span>
+      <button id="per-top-export" style="padding:8px 16px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:700;cursor:pointer">⬇️ 匯出Excel (抓畫面59人)</button>
+      <label style="padding:8px 16px;border-radius:999px;background:#059669;color:#fff;font-weight:700;cursor:pointer">⬆️ 匯入Excel<input id="per-top-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
+      <span id="per-count" style="font-size:12px;color:#666;margin-left:8px">目前偵測到 0 人</span>
+      <button id="per-refresh-count" style="margin-left:auto;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #ddd;font-size:12px">🔄 重新抓取</button>
+    `;
+    parent.insertBefore(bar, parent.firstChild);
+
+    function updateCount(){
+      let list=getPersonnel();
+      let el=document.getElementById('per-count');
+      if(el) el.textContent=`目前偵測到 ${list.length} 人 | 來源：${list.length>10?'人員設定':'畫面抓取'}`;
+    }
+    setTimeout(updateCount,1000);
+    document.getElementById('per-refresh-count').onclick=updateCount;
+    document.getElementById('per-top-export').onclick=function(){
+      let list=getPersonnel();
+      if(list.length<=1){
+        // 強制再抓DOM一次
+        list=getPersonnelFromDOM();
+      }
+      if(list.length===0){ alert('還是抓不到，請先點一下「人員設定」分頁，讓59人名單跑出來，再按匯出'); return; }
+      let data=list.map((p,i)=>({編號:i+1, 姓名:p.name||p.姓名||'', 單位:p.dept||p.單位||p.unit||'水電課', 職稱:p.title||p.職稱||'', 角色:p.role||p.權限||'領料', 帳號:p.account||'', 電話:p.phone||'', 備註:p.note||''}));
+      let ws=XLSX.utils.json_to_sheet(data);
+      let wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '人員清單');
+      XLSX.writeFile(wb, '人員清單_'+list.length+'人_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    };
+    document.getElementById('per-top-import').addEventListener('change', function(e){
+      if(!e.target.files[0]) return;
+      let file=e.target.files[0];
+      let reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          let wb=XLSX.read(ev.target.result,{type:'binary'});
+          let sheet=wb.Sheets[wb.SheetNames[0]];
+          let rows=XLSX.utils.sheet_to_json(sheet);
+          let newList=rows.map(r=>({name:r.姓名||r.name||'', dept:r.單位||r.dept||'水電課', title:r.職稱||r.title||'', role:r.角色||r.role||'領料', account:r.帳號||r.account||'', phone:r.電話||r.phone||'', note:r.備註||r.note||'', id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)})).filter(p=>p.name);
+          if(newList.length===0){ alert('沒抓到姓名'); return; }
+          let mode=confirm(`讀到 ${newList.length} 筆\n確定=覆蓋，取消=附加`);
+          let old=getPersonnel();
+          let finalList=mode?newList:[...old, ...newList];
+          ['water_warehouse_personnel_v7','personnel_list','ww_personnel'].forEach(k=>{ try{ localStorage.setItem(k, JSON.stringify(finalList)); }catch(e){} });
+          alert('已匯入 '+newList.length+' 筆，請重新整理');
+          location.reload();
+        }catch(err){ alert('失敗:'+err.message); }
+      };
+      reader.readAsBinaryString(file);
+    });
+  }
+
+  setInterval(addTopBar,1000);
+  setTimeout(addTopBar,800);
+})();
+</script>
+</body></html>`);
     w.document.close();
   }
   function addDatabaseTab(){
@@ -743,6 +1093,181 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     if(e.target.id==='db-thermal-water'){ let f=getMats().filter(m=>String(m.sku).startsWith('W-')); printThermal(f, '水材料'); }
     if(e.target.id==='db-thermal-electric'){ let f=getMats().filter(m=>String(m.sku).startsWith('E-')); printThermal(f, '電材料'); }
   });
+})();
+</script>
+
+<script>
+(function(){
+  function getPersonnelFromDOM(){
+    let list=[];
+    // 抓畫面上所有人員卡片：有頭像圓圈 + 姓名
+    // 結構：div 裡有 鄭逸沂 + 水電課 + 領料下拉
+    let rows=[...document.querySelectorAll('div')].filter(d=> d.querySelector('select') && d.textContent.includes('水電課') );
+    // 更準：找所有包含重設11111的行的前一個兄弟
+    let allCards=[...document.querySelectorAll('div')].filter(el=>{
+      return el.textContent.includes('重設11111') && el.querySelector('select');
+    });
+    // 直接抓顯示的人員區塊：從你的截圖，每一列是 鄭逸沂 水電課 領料
+    // 我們抓所有有 "水電課" 的文字節點的父層
+    let persons=[...document.querySelectorAll('*')].filter(el=>{
+      let t=el.textContent||'';
+      // 避免抓到外層大容器，只抓小卡
+      return (t.trim().length<30) && (t.includes('水電課')||t.includes('機電')||t.includes('課')) && el.children.length===0;
+    });
+    // 另一招：直接從頁面原始JS裡找 personnel 陣列
+    try{
+      let scripts=[...document.querySelectorAll('script')].map(s=>s.textContent).join('\n');
+      let m=scripts.match(/personnel\s*[:=]\s*\[(.*?)\]/s);
+    }catch(e){}
+    
+    // 最穩：掃描所有按鈕區前的姓名
+    let nameEls=[...document.querySelectorAll('div')].filter(d=>{
+      let txt=d.textContent.trim();
+      // 姓名 3字，旁邊有水電課
+      return /^[一-龥]{2,4}$/.test(txt) && d.nextElementSibling && d.nextElementSibling.textContent.includes('水電課');
+    });
+    
+    // 實際做法：抓畫面左側藍框區域內所有人名
+    let container=document.querySelector('#per-excel-topbar')?.parentElement?.parentElement;
+    // 直接從 localStorage 全掃
+    let lsAll=[];
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      try{
+        let v=JSON.parse(localStorage.getItem(k));
+        if(Array.isArray(v) && v.length>10 && v[0].name){
+          lsAll=v;
+          break;
+        }
+        if(v && Array.isArray(v.personnel) && v.personnel.length>10){
+          lsAll=v.personnel;
+          break;
+        }
+        if(v && typeof v==='object'){
+          // 掃深層
+          for(let kk in v){
+            if(Array.isArray(v[kk]) && v[kk].length>10 && v[kk][0] && v[kk][0].name){
+              lsAll=v[kk];
+              break;
+            }
+          }
+        }
+      }catch(e){}
+    }
+    if(lsAll.length>0) return lsAll;
+
+    // fallback DOM scrape: 抓所有顯示的人名行
+    let domList=[];
+    [...document.querySelectorAll('div')].forEach(div=>{
+      // 每個人的卡片裡會有兩個文字：姓名 和 單位
+      if(div.children.length>=2) return;
+      // 找姓名 + 單位在一起的父層
+    });
+    // 終極：直接抓所有 包含水電課的父容器裡的姓名
+    let cards=[...document.querySelectorAll('div')].filter(d=> d.innerHTML.includes('水電課') && d.querySelector('select'));
+    cards.forEach(card=>{
+      let texts=[...card.querySelectorAll('div,span')].map(e=>e.textContent.trim()).filter(t=>t.length>=2 && t.length<=6);
+      let name=texts.find(t=>/^[\u4e00-\u9fa5]{2,4}$/.test(t) && !t.includes('水電'));
+      let dept=[...card.querySelectorAll('div,span')].map(e=>e.textContent.trim()).find(t=>t.includes('課')||t.includes('組'));
+      let roleSel=card.querySelector('select');
+      let role=roleSel?roleSel.value:'';
+      if(name){
+        domList.push({name:name, dept:dept||'水電課', role:role, title:'', account:'', phone:'', note:''});
+      }
+    });
+    return domList;
+  }
+
+  function getPersonnel(){
+    // 先試 localStorage
+    const KEYS=['water_warehouse_personnel_v7','personnel_list','ww_personnel','personnel','water_warehouse_personnel','water-warehouse-personnel'];
+    for(let k of KEYS){
+      try{
+        let v=JSON.parse(localStorage.getItem(k)||'null');
+        if(v){
+          if(Array.isArray(v)&&v.length>1) return v;
+          if(v.personnel&&v.personnel.length>1) return v.personnel;
+        }
+      }catch(e){}
+    }
+    // 再試全掃 localStorage 找超過10人的陣列
+    for(let i=0;i<localStorage.length;i++){
+      let k=localStorage.key(i);
+      try{
+        let v=JSON.parse(localStorage.getItem(k));
+        if(Array.isArray(v)&&v.length>10&&v[0].name) return v;
+        if(v&&v.personnel&&v.personnel.length>10) return v.personnel;
+      }catch(e){}
+    }
+    // 最後抓畫面
+    return getPersonnelFromDOM();
+  }
+
+  function addTopBar(){
+    // 找到人員設定分頁的容器，最上方插入操作列
+    let header=[...document.querySelectorAll('div')].find(d=> d.textContent.includes('人員設定') && d.textContent.includes('人') && d.textContent.includes('種角色'));
+    if(!header) return;
+    let parent=header.parentElement;
+    if(!parent) return;
+    if(document.getElementById('per-excel-topbar')) return;
+    
+    let bar=document.createElement('div');
+    bar.id='per-excel-topbar';
+    bar.style.cssText='display:flex;gap:10px;align-items:center;padding:12px 16px;background:#fff;border:1.5px solid #e11d48;border-radius:12px;margin:10px 16px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.08)';
+    bar.innerHTML=`
+      <span style="font-weight:900;color:#111">👥 人員 59 人管理</span>
+      <button id="per-top-export" style="padding:8px 16px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:700;cursor:pointer">⬇️ 匯出Excel (抓畫面59人)</button>
+      <label style="padding:8px 16px;border-radius:999px;background:#059669;color:#fff;font-weight:700;cursor:pointer">⬆️ 匯入Excel<input id="per-top-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
+      <span id="per-count" style="font-size:12px;color:#666;margin-left:8px">目前偵測到 0 人</span>
+      <button id="per-refresh-count" style="margin-left:auto;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #ddd;font-size:12px">🔄 重新抓取</button>
+    `;
+    parent.insertBefore(bar, parent.firstChild);
+
+    function updateCount(){
+      let list=getPersonnel();
+      let el=document.getElementById('per-count');
+      if(el) el.textContent=`目前偵測到 ${list.length} 人 | 來源：${list.length>10?'人員設定':'畫面抓取'}`;
+    }
+    setTimeout(updateCount,1000);
+    document.getElementById('per-refresh-count').onclick=updateCount;
+    document.getElementById('per-top-export').onclick=function(){
+      let list=getPersonnel();
+      if(list.length<=1){
+        // 強制再抓DOM一次
+        list=getPersonnelFromDOM();
+      }
+      if(list.length===0){ alert('還是抓不到，請先點一下「人員設定」分頁，讓59人名單跑出來，再按匯出'); return; }
+      let data=list.map((p,i)=>({編號:i+1, 姓名:p.name||p.姓名||'', 單位:p.dept||p.單位||p.unit||'水電課', 職稱:p.title||p.職稱||'', 角色:p.role||p.權限||'領料', 帳號:p.account||'', 電話:p.phone||'', 備註:p.note||''}));
+      let ws=XLSX.utils.json_to_sheet(data);
+      let wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '人員清單');
+      XLSX.writeFile(wb, '人員清單_'+list.length+'人_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    };
+    document.getElementById('per-top-import').addEventListener('change', function(e){
+      if(!e.target.files[0]) return;
+      let file=e.target.files[0];
+      let reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          let wb=XLSX.read(ev.target.result,{type:'binary'});
+          let sheet=wb.Sheets[wb.SheetNames[0]];
+          let rows=XLSX.utils.sheet_to_json(sheet);
+          let newList=rows.map(r=>({name:r.姓名||r.name||'', dept:r.單位||r.dept||'水電課', title:r.職稱||r.title||'', role:r.角色||r.role||'領料', account:r.帳號||r.account||'', phone:r.電話||r.phone||'', note:r.備註||r.note||'', id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)})).filter(p=>p.name);
+          if(newList.length===0){ alert('沒抓到姓名'); return; }
+          let mode=confirm(`讀到 ${newList.length} 筆\n確定=覆蓋，取消=附加`);
+          let old=getPersonnel();
+          let finalList=mode?newList:[...old, ...newList];
+          ['water_warehouse_personnel_v7','personnel_list','ww_personnel'].forEach(k=>{ try{ localStorage.setItem(k, JSON.stringify(finalList)); }catch(e){} });
+          alert('已匯入 '+newList.length+' 筆，請重新整理');
+          location.reload();
+        }catch(err){ alert('失敗:'+err.message); }
+      };
+      reader.readAsBinaryString(file);
+    });
+  }
+
+  setInterval(addTopBar,1000);
+  setTimeout(addTopBar,800);
 })();
 </script>
 </body>
