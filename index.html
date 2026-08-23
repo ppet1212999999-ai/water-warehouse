@@ -772,46 +772,78 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 })();
 </script>
 <script>
-// === 浮動按鈕可拖曳 (手機/電腦都可用) ===
+<script>
+// === 浮動按鈕全部可拖曳 - 修正版 ===
 (function(){
-  function makeDrag(){
-    var fabs=document.querySelectorAll('div[style*="position:fixed"]');
-    fabs.forEach(function(fab){
-      if((fab.innerHTML.includes('材料管理')||fab.innerHTML.includes('自動同步')||fab.innerHTML.includes('材料清單')) &&!fab.dataset.drag){
-        fab.dataset.drag='1';
-        fab.style.touchAction='none';
-        fab.style.cursor='grab';
-        fab.style.zIndex='99999';
-        var dragging=false,sx,sy,ox,oy;
-        fab.addEventListener('mousedown',function(e){
-          dragging=true; sx=e.clientX; sy=e.clientY;
-          var r=fab.getBoundingClientRect(); ox=r.left; oy=r.top;
-          fab.style.transition='none';
-        });
-        document.addEventListener('mousemove',function(e){
-          if(!dragging) return;
-          var nx=Math.max(0,Math.min(innerWidth-fab.offsetWidth, ox+e.clientX-sx));
-          var ny=Math.max(0,Math.min(innerHeight-fab.offsetHeight, oy+e.clientY-sy));
-          fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
-        });
-        document.addEventListener('mouseup',function(){ dragging=false; fab.style.transition='all 0.2s'; });
-        fab.addEventListener('touchstart',function(e){
-          var t=e.touches[0]; dragging=true; sx=t.clientX; sy=t.clientY;
-          var r=fab.getBoundingClientRect(); ox=r.left; oy=r.top;
-        },{passive:false});
-        document.addEventListener('touchmove',function(e){
-          if(!dragging) return; e.preventDefault();
-          var t=e.touches[0];
-          var nx=Math.max(0,Math.min(innerWidth-fab.offsetWidth, ox+t.clientX-sx));
-          var ny=Math.max(0,Math.min(innerHeight-fab.offsetHeight, oy+t.clientY-sy));
-          fab.style.left=nx+'px'; fab.style.top=ny+'px'; fab.style.right='auto'; fab.style.bottom='auto';
-        },{passive:false});
-        document.addEventListener('touchend',function(){ dragging=false; });
+  function makeDraggable(el){
+    if(!el || el.dataset.drag==='1') return;
+    el.dataset.drag='1';
+    el.style.touchAction='none';
+    el.style.cursor='grab';
+    el.style.zIndex='99999';
+    el.style.position='fixed'; // 確保可拖
+    var dragging=false,sx,sy,ox,oy,hasMoved=false;
+
+    function start(x,y){
+      dragging=true; hasMoved=false;
+      sx=x; sy=y;
+      var r=el.getBoundingClientRect(); ox=r.left; oy=r.top;
+      el.style.transition='none';
+    }
+    function move(x,y){
+      if(!dragging) return;
+      var dx=x-sx, dy=y-sy;
+      if(Math.abs(dx)>5 || Math.abs(dy)>5) hasMoved=true;
+      var nx=Math.max(0,Math.min(innerWidth-el.offsetWidth, ox+dx));
+      var ny=Math.max(0,Math.min(innerHeight-el.offsetHeight, oy+dy));
+      el.style.left=nx+'px'; el.style.top=ny+'px'; el.style.right='auto'; el.style.bottom='auto';
+    }
+    function end(e){
+      if(!dragging) return;
+      dragging=false;
+      el.style.transition='all 0.2s';
+      if(hasMoved && e){
+        // 拖動過就阻止點擊事件，避免點開彈窗
+        e.preventDefault(); e.stopPropagation();
+      }
+    }
+
+    // 滑鼠 - 直接綁在元素上
+    el.addEventListener('mousedown',function(e){ start(e.clientX,e.clientY); });
+    // 觸控
+    el.addEventListener('touchstart',function(e){
+      var t=e.touches[0]; start(t.clientX,t.clientY);
+    },{passive:false});
+
+    document.addEventListener('mousemove',function(e){ move(e.clientX,e.clientY); });
+    document.addEventListener('mouseup',function(e){
+      if(dragging && hasMoved){ e.preventDefault(); }
+      dragging=false; el.style.transition='all 0.2s';
+    });
+    document.addEventListener('touchmove',function(e){
+      if(!dragging) return; e.preventDefault();
+      var t=e.touches[0]; move(t.clientX,t.clientY);
+    },{passive:false});
+    document.addEventListener('touchend',function(){ dragging=false; });
+  }
+
+  function scan(){
+    // 1. 材料管理按鈕 (單顆)
+    var matBtn=document.getElementById('mat-admin-btn');
+    if(matBtn) makeDraggable(matBtn);
+    // 2. 文字包含材料管理的按鈕
+    document.querySelectorAll('button').forEach(function(b){
+      if(b.textContent.includes('材料管理')) makeDraggable(b);
+    });
+    // 3. 右側固定容器 (自動同步那整塊)
+    document.querySelectorAll('div[style*="position:fixed"]').forEach(function(d){
+      if(d.innerHTML.includes('自動同步')||d.innerHTML.includes('材料管理')){
+        makeDraggable(d);
       }
     });
   }
-  setInterval(makeDrag,1000);
-  setTimeout(makeDrag,800);
+  setInterval(scan,1000);
+  setTimeout(scan,500);
 })();
 </script>
 </body>
