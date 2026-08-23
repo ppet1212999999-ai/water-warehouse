@@ -902,79 +902,10 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   setTimeout(inject, 1000);
 })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-// === v7.4.71 修復：拖曳不回原點 + 大樓清單雲端同步 ===
-(function(){
-  // --- 修拖曳 ---
-  var dragKeys = {pos_mat_admin:'材料管理按鈕', pos_cloud_sync:'雲端同步', pos_mat_manage:'材料管理'};
-  function makeDragFixed(el, key){
-    if(!el || el.dataset.df==='71') return;
-    el.dataset.df='71';
-    el.style.touchAction='none'; el.style.cursor='grab'; el.style.zIndex='99999'; el.style.position='fixed';
-    try{ var s=JSON.parse(localStorage.getItem(key)||'null'); if(s&&s.left){ el.style.left=s.left; el.style.top=s.top; el.style.right='auto'; el.style.bottom='auto'; } }catch(e){}
-    var dragging=false,moved=false,sx,sy,ox,oy;
-    function save(){ try{ var r=el.getBoundingClientRect(); localStorage.setItem(key, JSON.stringify({left:r.left+'px',top:r.top+'px'})); }catch(e){} }
-    function st(x,y){ dragging=true; moved=false; sx=x; sy=y; var r=el.getBoundingClientRect(); ox=r.left; oy=r.top; el.style.transition='none'; }
-    function mv(x,y){ if(!dragging) return; var dx=x-sx, dy=y-sy; if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true; if(!moved) return; var nx=ox+dx, ny=oy+dy; nx=Math.max(0,Math.min(innerWidth-el.offsetWidth,nx)); ny=Math.max(0,Math.min(innerHeight-el.offsetHeight,ny)); el.style.left=nx+'px'; el.style.top=ny+'px'; el.style.right='auto'; el.style.bottom='auto'; }
-    function en(e){ if(!dragging) return; dragging=false; el.style.transition='all 0.2s'; if(moved){ e&&e.preventDefault(); save(); setTimeout(()=>moved=false,200); var b=(ev)=>{ev.stopPropagation(); ev.preventDefault(); document.removeEventListener('click',b,true);}; document.addEventListener('click',b,true); } }
-    el.addEventListener('mousedown',e=>st(e.clientX,e.clientY));
-    el.addEventListener('touchstart',e=>{var t=e.touches[0]; st(t.clientX,t.clientY);},{passive:false});
-    window.addEventListener('mousemove',e=>mv(e.clientX,e.clientY));
-    window.addEventListener('touchmove',e=>{if(!dragging) return; e.preventDefault(); var t=e.touches[0]; mv(t.clientX,t.clientY);},{passive:false});
-    window.addEventListener('mouseup',e=>en(e)); window.addEventListener('touchend',e=>en(e));
-  }
-
-  // --- 大樓清單加入雲端同步 ---
-  var BUILD_KEY='unit_locations_v7';
-  function patchCloudSync(){
-    // 攔截你原本的雲端同步存檔，順便存大樓清單
-    var origSetItem = localStorage.setItem;
-    localStorage.setItem = function(k,v){
-      origSetItem.apply(this, arguments);
-      // 當有同步動作時，自動把大樓清單也打包進雲端資料
-      if(k.includes('warehouse') || k.includes('cloud') || k.includes('sync')){
-        try{
-          var locs = localStorage.getItem(BUILD_KEY);
-          if(locs) origSetItem.call(localStorage, 'cloud_'+BUILD_KEY, locs);
-        }catch(e){}
-      }
-    };
-  }
-
-  // 每秒掃描按鈕並修復
-  setInterval(()=>{
-    var matBtn=document.getElementById('mat-admin-btn'); if(matBtn) makeDragFixed(matBtn, 'pos_mat_admin');
-    document.querySelectorAll('button').forEach(b=>{
-      if(b.textContent.includes('材料管理') && b.id!=='mat-admin-btn') makeDragFixed(b, 'pos_mat_manage');
-    });
-    document.querySelectorAll('div').forEach(d=>{
-      var s=d.getAttribute('style')||'';
-      if(s.includes('position:fixed') && (d.innerHTML.includes('自動同步') || d.textContent.includes('雲端同步'))){
-        makeDragFixed(d, 'pos_cloud_sync');
-      }
-    });
-  },1000);
-
-  // 啟動雲端同步補丁
-  patchCloudSync();
-
-  // 手機同步教學
-  console.log('v7.4.71 修復已載入：拖曳位置會記憶，大樓清單會跟著雲端同步');
-
-  // 自動檢查手機舊資料
-  setTimeout(()=>{
-    try{
-      var cloudLoc = localStorage.getItem('cloud_'+BUILD_KEY);
-      var localLoc = localStorage.getItem(BUILD_KEY);
-      if(cloudLoc && cloudLoc!==localLoc){
-        if(confirm('偵測到雲端有新大樓清單，要更新到這台裝置嗎？\n電腦改的會同步到手機')){
-          localStorage.setItem(BUILD_KEY, cloudLoc);
-          location.reload();
-        }
-      }
-    }catch(e){}
-  },2000);
-})();
+// === v7.4.71 最終修復：拖曳記憶 + 大樓雙機同步 + 匯出匯入 ===
+...最新的那段...
 </script>
 </body>
 </html>
