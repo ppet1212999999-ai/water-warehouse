@@ -86,7 +86,7 @@ HG-400220H`,spec:"東亞或同等品",unit:"個",type:"電",category:"電材料"
 
 <div id="syncModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
 <div style="background:white;width:95%;max-width:550px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:16px;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.60 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><b style="font-size:16px;">☁️ Google 雲端同步 v7.4.61 FINAL-人員修復+封鎖舊13筆 FINAL 自動版</b><button onclick="closeSyncModal()" style="border:none;background:none;font-size:20px;">✕</button></div>
 <div style="background:#eff6ff;border:2px solid #3b82f6;padding:10px;border-radius:8px;margin-bottom:10px;">
 <div style="font-size:12px;margin-bottom:6px;">Google Apps Script 網址 (已綁定):<br><input id="gasUrlInput" style="border:1px solid #3b82f6;padding:8px;border-radius:6px;width:100%;margin-top:4px;background:#fff;font-size:12px;" value="https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec"></div>
 <div style="font-size:12px;margin-top:6px;">同步碼: <input id="syncCodeInput" readonly style="background:#e5e7eb" value="water-warehouse-v2-0822" style="border:1px solid #ccc;padding:6px 10px;border-radius:6px;width:200px;"></div>
@@ -739,17 +739,254 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     if(e.target.id==='db-a4-all'){
       var mats=getMats();
       var w=window.open('','_blank'); var html=mats.map(function(m){ return '<div class="label"><img src="'+m.qrDataUrl+'"><div class="num">'+m.orig_code+'</div><div class="sku">'+m.sku+'</div><div class="name">'+(m.name||'').slice(0,14)+'</div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center} img{width:110px;height:110px} .num{font-weight:900} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">📄 列印全部 '+mats.length+'張 真實QR</button></div><div class="grid">'+html+'</div></body></html>'); w.document.close();
+      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center} img{width:110px;height:110px} .num{font-weight:900} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">📄 列印全部 '+mats.length+'張 真實QR</button></div><div class="grid">'+html+'</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  function makeRealQR(text, containerId){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML='';
+    if(!text || text.trim()=='' || text==='1-1' && false){ 
+      // still generate
+    }
+    try{
+      new QRCode(container, {
+        text: text || '1-1',
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(e){
+      console.log('QR error',e);
+      container.innerHTML='<div style="width:128px;height:128px;background:#fff;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px">QR: '+text+'</div>';
+    }
+  }
+
+  function patchMaterialQR(){
+    // 找到材料管理裡那個顯示 SKU: W-NEW | 原始編號 1-1 的區域
+    var qrArea = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
+    if(!qrArea) return;
+    var previewBox = qrArea.parentElement?.querySelector('div');
+    // 找輸入框
+    var origInput = document.querySelector('input[placeholder*="原始編號"]');
+    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder.includes('1-1'));
+    if(!origInput) return;
+
+    // 把原本3個黑點的假圖區換成真QR容器
+    var oldQRImgs = qrArea.parentElement.querySelectorAll('img, div > div');
+    // 建立新容器
+    if(!document.getElementById('real-qr-preview')){
+      var realDiv = document.createElement('div');
+      realDiv.id='real-qr-preview';
+      realDiv.style.cssText='width:132px;height:132px;background:#fff;border:2px solid #111;border-radius:8px;padding:2px;display:inline-block;vertical-align:top';
+      // 插到最前面
+      qrArea.parentElement.insertBefore(realDiv, qrArea);
+      // 隱藏原本的3黑點假圖
+      [...qrArea.parentElement.querySelectorAll('img')].forEach(function(img){
+        if(img.src.includes('data:image') && img.width<50) img.style.display='none';
+      });
+      // 隱藏那3個黑方塊div（可能是用div畫的）
+      [...qrArea.parentElement.querySelectorAll('div')].forEach(function(d){
+        if(d.textContent=='' && d.style.backgroundColor==='' && d.offsetWidth<30 && d.offsetHeight<30){
+          // 可能是假QR
+        }
+      });
+      makeRealQR(origInput.value || '1-1', 'real-qr-preview');
+      
+      origInput.addEventListener('input', function(){
+        makeRealQR(this.value || '1-1', 'real-qr-preview');
+        var skuInfo = document.querySelector('#qr-info-text');
+        if(skuInfo) skuInfo.textContent = 'SKU: ' + (document.querySelector('input[placeholder*="W-001"]')?.value || 'W-NEW') + ' | 原始編號 ' + (this.value || '1-1');
+      });
+    }
+  }
+
+  // 修復截圖那種3黑點樣式：強制用CSS隱藏假的
+  var style=document.createElement('style');
+  style.textContent=`
+    /* 隱藏材料管理裡的假3點QR */
+    div:has(> div:only-child) > div[style*="background: black"]{display:none !important}
+    #real-qr-preview img{width:128px !important;height:128px !important;image-rendering:pixelated !important;display:block !important}
+    #real-qr-preview canvas{width:128px !important;height:128px !important}
+  `;
+  document.head.appendChild(style);
+
+  setInterval(patchMaterialQR, 1000);
+  setTimeout(patchMaterialQR, 800);
+})();
+</script>
+</body></html>'); w.document.close();
     }
     if(e.target.id==='db-a4-water'){
       var mats=getMats().filter(function(m){ return String(m.sku).startsWith('W-'); });
       var w=window.open('','_blank'); var html=mats.map(function(m){ return '<div class="label"><img src="'+m.qrDataUrl+'"><div class="num">'+m.orig_code+'</div><div class="sku">'+m.sku+'</div><div class="name">'+(m.name||'').slice(0,14)+'</div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center} img{width:110px;height:110px} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">💧 水料 '+mats.length+'張</button></div><div class="grid">'+html+'</div></body></html>'); w.document.close();
+      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center} img{width:110px;height:110px} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">💧 水料 '+mats.length+'張</button></div><div class="grid">'+html+'</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  function makeRealQR(text, containerId){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML='';
+    if(!text || text.trim()=='' || text==='1-1' && false){ 
+      // still generate
+    }
+    try{
+      new QRCode(container, {
+        text: text || '1-1',
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(e){
+      console.log('QR error',e);
+      container.innerHTML='<div style="width:128px;height:128px;background:#fff;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px">QR: '+text+'</div>';
+    }
+  }
+
+  function patchMaterialQR(){
+    // 找到材料管理裡那個顯示 SKU: W-NEW | 原始編號 1-1 的區域
+    var qrArea = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
+    if(!qrArea) return;
+    var previewBox = qrArea.parentElement?.querySelector('div');
+    // 找輸入框
+    var origInput = document.querySelector('input[placeholder*="原始編號"]');
+    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder.includes('1-1'));
+    if(!origInput) return;
+
+    // 把原本3個黑點的假圖區換成真QR容器
+    var oldQRImgs = qrArea.parentElement.querySelectorAll('img, div > div');
+    // 建立新容器
+    if(!document.getElementById('real-qr-preview')){
+      var realDiv = document.createElement('div');
+      realDiv.id='real-qr-preview';
+      realDiv.style.cssText='width:132px;height:132px;background:#fff;border:2px solid #111;border-radius:8px;padding:2px;display:inline-block;vertical-align:top';
+      // 插到最前面
+      qrArea.parentElement.insertBefore(realDiv, qrArea);
+      // 隱藏原本的3黑點假圖
+      [...qrArea.parentElement.querySelectorAll('img')].forEach(function(img){
+        if(img.src.includes('data:image') && img.width<50) img.style.display='none';
+      });
+      // 隱藏那3個黑方塊div（可能是用div畫的）
+      [...qrArea.parentElement.querySelectorAll('div')].forEach(function(d){
+        if(d.textContent=='' && d.style.backgroundColor==='' && d.offsetWidth<30 && d.offsetHeight<30){
+          // 可能是假QR
+        }
+      });
+      makeRealQR(origInput.value || '1-1', 'real-qr-preview');
+      
+      origInput.addEventListener('input', function(){
+        makeRealQR(this.value || '1-1', 'real-qr-preview');
+        var skuInfo = document.querySelector('#qr-info-text');
+        if(skuInfo) skuInfo.textContent = 'SKU: ' + (document.querySelector('input[placeholder*="W-001"]')?.value || 'W-NEW') + ' | 原始編號 ' + (this.value || '1-1');
+      });
+    }
+  }
+
+  // 修復截圖那種3黑點樣式：強制用CSS隱藏假的
+  var style=document.createElement('style');
+  style.textContent=`
+    /* 隱藏材料管理裡的假3點QR */
+    div:has(> div:only-child) > div[style*="background: black"]{display:none !important}
+    #real-qr-preview img{width:128px !important;height:128px !important;image-rendering:pixelated !important;display:block !important}
+    #real-qr-preview canvas{width:128px !important;height:128px !important}
+  `;
+  document.head.appendChild(style);
+
+  setInterval(patchMaterialQR, 1000);
+  setTimeout(patchMaterialQR, 800);
+})();
+</script>
+</body></html>'); w.document.close();
     }
     if(e.target.id==='db-a4-electric'){
       var mats=getMats().filter(function(m){ return String(m.sku).startsWith('E-'); });
       var w=window.open('','_blank'); var html=mats.map(function(m){ return '<div class="label"><img src="'+m.qrDataUrl+'"><div class="num">'+m.orig_code+'</div><div class="sku">'+m.sku+'</div><div class="name">'+(m.name||'').slice(0,14)+'</div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center} img{width:110px;height:110px} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">⚡ 電料 '+mats.length+'張</button></div><div class="grid">'+html+'</div></body></html>'); w.document.close();
+      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .label{border:1px dashed #aaa;padding:6px;text-align:center} img{width:110px;height:110px} .no-print{margin-bottom:10px} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">⚡ 電料 '+mats.length+'張</button></div><div class="grid">'+html+'</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  function makeRealQR(text, containerId){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML='';
+    if(!text || text.trim()=='' || text==='1-1' && false){ 
+      // still generate
+    }
+    try{
+      new QRCode(container, {
+        text: text || '1-1',
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(e){
+      console.log('QR error',e);
+      container.innerHTML='<div style="width:128px;height:128px;background:#fff;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px">QR: '+text+'</div>';
+    }
+  }
+
+  function patchMaterialQR(){
+    // 找到材料管理裡那個顯示 SKU: W-NEW | 原始編號 1-1 的區域
+    var qrArea = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
+    if(!qrArea) return;
+    var previewBox = qrArea.parentElement?.querySelector('div');
+    // 找輸入框
+    var origInput = document.querySelector('input[placeholder*="原始編號"]');
+    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder.includes('1-1'));
+    if(!origInput) return;
+
+    // 把原本3個黑點的假圖區換成真QR容器
+    var oldQRImgs = qrArea.parentElement.querySelectorAll('img, div > div');
+    // 建立新容器
+    if(!document.getElementById('real-qr-preview')){
+      var realDiv = document.createElement('div');
+      realDiv.id='real-qr-preview';
+      realDiv.style.cssText='width:132px;height:132px;background:#fff;border:2px solid #111;border-radius:8px;padding:2px;display:inline-block;vertical-align:top';
+      // 插到最前面
+      qrArea.parentElement.insertBefore(realDiv, qrArea);
+      // 隱藏原本的3黑點假圖
+      [...qrArea.parentElement.querySelectorAll('img')].forEach(function(img){
+        if(img.src.includes('data:image') && img.width<50) img.style.display='none';
+      });
+      // 隱藏那3個黑方塊div（可能是用div畫的）
+      [...qrArea.parentElement.querySelectorAll('div')].forEach(function(d){
+        if(d.textContent=='' && d.style.backgroundColor==='' && d.offsetWidth<30 && d.offsetHeight<30){
+          // 可能是假QR
+        }
+      });
+      makeRealQR(origInput.value || '1-1', 'real-qr-preview');
+      
+      origInput.addEventListener('input', function(){
+        makeRealQR(this.value || '1-1', 'real-qr-preview');
+        var skuInfo = document.querySelector('#qr-info-text');
+        if(skuInfo) skuInfo.textContent = 'SKU: ' + (document.querySelector('input[placeholder*="W-001"]')?.value || 'W-NEW') + ' | 原始編號 ' + (this.value || '1-1');
+      });
+    }
+  }
+
+  // 修復截圖那種3黑點樣式：強制用CSS隱藏假的
+  var style=document.createElement('style');
+  style.textContent=`
+    /* 隱藏材料管理裡的假3點QR */
+    div:has(> div:only-child) > div[style*="background: black"]{display:none !important}
+    #real-qr-preview img{width:128px !important;height:128px !important;image-rendering:pixelated !important;display:block !important}
+    #real-qr-preview canvas{width:128px !important;height:128px !important}
+  `;
+  document.head.appendChild(style);
+
+  setInterval(patchMaterialQR, 1000);
+  setTimeout(patchMaterialQR, 800);
+})();
+</script>
+</body></html>'); w.document.close();
     }
     if(e.target.id==='db-thermal-all' || e.target.id==='db-thermal-water' || e.target.id==='db-thermal-electric'){
       var mats=getMats();
@@ -759,9 +996,167 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       var size=document.getElementById('label-size')?document.getElementById('label-size').value:'50x30';
       var ww=size.split('x')[0]; var hh=size.split('x')[1];
       var w=window.open('','_blank'); var html=list.map(function(m){ return '<div class="label"><div class="row"><img src="'+m.qrDataUrl+'"><div><div style="font-weight:900">'+m.orig_code+'</div><div>'+m.sku+'</div><div>'+m.name+'</div></div></div></div>'; }).join('');
-      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:'+ww+'mm '+hh+'mm;margin:0} .label{width:'+ww+'mm;height:'+hh+'mm;padding:2mm;page-break-after:always} .row{display:flex;gap:2mm} img{width:'+(parseInt(hh)-4)+'mm;height:'+(parseInt(hh)-4)+'mm} .no-print{position:fixed;top:0;left:0;right:0;background:#111;color:#fff;padding:10px;text-align:center} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">列印 '+list.length+' 張 '+size+'</button></div>'+html+'</body></html>'); w.document.close();
+      w.document.write('<html><head><meta charset="utf-8"><style>@page{size:'+ww+'mm '+hh+'mm;margin:0} .label{width:'+ww+'mm;height:'+hh+'mm;padding:2mm;page-break-after:always} .row{display:flex;gap:2mm} img{width:'+(parseInt(hh)-4)+'mm;height:'+(parseInt(hh)-4)+'mm} .no-print{position:fixed;top:0;left:0;right:0;background:#111;color:#fff;padding:10px;text-align:center} @media print{.no-print{display:none}}</style></head><body><div class="no-print"><button onclick="window.print()">列印 '+list.length+' 張 '+size+'</button></div>'+html+'
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  function makeRealQR(text, containerId){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML='';
+    if(!text || text.trim()=='' || text==='1-1' && false){ 
+      // still generate
+    }
+    try{
+      new QRCode(container, {
+        text: text || '1-1',
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(e){
+      console.log('QR error',e);
+      container.innerHTML='<div style="width:128px;height:128px;background:#fff;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px">QR: '+text+'</div>';
+    }
+  }
+
+  function patchMaterialQR(){
+    // 找到材料管理裡那個顯示 SKU: W-NEW | 原始編號 1-1 的區域
+    var qrArea = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
+    if(!qrArea) return;
+    var previewBox = qrArea.parentElement?.querySelector('div');
+    // 找輸入框
+    var origInput = document.querySelector('input[placeholder*="原始編號"]');
+    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder.includes('1-1'));
+    if(!origInput) return;
+
+    // 把原本3個黑點的假圖區換成真QR容器
+    var oldQRImgs = qrArea.parentElement.querySelectorAll('img, div > div');
+    // 建立新容器
+    if(!document.getElementById('real-qr-preview')){
+      var realDiv = document.createElement('div');
+      realDiv.id='real-qr-preview';
+      realDiv.style.cssText='width:132px;height:132px;background:#fff;border:2px solid #111;border-radius:8px;padding:2px;display:inline-block;vertical-align:top';
+      // 插到最前面
+      qrArea.parentElement.insertBefore(realDiv, qrArea);
+      // 隱藏原本的3黑點假圖
+      [...qrArea.parentElement.querySelectorAll('img')].forEach(function(img){
+        if(img.src.includes('data:image') && img.width<50) img.style.display='none';
+      });
+      // 隱藏那3個黑方塊div（可能是用div畫的）
+      [...qrArea.parentElement.querySelectorAll('div')].forEach(function(d){
+        if(d.textContent=='' && d.style.backgroundColor==='' && d.offsetWidth<30 && d.offsetHeight<30){
+          // 可能是假QR
+        }
+      });
+      makeRealQR(origInput.value || '1-1', 'real-qr-preview');
+      
+      origInput.addEventListener('input', function(){
+        makeRealQR(this.value || '1-1', 'real-qr-preview');
+        var skuInfo = document.querySelector('#qr-info-text');
+        if(skuInfo) skuInfo.textContent = 'SKU: ' + (document.querySelector('input[placeholder*="W-001"]')?.value || 'W-NEW') + ' | 原始編號 ' + (this.value || '1-1');
+      });
+    }
+  }
+
+  // 修復截圖那種3黑點樣式：強制用CSS隱藏假的
+  var style=document.createElement('style');
+  style.textContent=`
+    /* 隱藏材料管理裡的假3點QR */
+    div:has(> div:only-child) > div[style*="background: black"]{display:none !important}
+    #real-qr-preview img{width:128px !important;height:128px !important;image-rendering:pixelated !important;display:block !important}
+    #real-qr-preview canvas{width:128px !important;height:128px !important}
+  `;
+  document.head.appendChild(style);
+
+  setInterval(patchMaterialQR, 1000);
+  setTimeout(patchMaterialQR, 800);
+})();
+</script>
+</body></html>'); w.document.close();
     }
   });
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  function makeRealQR(text, containerId){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML='';
+    if(!text || text.trim()=='' || text==='1-1' && false){ 
+      // still generate
+    }
+    try{
+      new QRCode(container, {
+        text: text || '1-1',
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(e){
+      console.log('QR error',e);
+      container.innerHTML='<div style="width:128px;height:128px;background:#fff;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px">QR: '+text+'</div>';
+    }
+  }
+
+  function patchMaterialQR(){
+    // 找到材料管理裡那個顯示 SKU: W-NEW | 原始編號 1-1 的區域
+    var qrArea = [...document.querySelectorAll('div')].find(d=> d.textContent.includes('輸入 原始編號 自動產生真QR'));
+    if(!qrArea) return;
+    var previewBox = qrArea.parentElement?.querySelector('div');
+    // 找輸入框
+    var origInput = document.querySelector('input[placeholder*="原始編號"]');
+    if(!origInput) origInput = [...document.querySelectorAll('input')].find(i=> i.placeholder.includes('1-1'));
+    if(!origInput) return;
+
+    // 把原本3個黑點的假圖區換成真QR容器
+    var oldQRImgs = qrArea.parentElement.querySelectorAll('img, div > div');
+    // 建立新容器
+    if(!document.getElementById('real-qr-preview')){
+      var realDiv = document.createElement('div');
+      realDiv.id='real-qr-preview';
+      realDiv.style.cssText='width:132px;height:132px;background:#fff;border:2px solid #111;border-radius:8px;padding:2px;display:inline-block;vertical-align:top';
+      // 插到最前面
+      qrArea.parentElement.insertBefore(realDiv, qrArea);
+      // 隱藏原本的3黑點假圖
+      [...qrArea.parentElement.querySelectorAll('img')].forEach(function(img){
+        if(img.src.includes('data:image') && img.width<50) img.style.display='none';
+      });
+      // 隱藏那3個黑方塊div（可能是用div畫的）
+      [...qrArea.parentElement.querySelectorAll('div')].forEach(function(d){
+        if(d.textContent=='' && d.style.backgroundColor==='' && d.offsetWidth<30 && d.offsetHeight<30){
+          // 可能是假QR
+        }
+      });
+      makeRealQR(origInput.value || '1-1', 'real-qr-preview');
+      
+      origInput.addEventListener('input', function(){
+        makeRealQR(this.value || '1-1', 'real-qr-preview');
+        var skuInfo = document.querySelector('#qr-info-text');
+        if(skuInfo) skuInfo.textContent = 'SKU: ' + (document.querySelector('input[placeholder*="W-001"]')?.value || 'W-NEW') + ' | 原始編號 ' + (this.value || '1-1');
+      });
+    }
+  }
+
+  // 修復截圖那種3黑點樣式：強制用CSS隱藏假的
+  var style=document.createElement('style');
+  style.textContent=`
+    /* 隱藏材料管理裡的假3點QR */
+    div:has(> div:only-child) > div[style*="background: black"]{display:none !important}
+    #real-qr-preview img{width:128px !important;height:128px !important;image-rendering:pixelated !important;display:block !important}
+    #real-qr-preview canvas{width:128px !important;height:128px !important}
+  `;
+  document.head.appendChild(style);
+
+  setInterval(patchMaterialQR, 1000);
+  setTimeout(patchMaterialQR, 800);
 })();
 </script>
 </body>
