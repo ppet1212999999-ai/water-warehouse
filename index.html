@@ -798,148 +798,108 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-// === v7.4.70 單位地點分兩欄 - 左下拉(可Excel) + 右手填 ===
+// === v7.4.70 單位地點雙欄 - 強化版 ===
 (function(){
-  var STORAGE_KEY='unit_locations_v7';
-  var defaultLocations=['1教','2教','3教','1宿','2宿','辦公室','倉庫','水電間'];
+  var KEY='unit_locations_v7';
+  var defaults=['1教','2教','3教','4教','1宿','2宿','3宿','辦公室','倉庫','水電間','圖書館','餐廳'];
+  function getLocs(){ try{var v=JSON.parse(localStorage.getItem(KEY)||'null'); if(v&&v.length) return v;}catch(e){} return defaults; }
+  function saveLocs(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
 
-  function getLocations(){
-    try{ var v=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'); if(v&&v.length) return v; }catch(e){}
-    return defaultLocations;
-  }
-  function saveLocations(arr){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-  }
-
-  function buildLocationUI(){
-    // 找單位地點的容器
-    var labelEl=[...document.querySelectorAll('label,div,span')].find(function(el){ return (el.textContent||'').trim()==='單位地點' || (el.textContent||'').includes('單位地點'); });
-    if(!labelEl) return false;
-    var container=labelEl.parentElement;
-    if(!container) return false;
-    if(container.querySelector('#unit-loc-select')) return true; // 已建
-
-    // 找原本的輸入框
-    var oldInput=container.querySelector('input,select');
-    var oldValue=oldInput?oldInput.value:'';
-
-    // 建立新UI
-    var wrap=document.createElement('div');
-    wrap.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;width:100%';
-    wrap.innerHTML=`
-      <select id="unit-loc-select" style="flex:1;min-width:120px;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:14px;">
-        <option value="">請選擇地點</option>
-      </select>
-      <input id="unit-loc-manual" type="text" placeholder="手填詳細位置 如 301室" style="flex:1;min-width:140px;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:14px;" value="${oldValue}">
-      <button id="unit-loc-manage" type="button" style="padding:8px 12px;border-radius:20px;background:#111;color:#fff;border:none;font-size:12px;cursor:pointer">⚙️ 管理</button>
-    `;
-
-    // 取代舊輸入
-    if(oldInput) oldInput.style.display='none';
-    labelEl.insertAdjacentElement('afterend', wrap);
-
-    // 載入下拉選項
-    function refreshSelect(){
-      var sel=document.getElementById('unit-loc-select');
-      var locs=getLocations();
-      sel.innerHTML='<option value="">請選擇地點</option>' + locs.map(function(l){ return `<option value="${l}">${l}</option>`; }).join('') + '<option value="__add__">➕ 新增...</option>';
-    }
-    refreshSelect();
-
-    // 選擇事件
-    document.getElementById('unit-loc-select').addEventListener('change', function(){
-      if(this.value==='__add__'){
-        var n=prompt('輸入新地點名稱:');
-        if(n){ var locs=getLocations(); if(!locs.includes(n)){ locs.push(n); saveLocations(locs); refreshSelect(); this.value=n; } }
-      }
+  function inject(){
+    // 找所有包含 單位地點 文字的容器，往下找 input
+    var all=[...document.querySelectorAll('*')].filter(function(el){
+      return el.childNodes.length===1 && el.childNodes[0].nodeType===3 && (el.textContent||'').trim()==='單位地點';
     });
+    // 如果沒找到純文字，找包含該文字的 div
+    if(all.length===0){
+      all=[...document.querySelectorAll('div,span,label')].filter(function(el){ return (el.textContent||'').trim()==='單位地點'; });
+    }
+    all.forEach(function(label){
+      var container=label.closest('div');
+      if(!container) return;
+      // 往上找兩層，確保是表單區塊
+      var formBlock=container.parentElement;
+      if(formBlock && formBlock.querySelector('#unit-loc-select')) return; // 已注入
 
-    // 管理面板
-    document.getElementById('unit-loc-manage').addEventListener('click', function(){
-      var existing=document.getElementById('unit-loc-panel');
-      if(existing){ existing.remove(); return; }
-      var panel=document.createElement('div');
-      panel.id='unit-loc-panel';
-      panel.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:2px solid #111;border-radius:16px;padding:16px;z-index:100000;min-width:320px;max-width:90%;max-height:80%;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,0.3)';
-      var locs=getLocations();
-      panel.innerHTML=`
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <b>📍 單位地點管理 (下拉選單)</b>
-          <button id="unit-loc-close" style="width:32px;height:32px;border-radius:50%;background:#111;color:#fff;border:none;cursor:pointer">✕</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-          <button id="unit-loc-export" style="padding:8px 14px;border-radius:20px;background:#0ea5e9;color:#fff;border:none;cursor:pointer">⬇️ Excel匯出</button>
-          <label style="padding:8px 14px;border-radius:20px;background:#111;color:#fff;cursor:pointer">⬆️ Excel匯入<input id="unit-loc-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
-        </div>
-        <div id="unit-loc-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
-          ${locs.map(function(l,i){ return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#f5f5f5;border-radius:10px"><span>${l}</span><button data-del="${i}" style="padding:4px 10px;border-radius:20px;background:#e11d48;color:#fff;border:none;cursor:pointer;font-size:12px">刪除</button></div>`; }).join('')}
-        </div>
-        <div style="display:flex;gap:8px">
-          <input id="unit-loc-new" placeholder="新增地點" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:10px">
-          <button id="unit-loc-add" style="padding:8px 16px;border-radius:20px;background:#111;color:#fff;border:none;cursor:pointer">新增</button>
-        </div>
-        <div style="font-size:11px;color:#666;margin-top:10px">Excel格式: 第一欄為「地點」即可，支援新增與覆蓋</div>
+      // 找這個區塊裡的所有 input / select
+      var inputs=[...formBlock.querySelectorAll('input')];
+      var targetInput=inputs.find(function(inp){
+        var ph=(inp.placeholder||'');
+        return ph.includes('地點') || inp.id.includes('loc') || true; // 取第一個
+      });
+      if(!targetInput) return;
+      if(formBlock.querySelector('#unit-loc-select')) return;
+
+      var oldVal=targetInput.value||'';
+      // 隱藏原本
+      targetInput.style.display='none';
+      // 建立雙欄
+      var wrap=document.createElement('div');
+      wrap.style.cssText='display:flex;gap:8px;margin-top:8px;width:100%';
+      wrap.innerHTML=`
+        <select id="unit-loc-select" style="flex:0 0 40%;padding:10px;border:1px solid #ddd;border-radius:10px">
+          <option value="">選擇地點</option>
+          ${getLocs().map(function(l){ return `<option value="${l}">${l}</option>`}).join('')}
+        </select>
+        <input id="unit-loc-manual" type="text" placeholder="手填 301室 / 2F" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:10px" value="${oldVal}">
+        <button id="unit-loc-manage" type="button" style="padding:8px 10px;border-radius:20px;background:#111;color:#fff;border:none">⚙️</button>
       `;
-      document.body.appendChild(panel);
+      targetInput.parentElement.insertBefore(wrap, targetInput.nextSibling);
 
-      panel.querySelector('#unit-loc-close').onclick=function(){ panel.remove(); };
-      panel.querySelector('#unit-loc-add').onclick=function(){
-        var v=panel.querySelector('#unit-loc-new').value.trim();
-        if(!v) return;
-        var locs=getLocations(); if(!locs.includes(v)){ locs.push(v); saveLocations(locs); refreshSelect(); panel.remove(); document.getElementById('unit-loc-manage').click(); }
-      };
-      panel.querySelectorAll('[data-del]').forEach(function(btn){
-        btn.onclick=function(){
-          var idx=parseInt(btn.getAttribute('data-del'));
-          var locs=getLocations(); locs.splice(idx,1); saveLocations(locs); refreshSelect(); panel.remove(); document.getElementById('unit-loc-manage').click();
-        };
-      });
-      panel.querySelector('#unit-loc-export').onclick=function(){
-        var locs=getLocations();
-        var data=locs.map(function(l,i){ return {編號:i+1, 地點:l}; });
-        var ws=XLSX.utils.json_to_sheet(data);
-        var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'單位地點');
-        XLSX.writeFile(wb, '單位地點_'+locs.length+'筆.xlsx');
-      };
-      panel.querySelector('#unit-loc-import').addEventListener('change', function(e){
-        var file=e.target.files[0]; if(!file) return;
-        var reader=new FileReader();
-        reader.onload=function(ev){
-          var wb=XLSX.read(ev.target.result,{type:'binary'});
-          var sheet=wb.Sheets[wb.SheetNames[0]];
-          var rows=XLSX.utils.sheet_to_json(sheet);
-          var newLocs=rows.map(function(r){ return r.地點||r.單位地點||r.地點名稱||Object.values(r)[0]; }).filter(function(v){ return v && String(v).trim(); }).map(function(v){ return String(v).trim(); });
-          if(newLocs.length===0){ alert('Excel沒有讀到地點'); return; }
-          if(confirm('讀到 '+newLocs.length+' 筆，要覆蓋現有清單嗎？\n按確定=覆蓋，按取消=附加')){
-            saveLocations(newLocs);
-          }else{
-            var locs=getLocations(); newLocs.forEach(function(l){ if(!locs.includes(l)) locs.push(l); }); saveLocations(locs);
-          }
-          refreshSelect(); panel.remove(); alert('匯入完成 '+newLocs.length+' 筆');
-        };
-        reader.readAsBinaryString(file);
-      });
-    });
-
-    // 把兩個欄位合併回原本隱藏的 input，確保儲存時有值
-    function syncBack(){
-      var sel=document.getElementById('unit-loc-select');
-      var manual=document.getElementById('unit-loc-manual');
-      if(oldInput){
-        var combined=(sel.value?sel.value:'') + (manual.value?' '+manual.value:'');
-        oldInput.value=combined.trim();
-        oldInput.dispatchEvent(new Event('input',{bubbles:true}));
-        oldInput.dispatchEvent(new Event('change',{bubbles:true}));
+      // 同步回原 input
+      function sync(){
+        var s=document.getElementById('unit-loc-select');
+        var m=document.getElementById('unit-loc-manual');
+        targetInput.value=((s.value||'')+' '+(m.value||'')).trim();
+        targetInput.dispatchEvent(new Event('input',{bubbles:true}));
+        targetInput.dispatchEvent(new Event('change',{bubbles:true}));
       }
-    }
-    document.getElementById('unit-loc-select').addEventListener('change', syncBack);
-    document.getElementById('unit-loc-manual').addEventListener('input', syncBack);
+      wrap.querySelector('#unit-loc-select').addEventListener('change', sync);
+      wrap.querySelector('#unit-loc-manual').addEventListener('input', sync);
 
-    return true;
+      // 管理彈窗
+      wrap.querySelector('#unit-loc-manage').onclick=function(){
+        if(document.getElementById('unit-loc-panel')){ document.getElementById('unit-loc-panel').remove(); return; }
+        var locs=getLocs();
+        var panel=document.createElement('div');
+        panel.id='unit-loc-panel';
+        panel.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:16px;z-index:999999;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.3);max-height:80vh;overflow:auto';
+        panel.innerHTML=`
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px"><b>📍 地點管理</b><button id="loc-close" style="width:30px;height:30px;border-radius:50%;background:#111;color:#fff;border:none">✕</button></div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button id="loc-export" style="padding:6px 12px;border-radius:20px;background:#0ea5e9;color:#fff;border:none">⬇️ 匯出Excel</button>
+            <label style="padding:6px 12px;border-radius:20px;background:#111;color:#fff;cursor:pointer">⬆️ 匯入Excel<input id="loc-import" type="file" accept=".xlsx,.xls" style="display:none"></label>
+          </div>
+          <div id="loc-list">${locs.map(function(l,i){ return `<div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f5f5f5;border-radius:8px;margin-bottom:4px"><span>${l}</span><button data-i="${i}" style="background:#e11d48;color:#fff;border:none;border-radius:12px;padding:2px 8px">刪除</button></div>`}).join('')}</div>
+          <div style="display:flex;gap:6px;margin-top:10px"><input id="loc-new" placeholder="新增地點" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px"><button id="loc-add" style="padding:6px 12px;background:#111;color:#fff;border:none;border-radius:20px">新增</button></div>
+        `;
+        document.body.appendChild(panel);
+        panel.querySelector('#loc-close').onclick=function(){ panel.remove(); };
+        panel.querySelector('#loc-add').onclick=function(){
+          var v=panel.querySelector('#loc-new').value.trim(); if(!v) return;
+          var ls=getLocs(); if(!ls.includes(v)){ ls.push(v); saveLocs(ls); } panel.remove(); inject();
+        };
+        panel.querySelectorAll('[data-i]').forEach(function(b){ b.onclick=function(){ var ls=getLocs(); ls.splice(parseInt(b.getAttribute('data-i')),1); saveLocs(ls); panel.remove(); inject(); }; });
+        panel.querySelector('#loc-export').onclick=function(){
+          var ws=XLSX.utils.json_to_sheet(getLocs().map(function(l,i){ return {地點:l}; })); var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'地點'); XLSX.writeFile(wb,'單位地點.xlsx');
+        };
+        panel.querySelector('#loc-import').onchange=function(e){
+          var f=e.target.files[0]; if(!f) return;
+          var r=new FileReader(); r.onload=function(ev){
+            var wb=XLSX.read(ev.target.result,{type:'binary'}); var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            var newL=rows.map(function(row){ return row.地點||row.單位地點||Object.values(row)[0]; }).filter(Boolean).map(function(s){ return String(s).trim(); });
+            if(newL.length){ saveLocs(newL); alert('匯入 '+newL.length+' 筆'); panel.remove(); inject(); }
+          }; r.readAsBinaryString(f);
+        };
+      };
+    });
   }
 
-  setInterval(buildLocationUI, 1000);
-  setTimeout(buildLocationUI, 800);
+  // 用 MutationObserver 監聽表單出現
+  var obs=new MutationObserver(function(){ inject(); });
+  obs.observe(document.body, {childList:true, subtree:true});
+  setInterval(inject, 1500);
+  setTimeout(inject, 1000);
 })();
 </script>
 </body>
