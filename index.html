@@ -1473,5 +1473,63 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 })();
 </script>
 </body>
+
+<script>
+// === 手機版同步視窗大小修復 ===
+(function(){
+  function fixModalSize(){
+    var modal = document.getElementById('syncModal');
+    if(!modal) return;
+    var inner = modal.querySelector('div[style*="max-height"]') || modal.firstElementChild;
+    if(!inner) return;
+    
+    var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if(isMobile){
+      // 手機版縮小視窗
+      modal.style.padding = '10px';
+      modal.style.alignItems = 'flex-start';
+      modal.style.paddingTop = '20px';
+      if(inner){
+        inner.style.width = '95vw';
+        inner.style.maxWidth = '95vw';
+        inner.style.maxHeight = '85vh';
+        inner.style.margin = '0 auto';
+        inner.style.fontSize = '14px';
+        // 確保關閉按鈕可見
+        var closeBtn = inner.querySelector('button[onclick="closeSyncModal()"]');
+        if(closeBtn){
+          closeBtn.style.position = 'sticky';
+          closeBtn.style.top = '0';
+          closeBtn.style.zIndex = '10';
+          closeBtn.style.background = '#fff';
+          closeBtn.style.padding = '8px 12px';
+          closeBtn.style.borderRadius = '20px';
+          closeBtn.style.border = '2px solid #111';
+          closeBtn.style.fontSize = '20px';
+        }
+      }
+    }
+  }
+
+  // 攔截 openSyncModal 再修一次
+  var origOpen = window.openSyncModal;
+  window.openSyncModal = function(){
+    if(origOpen) origOpen.apply(this, arguments);
+    setTimeout(fixModalSize, 50);
+    setTimeout(fixModalSize, 300);
+  };
+
+  // 點擊背景關閉
+  document.addEventListener('click', function(e){
+    var modal = document.getElementById('syncModal');
+    if(modal && e.target === modal){
+      if(window.closeSyncModal) window.closeSyncModal();
+    }
+  });
+
+  setInterval(fixModalSize, 1000);
+})();
+</script>
+</body>
 </body>
 </html>
