@@ -772,28 +772,114 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 })();
 </script>
 <script>
-// === 最簡可拖曳版 - 兩個都能動 ===
+// === v7.4.73 修復：拖曳記憶 + 關窗不跳回原點 ===
 (function(){
+  var POS_KEY_PREFIX='mat_drag_pos_';
+  function getPosKey(el){
+    if(el.id) return POS_KEY_PREFIX+el.id;
+    var txt=(el.textContent||'').slice(0,12).replace(/\s/g,'_');
+    return POS_KEY_PREFIX+txt;
+  }
+  function savePos(el){
+    try{
+      var r=el.getBoundingClientRect();
+      localStorage.setItem(getPosKey(el), JSON.stringify({left:r.left, top:r.top}));
+    }catch(e){}
+  }
+  function restorePos(el){
+    try{
+      var v=JSON.parse(localStorage.getItem(getPosKey(el))||'null');
+      if(v && typeof v.left==='number'){
+        el.style.left=v.left+'px';
+        el.style.top=v.top+'px';
+        el.style.right='auto';
+        el.style.bottom='auto';
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
   function makeDrag(el){
-    if(!el || el._drag) return;
-    el._drag=true;
-    el.style.position='fixed';
+    if(!el || el._dragFixed) return;
+    // 如果已經是拖曳元件但被重建，仍要恢復位置
+    if(!el.style.position || el.style.position==='') el.style.position='fixed';
     el.style.touchAction='none';
     el.style.zIndex='99999';
-    var d=false,sx,sy,ox,oy;
-    el.addEventListener('mousedown',function(e){d=true;sx=e.clientX;sy=e.clientY;var r=el.getBoundingClientRect();ox=r.left;oy=r.top;el.style.transition='none';});
-    el.addEventListener('touchstart',function(e){d=true;var t=e.touches[0];sx=t.clientX;sy=t.clientY;var r=el.getBoundingClientRect();ox=r.left;oy=r.top;},{passive:false});
-    window.addEventListener('mousemove',function(e){if(!d)return;var nx=ox+e.clientX-sx,ny=oy+e.clientY-sy;el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,nx))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,ny))+'px';el.style.right='auto';el.style.bottom='auto';});
-    window.addEventListener('touchmove',function(e){if(!d)return;var t=e.touches[0];var nx=ox+t.clientX-sx,ny=oy+t.clientY-sy;el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,nx))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,ny))+'px';el.style.right='auto';el.style.bottom='auto';},{passive:false});
-    window.addEventListener('mouseup',function(){d=false;});
-    window.addEventListener('touchend',function(){d=false;});
+    // 恢復上次位置，否則不強制改left/top，避免跳回原點
+    if(!restorePos(el)){
+      // 若沒有記錄且沒有left/top，保持現有位置，不覆蓋
+      if(!el.style.left){
+        // 第一次出現才給預設右下角，不影響已定位的
+        // el.style.left='auto'; el.style.right='20px'; el.style.bottom='20px';
+      }
+    }
+    el._dragFixed=true;
+    var dragging=false, moved=false, sx=0, sy=0, ox=0, oy=0;
+    function onDown(clientX, clientY){
+      dragging=true; moved=false;
+      sx=clientX; sy=clientY;
+      var r=el.getBoundingClientRect(); ox=r.left; oy=r.top;
+      el.style.transition='none';
+    }
+    function onMove(clientX, clientY){
+      if(!dragging) return;
+      var dx=clientX-sx, dy=clientY-sy;
+      if(Math.abs(dx)>3 || Math.abs(dy)>3) moved=true;
+      var nx=ox+dx, ny=oy+dy;
+      nx=Math.max(0, Math.min(window.innerWidth-el.offsetWidth, nx));
+      ny=Math.max(0, Math.min(window.innerHeight-el.offsetHeight, ny));
+      el.style.left=nx+'px';
+      el.style.top=ny+'px';
+      el.style.right='auto';
+      el.style.bottom='auto';
+    }
+    function onUp(){
+      if(!dragging) return;
+      dragging=false;
+      if(moved){
+        savePos(el);
+        // 防止拖曳結束後觸發click打開視窗
+        setTimeout(function(){ moved=false; }, 100);
+      }
+    }
+    el.addEventListener('mousedown', function(e){
+      if(e.button!==0) return;
+      onDown(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+    el.addEventListener('touchstart', function(e){
+      var t=e.touches[0]; if(!t) return;
+      onDown(t.clientX, t.clientY);
+    }, {passive:false});
+    // 用 capture 避免被 React 吃掉
+    window.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); }, true);
+    window.addEventListener('touchmove', function(e){
+      var t=e.touches[0]; if(!t) return;
+      onMove(t.clientX, t.clientY);
+      if(dragging) e.preventDefault();
+    }, {passive:false, capture:true});
+    window.addEventListener('mouseup', onUp, true);
+    window.addEventListener('touchend', onUp, true);
+    // 攔截拖曳後的click
+    el.addEventListener('click', function(e){
+      if(moved){ e.stopPropagation(); e.preventDefault(); }
+    }, true);
   }
   function scan(){
     var m=document.getElementById('mat-admin-btn'); if(m) makeDrag(m);
-    document.querySelectorAll('button').forEach(function(b){ if(b.textContent.indexOf('材料管理')>-1) makeDrag(b); });
-    document.querySelectorAll('div').forEach(function(d){ var s=(d.getAttribute('style')||''); if(s.indexOf('position:fixed')>-1 && (d.innerHTML.indexOf('自動同步')>-1 || d.innerHTML.indexOf('材料管理')>-1)) makeDrag(d); });
+    document.querySelectorAll('button').forEach(function(b){
+      if((b.textContent||'').indexOf('材料管理')>-1) makeDrag(b);
+    });
+    // 自動同步那個小浮窗也固定
+    document.querySelectorAll('div').forEach(function(d){
+      var s=d.getAttribute('style')||'';
+      if(s.indexOf('position:fixed')>-1 && (d.innerHTML.indexOf('自動同步')>-1 || d.innerHTML.indexOf('材料管理')>-1)){
+        makeDrag(d);
+      }
+    });
   }
-  setInterval(scan,1000); setTimeout(scan,500);
+  setInterval(scan, 800);
+  setTimeout(scan, 400);
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -837,7 +923,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       var target=inputs.find(i=> i.placeholder && i.placeholder.includes('B棟')) || inputs[0];
       if(!target || target.dataset.patched) return;
       var wrap=document.createElement('div');
-      wrap.innerHTML=`<div style="display:flex;gap:6px;margin-top:6px"><select id="unit-loc-select" style="flex:0 0 44%;padding:10px;border:1px solid #ddd;border-radius:999px"><option value="">選擇大樓 (${getLocs().length}棟)</option>${getLocs().map(l=>`<option value="${l}">${l}</option>`).join('')}</select><input id="unit-loc-manual" placeholder="加填 301/2F" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:999px"></div>`;
+      wrap.innerHTML=`<div style="display:flex;gap:6px;margin-top:6px"><select id="unit-loc-select" style="flex:0 0 44%;padding:10px;border:1px solid #ddd;border-radius:999px"><option value="">選擇大樓</option>${getLocs().map(l=>`<option value="${l}">${l}</option>`).join('')}</select><input id="unit-loc-manual" placeholder="加填 301/2F" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:999px"></div>`;
       var selWrap=wrap.firstChild;
       target.parentElement.insertBefore(selWrap, target.nextSibling);
       target.style.display='none'; target.dataset.patched='1';
