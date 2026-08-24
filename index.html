@@ -2790,6 +2790,133 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 })();
 </script>
 
+
+<script>
+// === v7.5.11 人員權限雲端同步修補 ===
+(function(){
+  function getFullData(){
+    try{
+      var raw=localStorage.getItem('v7_4_22');
+      var obj=raw?JSON.parse(raw):{orders:[], personnel:[]};
+      var orders=obj.orders||[];
+      var personnel=obj.personnel||[];
+      // 也嘗試從其他人員key補
+      try{
+        var alt=JSON.parse(localStorage.getItem('water_warehouse_personnel_v7')||'[]');
+        if(alt.length>personnel.length) personnel=alt;
+      }catch(e){}
+      return {orders:orders, personnel:personnel};
+    }catch(e){ return {orders:[], personnel:[]}; }
+  }
+
+  // 覆蓋 autoUpload -> 改成上傳完整資料
+  var origAutoUpload = window.autoUpload;
+  window.autoUpload = async function(){
+    try{
+      var gasUrl=localStorage.getItem('gasUrl')|| (window.DEFAULT_GAS_URL||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
+      var code=localStorage.getItem('syncCode')|| (window.DEFAULT_SYNC_CODE||'water-warehouse-v2-0822');
+      var full=getFullData();
+      if(full.orders.length===0 && full.personnel.length===0) return;
+      var payload = { _v2:true, orders:full.orders, personnel:full.personnel, time:new Date().toISOString() };
+      var statusEl=document.getElementById('syncStatusFinal');
+      if(statusEl) statusEl.textContent='● 自動上傳中... '+full.orders.length+'筆單 + '+full.personnel.length+'人';
+      await fetch(gasUrl+'?code='+encodeURIComponent(code)+'&v2=1', {method:'POST', mode:'no-cors', body: JSON.stringify(payload)});
+      var now=new Date().toLocaleTimeString();
+      if(statusEl) statusEl.textContent='● 已同步 '+full.orders.length+'筆 + '+full.personnel.length+'人 '+now;
+      var btn=document.getElementById('floatingSyncBtnFinal');
+      if(btn) btn.textContent='☁️ 已同步 '+now;
+      localStorage.setItem('lastUploadCount', full.orders.length.toString());
+      console.log('v7.5.11 已上傳完整', payload);
+    }catch(e){ console.log('autoUpload v2 error', e); if(origAutoUpload) return origAutoUpload(); }
+  };
+
+  // 覆蓋 uploadCloudFinal 手動上傳也用完整
+  var origUpload = window.uploadCloudFinal;
+  window.uploadCloudFinal = async function(){
+    var full=getFullData();
+    if(full.orders.length===0 && full.personnel.length===0){ alert('此裝置無紀錄'); return; }
+    var code=(document.getElementById('syncCodeInput')?.value.trim())||localStorage.getItem('syncCode')||'water-warehouse-v2-0822';
+    var gasUrl=(document.getElementById('gasUrlInput')?.value.trim())||localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+    try{
+      var payload={_v2:true, orders:full.orders, personnel:full.personnel};
+      await fetch(gasUrl+'?code='+encodeURIComponent(code)+'&v2=1', {method:'POST', mode:'no-cors', body: JSON.stringify(payload)});
+      alert('已上傳 '+full.orders.length+'筆領料單 + '+full.personnel.length+'人 人員權限\n手機電腦都會同步了！');
+      document.getElementById('syncStatusFinal').textContent='● 已上傳 '+full.orders.length+'筆 + '+full.personnel.length+'人';
+    }catch(e){ alert('上傳失敗:'+e.message); }
+  };
+
+  // 覆蓋 downloadCloudFinal 下載完整
+  var origDownload = window.downloadCloudFinal;
+  window.downloadCloudFinal = async function(){
+    var code=(document.getElementById('syncCodeInput')?.value.trim())||localStorage.getItem('syncCode')||'water-warehouse-v2-0822';
+    var gasUrl=(document.getElementById('gasUrlInput')?.value.trim())||localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+    localStorage.setItem('gasUrl', gasUrl);
+    localStorage.setItem('syncCode', code);
+    try{
+      var res=await fetch(gasUrl+'?code='+encodeURIComponent(code)+'&v2=1');
+      var cloud=await res.json();
+      var cloudOrders=[], cloudPersonnel=[];
+      if(Array.isArray(cloud)){
+        // 舊版：只有訂單陣列
+        cloudOrders=cloud;
+      }else if(cloud && cloud._v2){
+        cloudOrders=cloud.orders||[];
+        cloudPersonnel=cloud.personnel||[];
+      }else if(cloud && cloud.orders){
+        cloudOrders=cloud.orders||[];
+        cloudPersonnel=cloud.personnel||[];
+      }else if(Array.isArray(cloud?.orders)){
+        cloudOrders=cloud.orders;
+      }
+
+      if((!cloudOrders||cloudOrders.length===0) && (!cloudPersonnel||cloudPersonnel.length===0)){
+        var local=getFullData();
+        if(local.orders.length>0){ alert('雲端空的，幫你把此裝置 '+local.orders.length+'筆 上傳'); window.autoUpload(); return; }
+        else{ alert('雲端無資料'); return; }
+      }
+
+      // 合併訂單
+      var local=getFullData();
+      var map={}; var all=local.orders.concat(cloudOrders);
+      for(var i=0;i<all.length;i++){ var h=all[i]; if(h&&h.id) map[h.id]=h; }
+      var merged=[]; for(var k in map) merged.push(map[k]);
+      merged.sort(function(a,b){ return (b.id||'').localeCompare(a.id||''); });
+
+      // 人員以雲端為主，但保留本地朱忠正超級管理員
+      var finalPersonnel = cloudPersonnel.length>0 ? cloudPersonnel : local.personnel;
+      // 確保朱忠正一定在且是超級
+      var hasZhu = finalPersonnel.find(function(p){return p.name==='朱忠正';});
+      if(!hasZhu){
+        finalPersonnel.unshift({id:'admin-1', name:'朱忠正', role:'超級管理員', pin:'11111', locked:true});
+      }else{
+        hasZhu.role='超級管理員'; hasZhu.locked=true;
+      }
+
+      // 寫回
+      try{
+        var raw=localStorage.getItem('v7_4_22');
+        var obj=raw?JSON.parse(raw):{};
+        obj.orders=merged;
+        obj.personnel=finalPersonnel;
+        localStorage.setItem('v7_4_22', JSON.stringify(obj));
+      }catch(e){
+        localStorage.setItem('v7_4_22', JSON.stringify({orders:merged, personnel:finalPersonnel}));
+      }
+      localStorage.setItem('water_warehouse_personnel_v7', JSON.stringify(finalPersonnel));
+      localStorage.setItem('personnel_list', JSON.stringify(finalPersonnel));
+      localStorage.setItem('hist', JSON.stringify(merged));
+
+      document.getElementById('syncStatusFinal').textContent='● 已同步 '+merged.length+'筆 + '+finalPersonnel.length+'人';
+      if(window.renderSyncModal) renderSyncModal();
+      alert('已下載 '+merged.length+'筆單 + '+finalPersonnel.length+'人\n權限已同步，重新整理後生效');
+      location.reload();
+    }catch(e){ alert('下載失敗:'+e.message); if(origDownload) return origDownload(); }
+  };
+
+  console.log('v7.5.11 人員同步已載入');
+})();
+</script>
+
 </body>
 
 </html>
