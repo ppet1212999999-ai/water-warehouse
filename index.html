@@ -257,7 +257,7 @@ localStorage.setItem = function(k,v){
 // 強制綁定新 GAS
 localStorage.setItem('gasUrl', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
 console.log('GAS URL updated to', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
-// V7.6.9.15: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
+// V7.6.9.16: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
 if(false) setInterval(()=>{
   var hist=null;
   try{ var raw=localStorage.getItem('v7_4_22'); if(raw){ var obj=JSON.parse(raw); if(obj && obj.orders) hist=obj.orders; } }catch(e){}
@@ -343,7 +343,7 @@ async function downloadCloudFinalForce(){
 }
 </script>
 <script>
-// V7.6.9.15: removed obsolete "old 13 records resurrection" global fetch interceptor.
+// V7.6.9.16: removed obsolete "old 13 records resurrection" global fetch interceptor.
 // Full V7.6 payloads may legitimately contain personnel names that matched the old blocker.
 </script>
 <script>
@@ -2459,7 +2459,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       mat.style.borderRadius='999px';
       mat.style.fontSize='13px';
       mat.style.lineHeight='1';
-      // V7.6.9.15: 顯示/隱藏交由目前登入角色控制，不在尺寸修復器強制 display。
+      // V7.6.9.16: 顯示/隱藏交由目前登入角色控制，不在尺寸修復器強制 display。
       mat.style.alignItems='center';
       mat.style.justifyContent='center';
       mat.style.transform='none';
@@ -2665,12 +2665,21 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 #ww76-card{width:min(560px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:20px;padding:18px;box-shadow:0 25px 60px rgba(0,0,0,.25);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 #ww76-card h2{margin:0 0 6px;font-size:19px} #ww76-card p{margin:4px 0 12px;font-size:12px;color:#64748b;line-height:1.5}
 .ww76-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.ww76-btn{border:1px solid #cbd5e1;border-radius:12px;padding:10px;background:#fff;font-weight:700;font-size:13px}.ww76-primary{background:#2563eb;color:#fff;border-color:#2563eb}.ww76-danger{color:#b91c1c}.ww76-status{margin-top:10px;padding:10px;border-radius:12px;background:#f8fafc;font-size:12px;white-space:pre-wrap}.ww76-role{font-size:12px;padding:8px 10px;background:#f1f5f9;border-radius:10px;margin:8px 0}.ww76-close{float:right;border:0;background:#f1f5f9;border-radius:999px;width:30px;height:30px}.ww76-note{font-size:11px!important;color:#92400e!important;background:#fffbeb;padding:8px;border-radius:10px}
-@media(max-width:520px){.ww76-row{grid-template-columns:1fr}#ww76-panel-btn{left:10px;bottom:10px}}
+@media(max-width:520px){
+#ww76-modal{padding:10px;align-items:center}
+#ww76-card{width:100%;max-width:none;max-height:82vh;padding:16px;border-radius:18px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden}
+#ww76-card h2{font-size:18px;line-height:1.25;padding-right:38px}
+#ww76-card p{font-size:12px}
+.ww76-row{grid-template-columns:1fr;gap:7px;margin:7px 0}
+.ww76-btn{width:100%;min-height:48px;padding:11px 8px;font-size:14px}
+.ww76-role,.ww76-status,.ww76-note{box-sizing:border-box;width:100%}
+#ww76-panel-btn{left:10px;bottom:10px}
+}
 </style>
 <script>
 (function(){
   'use strict';
-  const VERSION='7.6.9.15';
+  const VERSION='7.6.9.16';
   const SUPER_NAME='朱忠正';
   const CORE_KEY='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
@@ -2871,7 +2880,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       XLSX.writeFile(wb,'Water-Warehouse-完整資料-'+stamp+'.xlsx');
       setStatus('✅ 完整資料已匯出：Excel 材料 '+materialRows.length+' 筆、人員 '+snap.personnel.length+' 人、歷史 '+snap.orders.length+' 單。另已同時下載 JSON 完整原始備份。');
     }catch(e){
-      console.error('V7.6.9.15 export error',e);
+      console.error('V7.6.9.16 export error',e);
       setStatus('❌ 完整資料匯出失敗：'+(e&&e.message?e.message:e));
       alert('完整資料匯出失敗：'+(e&&e.message?e.message:e));
     }
@@ -2904,7 +2913,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     let cfg=cloudConfig(), snap=await requireDataReady('雲端上傳'); if(!snap) return;
     let syncId='ww765-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
     let slimMaterials=cloudSafeMaterials(snap.materials);
-    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.15-slim-no-qr-base64'};
+    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.16-slim-no-qr-base64'};
     setStatus('☁️ 上傳中…QR 圖片快取不送雲端；送出後會立即回讀驗證。');
     try{
       await fetch(cfg.url+'?code='+encodeURIComponent(cfg.code)+'&v2=1&v76=1',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
@@ -2957,8 +2966,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   function setStatus(t){let e=document.getElementById('ww76-status');if(e)e.textContent=t;console.log('[WW76]',t)}
   function buildUI(){
     if(document.getElementById('ww76-panel-btn')) return;
-    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.15 管理';document.body.appendChild(b);
-    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.15 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><p class="ww76-note">V7.6.9.15 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
+    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.16 管理';document.body.appendChild(b);
+    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.16 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><div class="ww76-row ww76-person-row"><button class="ww76-btn" id="ww76-person-down">👥 下載人員／權限</button></div><p class="ww76-note">V7.6.9.16 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
     b.onclick=async()=>{let u=getCurrentUser();let rr=currentRole(),label=rr==='領料'?'一般領料員':rr==='倉管'?'倉管員':rr;document.getElementById('ww76-role').textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+label;m.style.display='flex';setStatus('正在讀取目前資料…');await refreshCurrentCounts('目前資料')};
     document.getElementById('ww76-close').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target===m)m.style.display='none'};
     document.getElementById('ww76-export').onclick=exportFull;
@@ -3000,17 +3009,17 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 
 <script>
-// === V7.6.9.15 舊同步正式退役層 ===
+// === V7.6.9.16 舊同步正式退役層 ===
 (function(){
   function retireLegacySync(){
     try{
       localStorage.setItem('autoSyncEnabled','0');
       window._autoSyncEnabled=false;
 
-      window.autoUpload=function(){ console.log('V7.6.9.15：舊 autoUpload 已退役'); };
-      window.debounceUpload=function(){ console.log('V7.6.9.15：舊 debounceUpload 已退役'); };
-      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.15 管理」的上傳到雲端。'); };
-      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.15 管理」的從雲端下載。'); };
+      window.autoUpload=function(){ console.log('V7.6.9.16：舊 autoUpload 已退役'); };
+      window.debounceUpload=function(){ console.log('V7.6.9.16：舊 debounceUpload 已退役'); };
+      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.16 管理」的上傳到雲端。'); };
+      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.16 管理」的從雲端下載。'); };
       window.clearCloudFinal=function(){ alert('舊同步清空功能已停用。'); };
 
       ['floatingSyncBtnFinal','syncModal','syncStatusFinal','autoSyncCheck'].forEach(function(id){
@@ -3024,12 +3033,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
       document.querySelectorAll('button,label,div').forEach(function(el){
         var t=(el.textContent||'').trim();
-        if(!t || t.indexOf('V7.6.9.15')>=0) return;
+        if(!t || t.indexOf('V7.6.9.16')>=0) return;
         if((t==='☁️ 自動同步' || t==='自動同步' || t.indexOf('自動同步：')===0) && t.length<80){
           try{el.remove();}catch(e){el.style.display='none';}
         }
       });
-    }catch(e){console.log('V7.6.9.15 retireLegacySync',e);}
+    }catch(e){console.log('V7.6.9.16 retireLegacySync',e);}
   }
   retireLegacySync();
   window.addEventListener('load',function(){
@@ -3043,10 +3052,10 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.15 多人增量同步：60 人手機不再整包互蓋 ===
+// === V7.6.9.16 多人增量同步：60 人手機不再整包互蓋 ===
 (function(){
   'use strict';
-  const V='7.6.9.15';
+  const V='7.6.9.16';
   const CORE='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
   const GAS_DEFAULT='https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
@@ -3172,7 +3181,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       localStorage.setItem('ww7691_reconciledAt',new Date().toISOString());
       return;
     }
-    status('🔎 第一次使用 V7.6.9.15：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
+    status('🔎 第一次使用 V7.6.9.16：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
     let found=[];
     // URL 不宜過長，分批 80 個 ID 查詢。
     for(let i=0;i<ids.length;i+=80){
@@ -3277,12 +3286,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       up.textContent='☁️ 上傳主資料＋我的新單';
       down.textContent='⬇️ 收集全部請料單';
       if(ex)ex.style.display='';if(ck)ck.style.display='';
-      if(note)note.textContent='V7.6.9.15 管理端：人員／權限與材料由管理端維護；請料單只做單號增量合併，不再整包覆蓋。';
+      if(note)note.textContent='V7.6.9.16 管理端：人員／權限與材料由管理端維護；請料單只做單號增量合併，不再整包覆蓋。';
     }else{
       up.textContent='☁️ 上傳我的新請料單';
       down.textContent='⬇️ 下載人員／權限';
       if(ex)ex.style.display='none';if(ck)ck.style.display='none';
-      if(note)note.textContent='V7.6.9.15 多人模式：一般領料員完成請料後會自動上傳該張新單；下載只更新人員／權限，歷史只顯示本人，不下載全公司歷史與 918 筆材料。';
+      if(note)note.textContent='V7.6.9.16 多人模式：一般領料員完成請料後會自動上傳該張新單；下載只更新人員／權限，歷史只顯示本人，不下載全公司歷史與 918 筆材料。';
     }
     let roleEl=document.getElementById('ww76-role'),u=currentUser();
     if(roleEl)roleEl.textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+r;
@@ -3298,8 +3307,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
   function patchPanel(){
     let b=document.getElementById('ww76-panel-btn');
-    if(b)b.textContent='🛡️ V7.6.9.15 同步';
-    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.15 多人同步';
+    if(b)b.textContent='🛡️ V7.6.9.16 同步';
+    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.16 多人同步';
     let p=document.querySelector('#ww76-card h2 + p');if(p)p.textContent='60 人增量請料同步：手機只送新單、只下載權限；管理端統一收單與匯出。';
     if(b){
       let old=b.onclick;
@@ -3320,7 +3329,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.15 舊歷史刪除工具權限核心（無全頁監控） ===
+// === V7.6.9.16 舊歷史刪除工具權限核心（無全頁監控） ===
 (function(){
   window.__wwCanDeleteHistory=function(){
     try{
@@ -3331,6 +3340,29 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       return r.indexOf('超級')>=0 || r.indexOf('系統')>=0;
     }catch(e){ return false; }
   };
+})();
+</script>
+
+
+<script>
+// === V7.6.9.16 手機人員／權限下載 + 同步視窗版面修正 ===
+(function(){
+  function wirePersonnelDownload(){
+    var b=document.getElementById('ww76-person-down');
+    if(!b)return;
+    b.style.display='';
+    b.onclick=function(){
+      if(window.WW769 && typeof window.WW769.downloadPersonnelOnly==='function'){
+        return window.WW769.downloadPersonnelOnly();
+      }
+      alert('人員／權限下載功能尚未載入，請重新開啟同步視窗再試一次。');
+    };
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(wirePersonnelDownload,120)});
+  else setTimeout(wirePersonnelDownload,120);
+  document.addEventListener('click',function(e){
+    if(e.target && e.target.id==='ww76-panel-btn') setTimeout(wirePersonnelDownload,50);
+  });
 })();
 </script>
 
