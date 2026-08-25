@@ -245,7 +245,7 @@ localStorage.setItem = function(k,v){
 // 強制綁定新 GAS
 localStorage.setItem('gasUrl', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
 console.log('GAS URL updated to', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
-// V7.6.8: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
+// V7.6.9.1: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
 if(false) setInterval(()=>{
   var hist=null;
   try{ var raw=localStorage.getItem('v7_4_22'); if(raw){ var obj=JSON.parse(raw); if(obj && obj.orders) hist=obj.orders; } }catch(e){}
@@ -331,7 +331,7 @@ async function downloadCloudFinalForce(){
 }
 </script>
 <script>
-// V7.6.8: removed obsolete "old 13 records resurrection" global fetch interceptor.
+// V7.6.9.1: removed obsolete "old 13 records resurrection" global fetch interceptor.
 // Full V7.6 payloads may legitimately contain personnel names that matched the old blocker.
 </script>
 <script>
@@ -2543,7 +2543,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 <script>
 (function(){
   'use strict';
-  const VERSION='7.6.3';
+  const VERSION='7.6.9';
   const SUPER_NAME='朱忠正';
   const CORE_KEY='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
@@ -2744,7 +2744,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       XLSX.writeFile(wb,'Water-Warehouse-完整資料-'+stamp+'.xlsx');
       setStatus('✅ 完整資料已匯出：Excel 材料 '+materialRows.length+' 筆、人員 '+snap.personnel.length+' 人、歷史 '+snap.orders.length+' 單。另已同時下載 JSON 完整原始備份。');
     }catch(e){
-      console.error('V7.6.8 export error',e);
+      console.error('V7.6.9.1 export error',e);
       setStatus('❌ 完整資料匯出失敗：'+(e&&e.message?e.message:e));
       alert('完整資料匯出失敗：'+(e&&e.message?e.message:e));
     }
@@ -2777,7 +2777,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     let cfg=cloudConfig(), snap=await requireDataReady('雲端上傳'); if(!snap) return;
     let syncId='ww765-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
     let slimMaterials=cloudSafeMaterials(snap.materials);
-    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.8-slim-no-qr-base64'};
+    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.1-slim-no-qr-base64'};
     setStatus('☁️ 上傳中…QR 圖片快取不送雲端；送出後會立即回讀驗證。');
     try{
       await fetch(cfg.url+'?code='+encodeURIComponent(cfg.code)+'&v2=1&v76=1',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
@@ -2830,8 +2830,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   function setStatus(t){let e=document.getElementById('ww76-status');if(e)e.textContent=t;console.log('[WW76]',t)}
   function buildUI(){
     if(document.getElementById('ww76-panel-btn')) return;
-    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.8 管理';document.body.appendChild(b);
-    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.8 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><p class="ww76-note">V7.6.8 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
+    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.1 管理';document.body.appendChild(b);
+    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.1 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><p class="ww76-note">V7.6.9.1 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
     b.onclick=async()=>{let u=getCurrentUser();let rr=currentRole(),label=rr==='領料'?'一般領料員':rr==='倉管'?'倉管員':rr;document.getElementById('ww76-role').textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+label;m.style.display='flex';setStatus('正在讀取目前資料…');await refreshCurrentCounts('目前資料')};
     document.getElementById('ww76-close').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target===m)m.style.display='none'};
     document.getElementById('ww76-export').onclick=exportFull;
@@ -2873,17 +2873,17 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 
 <script>
-// === V7.6.8 舊同步正式退役層 ===
+// === V7.6.9.1 舊同步正式退役層 ===
 (function(){
   function retireLegacySync(){
     try{
       localStorage.setItem('autoSyncEnabled','0');
       window._autoSyncEnabled=false;
 
-      window.autoUpload=function(){ console.log('V7.6.8：舊 autoUpload 已退役'); };
-      window.debounceUpload=function(){ console.log('V7.6.8：舊 debounceUpload 已退役'); };
-      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.8 管理」的上傳到雲端。'); };
-      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.8 管理」的從雲端下載。'); };
+      window.autoUpload=function(){ console.log('V7.6.9.1：舊 autoUpload 已退役'); };
+      window.debounceUpload=function(){ console.log('V7.6.9.1：舊 debounceUpload 已退役'); };
+      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.1 管理」的上傳到雲端。'); };
+      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.1 管理」的從雲端下載。'); };
       window.clearCloudFinal=function(){ alert('舊同步清空功能已停用。'); };
 
       ['floatingSyncBtnFinal','syncModal','syncStatusFinal','autoSyncCheck'].forEach(function(id){
@@ -2897,12 +2897,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
       document.querySelectorAll('button,label,div').forEach(function(el){
         var t=(el.textContent||'').trim();
-        if(!t || t.indexOf('V7.6.8')>=0) return;
+        if(!t || t.indexOf('V7.6.9.1')>=0) return;
         if((t==='☁️ 自動同步' || t==='自動同步' || t.indexOf('自動同步：')===0) && t.length<80){
           try{el.remove();}catch(e){el.style.display='none';}
         }
       });
-    }catch(e){console.log('V7.6.8 retireLegacySync',e);}
+    }catch(e){console.log('V7.6.9.1 retireLegacySync',e);}
   }
   retireLegacySync();
   window.addEventListener('load',function(){
@@ -2911,6 +2911,283 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     setTimeout(retireLegacySync,2200);
   });
   setInterval(retireLegacySync,10000);
+})();
+</script>
+
+
+<script>
+// === V7.6.9.1 多人增量同步：60 人手機不再整包互蓋 ===
+(function(){
+  'use strict';
+  const V='7.6.9.1';
+  const CORE='v7_4_22';
+  const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
+  const GAS_DEFAULT='https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+  const CODE_DEFAULT='water-warehouse-v2-0822';
+  const SENT_KEY='ww769_uploaded_order_ids';
+
+  function j(raw,f){try{return JSON.parse(raw)}catch(e){return f}}
+  function cfg(){return {url:localStorage.getItem('gasUrl')||GAS_DEFAULT,code:localStorage.getItem('syncCode')||CODE_DEFAULT}}
+  function currentUser(){
+    return j(localStorage.getItem('v7_loginUser'),null)||
+           j(localStorage.getItem('water_warehouse_current_user'),null)||
+           j(localStorage.getItem('current_user'),null);
+  }
+  function personnel(){
+    let core=j(localStorage.getItem(CORE),{})||{};
+    let arr=Array.isArray(core.personnel)?core.personnel:[];
+    if(arr.length) return arr;
+    for(const k of PERSON_KEYS){let a=j(localStorage.getItem(k),[]);if(Array.isArray(a)&&a.length)return a}
+    return [];
+  }
+  function normRole(r){
+    r=String(r||'');
+    if(r.includes('超級'))return '超級管理員';
+    if(r.includes('系統'))return '系統管理員';
+    if(r.includes('倉管'))return '倉管員';
+    return '一般領料員';
+  }
+  function role(){
+    let u=currentUser(), ps=personnel();
+    let p=u&&ps.find(x=>x&&x.name===u.name);
+    return normRole((p&&p.role)||(u&&u.role));
+  }
+  function manager(){let r=role();return r==='超級管理員'||r==='系統管理員'}
+  function orders(){
+    let c=j(localStorage.getItem(CORE),{})||{};
+    if(Array.isArray(c.orders)) return c.orders;
+    let h=j(localStorage.getItem('hist'),[]);
+    return Array.isArray(h)?h:[];
+  }
+  function saveOrders(arr){
+    let map=new Map();
+    (Array.isArray(arr)?arr:[]).forEach(o=>{if(o&&o.id)map.set(String(o.id),o)});
+    let out=[...map.values()];
+    out.sort((a,b)=>String(b.id||'').localeCompare(String(a.id||'')));
+    let c=j(localStorage.getItem(CORE),{})||{};
+    c.orders=out;
+    if(!Array.isArray(c.personnel))c.personnel=personnel();
+    localStorage.setItem(CORE,JSON.stringify(c));
+    localStorage.setItem('hist',JSON.stringify(out));
+    return out;
+  }
+  function writePersonnel(arr){
+    if(!Array.isArray(arr)||!arr.length)throw new Error('雲端未提供人員權限');
+    PERSON_KEYS.forEach(k=>localStorage.setItem(k,JSON.stringify(arr)));
+    let c=j(localStorage.getItem(CORE),{})||{};c.personnel=arr;c.orders=Array.isArray(c.orders)?c.orders:orders();
+    localStorage.setItem(CORE,JSON.stringify(c));
+    let u=currentUser();
+    if(u){
+      let p=arr.find(x=>x&&x.name===u.name);
+      if(p){
+        ['v7_loginUser','water_warehouse_current_user','current_user'].forEach(k=>{
+          let x=j(localStorage.getItem(k),null);
+          if(x){x.role=p.role;x.locked=!!p.locked;localStorage.setItem(k,JSON.stringify(x))}
+        });
+      }
+    }
+    if(window.WW76&&window.WW76.enforcePermissions)window.WW76.enforcePermissions();
+  }
+  function slimMat(m){
+    let x=Object.assign({},m||{});
+    ['qrDataUrl','qrDataURL','qrImage','qrBase64','qrCanvas','qrCanvasData','imageData','imageBase64'].forEach(k=>delete x[k]);
+    return x;
+  }
+  function snapshot(){
+    return window.WW76&&window.WW76.getSnapshot?window.WW76.getSnapshot():{orders:orders(),personnel:personnel(),materials:[]};
+  }
+  function sentIds(){
+    let a=j(localStorage.getItem(SENT_KEY),[]);
+    return new Set(Array.isArray(a)?a.map(String):[]);
+  }
+  function markSent(ids){
+    let s=sentIds();ids.forEach(id=>s.add(String(id)));
+    // 只保存 ID，不保存整張單；最多保留最近 5000 個。
+    let a=[...s];if(a.length>5000)a=a.slice(a.length-5000);
+    localStorage.setItem(SENT_KEY,JSON.stringify(a));
+  }
+  function pendingOrders(){
+    // 升級裝置在完成第一次雲端單號比對前，不把舊歷史單直接當成待上傳。
+    if(localStorage.getItem('ww7691_reconciled')!=='1') return [];
+    let sent=sentIds();
+    return orders().filter(o=>o&&o.id&&!sent.has(String(o.id)));
+  }
+  async function getJson(action,extra){
+    let c=cfg(), qs='?code='+encodeURIComponent(c.code)+'&action='+encodeURIComponent(action)+'&t='+Date.now();
+    if(extra)Object.keys(extra).forEach(k=>qs+='&'+encodeURIComponent(k)+'='+encodeURIComponent(extra[k]));
+    let r=await fetch(c.url+qs,{cache:'no-store'});
+    let x=await r.json();
+    if(x&&x.ok===false)throw new Error(x.error||x.message||'雲端操作失敗');
+    return x;
+  }
+  async function post(action,payload){
+    let c=cfg();
+    await fetch(c.url+'?code='+encodeURIComponent(c.code)+'&action='+encodeURIComponent(action)+'&t='+Date.now(),{
+      method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)
+    });
+  }
+  function status(t){
+    let e=document.getElementById('ww76-status');if(e)e.textContent=t;
+    console.log('[WW769]',t);
+  }
+  async function verifyIds(ids){
+    if(!ids.length)return true;
+    let x=await getJson('checkOrders',{ids:ids.join(',')});
+    let got=new Set((x.ids||[]).map(String));
+    return ids.every(id=>got.has(String(id)));
+  }
+
+  async function reconcileExistingOrders(){
+    if(localStorage.getItem('ww7691_reconciled')==='1') return;
+    let ids=orders().filter(o=>o&&o.id).map(o=>String(o.id));
+    if(!ids.length){
+      localStorage.setItem('ww7691_reconciled','1');
+      localStorage.setItem('ww7691_reconciledAt',new Date().toISOString());
+      return;
+    }
+    status('🔎 第一次使用 V7.6.9.1：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
+    let found=[];
+    // URL 不宜過長，分批 80 個 ID 查詢。
+    for(let i=0;i<ids.length;i+=80){
+      let part=ids.slice(i,i+80);
+      let x=await getJson('checkOrders',{ids:part.join(',')});
+      if(Array.isArray(x.ids)) found=found.concat(x.ids.map(String));
+    }
+    markSent(found);
+    // 注意：雲端沒有的舊單不自動標記，保留為真正待補傳資料。
+    localStorage.setItem('ww7691_reconciled','1');
+    localStorage.setItem('ww7691_reconciledAt',new Date().toISOString());
+    localStorage.setItem('ww7691_reconciledFound',String(found.length));
+  }
+
+  async function uploadMyOrders(){
+    try{await reconcileExistingOrders()}catch(e){status('❌ 舊單比對失敗：'+e.message+'。為安全起見沒有上傳任何請料單。');return}
+
+    let u=currentUser();
+    if(!u){alert('請先登入');return}
+    let pending=pendingOrders();
+    if(!pending.length){status('✅ 此裝置目前沒有尚未上傳的新請料單。');return}
+    let payload={
+      _v769:true,deviceMode:'incremental-orders',submittedBy:u.name||'',submittedAt:new Date().toISOString(),
+      orders:pending
+    };
+    status('☁️ 正在上傳此裝置 '+pending.length+' 筆新請料單；不會上傳材料、人員或其他歷史資料…');
+    try{
+      await post('orders',payload);
+      await new Promise(r=>setTimeout(r,900));
+      let ids=pending.map(o=>String(o.id));
+      if(!(await verifyIds(ids)))throw new Error('雲端尚未確認收到全部單號');
+      markSent(ids);
+      status('✅ 已上傳 '+pending.length+' 筆新請料單並確認雲端收到。已上傳過的單下次不會重複送。');
+    }catch(e){status('❌ 請料單上傳失敗：'+e.message+'。尚未標記為已上傳，可稍後重試。')}
+  }
+
+  async function uploadManager(){
+    let snap=snapshot(), ps=snap.personnel||[], mats=(snap.materials||[]).map(slimMat);
+    if(!ps.length||!mats.length){status('⛔ 主資料尚未載入完成，已停止上傳。');return}
+    status('☁️ 管理端上傳主資料：'+ps.length+' 人 / '+mats.length+' 材料；請料單採增量合併，不覆蓋雲端舊單…');
+    try{
+      await post('master',{_v769:true,version:V,time:new Date().toISOString(),personnel:ps,materials:mats,qrMap:snap.qrMap||[]});
+      await new Promise(r=>setTimeout(r,700));
+      let px=await getJson('personnel');
+      if(!Array.isArray(px.personnel)||px.personnel.length!==ps.length)throw new Error('人員主資料回讀數量不一致');
+
+      // 管理端自己若有新單，也只增量送出；第一次先比對舊單號。
+      await reconcileExistingOrders();
+      let pending=pendingOrders();
+      if(pending.length){
+        await post('orders',{_v769:true,deviceMode:'manager-incremental-orders',submittedBy:(currentUser()||{}).name||'',submittedAt:new Date().toISOString(),orders:pending});
+        await new Promise(r=>setTimeout(r,700));
+        let ids=pending.map(o=>String(o.id));
+        if(!(await verifyIds(ids)))throw new Error('管理端新請料單回讀驗證失敗');
+        markSent(ids);
+      }
+      status('✅ 管理端主資料已同步：'+ps.length+' 人 / '+mats.length+' 材料'+(pending.length?'；另新增 '+pending.length+' 筆請料單。':'。'));
+    }catch(e){status('❌ 管理端上傳失敗：'+e.message)}
+  }
+
+  async function downloadPersonnelOnly(){
+    status('⬇️ 正在下載最新人員／權限設定；不下載材料與全公司歷史紀錄…');
+    try{
+      let x=await getJson('personnel');
+      writePersonnel(x.personnel);
+      await reconcileExistingOrders();
+      let u=currentUser(), r=role(), pending=pendingOrders().length;
+      status('✅ 人員／權限同步完成：'+x.personnel.length+' 人。'+(u?'目前 '+u.name+'：'+r+'。':'')+' 本機尚未送出的新單：'+pending+' 筆。');
+    }catch(e){status('❌ 權限下載失敗：'+e.message)}
+  }
+
+  async function downloadManager(){
+    status('⬇️ 管理端正在收集雲端所有請料單與最新人員權限…');
+    try{
+      let px=await getJson('personnel');
+      writePersonnel(px.personnel);
+      let ox=await getJson('orders');
+      let cloud=Array.isArray(ox.orders)?ox.orders:[];
+      let merged=saveOrders(orders().concat(cloud));
+      // 雲端已有的單都標記為已送過，避免管理端下一次反向重送。
+      markSent(cloud.filter(o=>o&&o.id).map(o=>String(o.id)));
+      status('✅ 管理端下載完成：雲端 '+cloud.length+' 單；本機合併後 '+merged.length+' 單 / '+px.personnel.length+' 人。材料主檔不重複下載。');
+    }catch(e){status('❌ 管理端下載失敗：'+e.message)}
+  }
+
+  async function upload(){
+    if(manager())return uploadManager();
+    return uploadMyOrders();
+  }
+  async function download(){
+    if(manager())return downloadManager();
+    return downloadPersonnelOnly();
+  }
+
+  function tuneUI(){
+    let up=document.getElementById('ww76-up'), down=document.getElementById('ww76-down');
+    let ex=document.getElementById('ww76-export'), ck=document.getElementById('ww76-check'), note=document.querySelector('#ww76-card .ww76-note');
+    if(!up||!down)return;
+    let m=manager(), r=role();
+    up.onclick=upload;down.onclick=download;
+    if(m){
+      up.textContent='☁️ 上傳主資料＋我的新單';
+      down.textContent='⬇️ 收集全部請料單';
+      if(ex)ex.style.display='';if(ck)ck.style.display='';
+      if(note)note.textContent='V7.6.9.1 管理端：人員／權限與材料由管理端維護；請料單只做單號增量合併，不再整包覆蓋。';
+    }else{
+      up.textContent='☁️ 上傳我的新請料單';
+      down.textContent='⬇️ 下載人員／權限';
+      if(ex)ex.style.display='none';if(ck)ck.style.display='none';
+      if(note)note.textContent='V7.6.9.1 多人模式：一般領料員只上傳本裝置的新請料單；下載只更新人員／權限，不下載全公司歷史與 918 筆材料。';
+    }
+    let roleEl=document.getElementById('ww76-role'),u=currentUser();
+    if(roleEl)roleEl.textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+r;
+    let st=document.getElementById('ww76-status');
+    if(st){
+      let ready=localStorage.getItem('ww7691_reconciled')==='1';
+      let p=pendingOrders().length;
+      st.textContent=ready
+        ? (m?'管理端模式｜本機尚未送出的新單：'+p+' 筆。':'多人手機模式｜本機尚未送出的新單：'+p+' 筆。')
+        : '首次升級尚未完成舊單比對；請先按「下載人員／權限」，系統會自動核對雲端單號。';
+    }
+  }
+
+  function patchPanel(){
+    let b=document.getElementById('ww76-panel-btn');
+    if(b)b.textContent='🛡️ V7.6.9.1 同步';
+    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.1 多人同步';
+    let p=document.querySelector('#ww76-card h2 + p');if(p)p.textContent='60 人增量請料同步：手機只送新單、只下載權限；管理端統一收單與匯出。';
+    if(b){
+      let old=b.onclick;
+      b.onclick=async function(e){
+        if(old)await old.call(this,e);
+        setTimeout(tuneUI,0);
+      };
+    }
+    tuneUI();
+  }
+
+  window.WW769={upload,download,uploadMyOrders,downloadPersonnelOnly,uploadManager,downloadManager,pendingOrders,reconcileExistingOrders};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(patchPanel,50));
+  else setTimeout(patchPanel,50);
+  setTimeout(patchPanel,900);
 })();
 </script>
 
