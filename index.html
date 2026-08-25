@@ -257,7 +257,7 @@ localStorage.setItem = function(k,v){
 // 強制綁定新 GAS
 localStorage.setItem('gasUrl', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
 console.log('GAS URL updated to', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
-// V7.6.9.17: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
+// V7.6.9.18: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
 if(false) setInterval(()=>{
   var hist=null;
   try{ var raw=localStorage.getItem('v7_4_22'); if(raw){ var obj=JSON.parse(raw); if(obj && obj.orders) hist=obj.orders; } }catch(e){}
@@ -343,7 +343,7 @@ async function downloadCloudFinalForce(){
 }
 </script>
 <script>
-// V7.6.9.17: removed obsolete "old 13 records resurrection" global fetch interceptor.
+// V7.6.9.18: removed obsolete "old 13 records resurrection" global fetch interceptor.
 // Full V7.6 payloads may legitimately contain personnel names that matched the old blocker.
 </script>
 <script>
@@ -2459,7 +2459,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       mat.style.borderRadius='999px';
       mat.style.fontSize='13px';
       mat.style.lineHeight='1';
-      // V7.6.9.17: 顯示/隱藏交由目前登入角色控制，不在尺寸修復器強制 display。
+      // V7.6.9.18: 顯示/隱藏交由目前登入角色控制，不在尺寸修復器強制 display。
       mat.style.alignItems='center';
       mat.style.justifyContent='center';
       mat.style.transform='none';
@@ -2679,7 +2679,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 <script>
 (function(){
   'use strict';
-  const VERSION='7.6.9.17';
+  const VERSION='7.6.9.18';
   const SUPER_NAME='朱忠正';
   const CORE_KEY='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
@@ -2880,7 +2880,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       XLSX.writeFile(wb,'Water-Warehouse-完整資料-'+stamp+'.xlsx');
       setStatus('✅ 完整資料已匯出：Excel 材料 '+materialRows.length+' 筆、人員 '+snap.personnel.length+' 人、歷史 '+snap.orders.length+' 單。另已同時下載 JSON 完整原始備份。');
     }catch(e){
-      console.error('V7.6.9.17 export error',e);
+      console.error('V7.6.9.18 export error',e);
       setStatus('❌ 完整資料匯出失敗：'+(e&&e.message?e.message:e));
       alert('完整資料匯出失敗：'+(e&&e.message?e.message:e));
     }
@@ -2913,7 +2913,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     let cfg=cloudConfig(), snap=await requireDataReady('雲端上傳'); if(!snap) return;
     let syncId='ww765-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
     let slimMaterials=cloudSafeMaterials(snap.materials);
-    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.17-slim-no-qr-base64'};
+    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.18-slim-no-qr-base64'};
     setStatus('☁️ 上傳中…QR 圖片快取不送雲端；送出後會立即回讀驗證。');
     try{
       await fetch(cfg.url+'?code='+encodeURIComponent(cfg.code)+'&v2=1&v76=1',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
@@ -2966,8 +2966,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   function setStatus(t){let e=document.getElementById('ww76-status');if(e)e.textContent=t;console.log('[WW76]',t)}
   function buildUI(){
     if(document.getElementById('ww76-panel-btn')) return;
-    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.17 管理';document.body.appendChild(b);
-    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.17 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><div class="ww76-row ww76-person-row"><button class="ww76-btn" id="ww76-person-down">👥 下載人員／權限</button></div><p class="ww76-note">V7.6.9.17 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
+    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.18 管理';document.body.appendChild(b);
+    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.18 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><div class="ww76-row ww76-person-row"><button class="ww76-btn" id="ww76-person-down">👥 下載人員／權限</button></div><p class="ww76-note">V7.6.9.18 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
     b.onclick=async()=>{let u=getCurrentUser();let rr=currentRole(),label=rr==='領料'?'一般領料員':rr==='倉管'?'倉管員':rr;document.getElementById('ww76-role').textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+label;m.style.display='flex';setStatus('正在讀取目前資料…');await refreshCurrentCounts('目前資料')};
     document.getElementById('ww76-close').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target===m)m.style.display='none'};
     document.getElementById('ww76-export').onclick=exportFull;
@@ -3009,17 +3009,17 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 
 <script>
-// === V7.6.9.17 舊同步正式退役層 ===
+// === V7.6.9.18 舊同步正式退役層 ===
 (function(){
   function retireLegacySync(){
     try{
       localStorage.setItem('autoSyncEnabled','0');
       window._autoSyncEnabled=false;
 
-      window.autoUpload=function(){ console.log('V7.6.9.17：舊 autoUpload 已退役'); };
-      window.debounceUpload=function(){ console.log('V7.6.9.17：舊 debounceUpload 已退役'); };
-      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.17 管理」的上傳到雲端。'); };
-      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.17 管理」的從雲端下載。'); };
+      window.autoUpload=function(){ console.log('V7.6.9.18：舊 autoUpload 已退役'); };
+      window.debounceUpload=function(){ console.log('V7.6.9.18：舊 debounceUpload 已退役'); };
+      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.18 管理」的上傳到雲端。'); };
+      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.18 管理」的從雲端下載。'); };
       window.clearCloudFinal=function(){ alert('舊同步清空功能已停用。'); };
 
       ['floatingSyncBtnFinal','syncModal','syncStatusFinal','autoSyncCheck'].forEach(function(id){
@@ -3033,12 +3033,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
       document.querySelectorAll('button,label,div').forEach(function(el){
         var t=(el.textContent||'').trim();
-        if(!t || t.indexOf('V7.6.9.17')>=0) return;
+        if(!t || t.indexOf('V7.6.9.18')>=0) return;
         if((t==='☁️ 自動同步' || t==='自動同步' || t.indexOf('自動同步：')===0) && t.length<80){
           try{el.remove();}catch(e){el.style.display='none';}
         }
       });
-    }catch(e){console.log('V7.6.9.17 retireLegacySync',e);}
+    }catch(e){console.log('V7.6.9.18 retireLegacySync',e);}
   }
   retireLegacySync();
   window.addEventListener('load',function(){
@@ -3052,10 +3052,10 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.17 多人增量同步：60 人手機不再整包互蓋 ===
+// === V7.6.9.18 多人增量同步：60 人手機不再整包互蓋 ===
 (function(){
   'use strict';
-  const V='7.6.9.17';
+  const V='7.6.9.18';
   const CORE='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
   const GAS_DEFAULT='https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
@@ -3181,7 +3181,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       localStorage.setItem('ww7691_reconciledAt',new Date().toISOString());
       return;
     }
-    status('🔎 第一次使用 V7.6.9.17：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
+    status('🔎 第一次使用 V7.6.9.18：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
     let found=[];
     // URL 不宜過長，分批 80 個 ID 查詢。
     for(let i=0;i<ids.length;i+=80){
@@ -3254,17 +3254,82 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   }
 
   async function downloadManager(){
-    status('⬇️ 管理端正在收集雲端所有請料單與最新人員權限…');
+    status('⬇️ 正在從雲端讀取全部請料單並產生 Excel；不寫入本機歷史紀錄…');
     try{
       let px=await getJson('personnel');
       writePersonnel(px.personnel);
       let ox=await getJson('orders');
       let cloud=Array.isArray(ox.orders)?ox.orders:[];
-      let merged=saveOrders(orders().concat(cloud));
-      // 雲端已有的單都標記為已送過，避免管理端下一次反向重送。
+      if(!cloud.length){status('ℹ️ 雲端目前沒有請料單可匯出。');return}
+      if(!window.XLSX)throw new Error('Excel 元件尚未載入');
+
+      let rows=[];
+      cloud.forEach(function(o){
+        let items=Array.isArray(o.items)?o.items:[];
+        if(items.length===0){
+          rows.push({
+            單號:o.id||'',
+            日期:o.date||'',
+            領料人:o.applicant||o.submittedBy||o.cloudSubmittedBy||'',
+            工令類型:o.workOrderType||'',
+            工令單號:o.workOrderNo||'',
+            單位地點:o.location||'',
+            原始編號:'',
+            SKU:'',
+            品名:'',
+            規格:'',
+            單位:'',
+            動作:'',
+            數量:'',
+            狀態:o.status||''
+          });
+        }else{
+          items.forEach(function(it){
+            rows.push({
+              單號:o.id||'',
+              日期:o.date||'',
+              領料人:o.applicant||o.submittedBy||o.cloudSubmittedBy||'',
+              工令類型:o.workOrderType||'',
+              工令單號:o.workOrderNo||'',
+              單位地點:o.location||'',
+              原始編號:it.orig_code||it.origCode||'',
+              SKU:it.sku||'',
+              品名:it.name||'',
+              規格:it.spec||'',
+              單位:it.unit||'',
+              動作:it.action||'領料',
+              數量:it.qty==null?'':it.qty,
+              狀態:o.status||''
+            });
+          });
+        }
+      });
+
+      let summary=cloud.map(function(o){
+        return {
+          單號:o.id||'',
+          日期:o.date||'',
+          領料人:o.applicant||o.submittedBy||o.cloudSubmittedBy||'',
+          工令類型:o.workOrderType||'',
+          工令單號:o.workOrderNo||'',
+          單位地點:o.location||'',
+          材料項數:Array.isArray(o.items)?o.items.length:0,
+          狀態:o.status||''
+        };
+      });
+
+      let wb=XLSX.utils.book_new();
+      let ws1=XLSX.utils.json_to_sheet(summary);
+      let ws2=XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb,ws1,'請料單');
+      XLSX.utils.book_append_sheet(wb,ws2,'請料明細');
+      let d=new Date(), pad=n=>String(n).padStart(2,'0');
+      let fn='雲端請料單_'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes())+'.xlsx';
+      XLSX.writeFile(wb,fn);
+
       markSent(cloud.filter(o=>o&&o.id).map(o=>String(o.id)));
-      status('✅ 管理端下載完成：雲端 '+cloud.length+' 單；本機合併後 '+merged.length+' 單 / '+px.personnel.length+' 人。材料主檔不重複下載。');
-    }catch(e){status('❌ 管理端下載失敗：'+e.message)}
+      status('✅ 雲端請料單 Excel 已下載：'+cloud.length+' 單 / '+rows.length+' 筆材料明細 / '+px.personnel.length+' 人。未寫入本機歷史紀錄。');
+    }catch(e){status('❌ 雲端請料單 Excel 下載失敗：'+e.message)}
   }
 
   async function upload(){
@@ -3284,14 +3349,14 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     up.onclick=upload;down.onclick=download;
     if(m){
       up.textContent='☁️ 上傳主資料＋我的新單';
-      down.textContent='⬇️ 收集全部請料單';
+      down.textContent='⬇️ 下載全部請料單 Excel';
       if(ex)ex.style.display='';if(ck)ck.style.display='';
-      if(note)note.textContent='V7.6.9.17 管理端：人員／權限與材料由管理端維護；請料單只做單號增量合併，不再整包覆蓋。';
+      if(note)note.textContent='V7.6.9.18 管理端：人員／權限與材料由管理端維護；雲端請料單直接下載成 Excel，不再寫回本機歷史，避免資料衝突。';
     }else{
       up.textContent='☁️ 上傳我的新請料單';
       down.textContent='⬇️ 下載人員／權限';
       if(ex)ex.style.display='none';if(ck)ck.style.display='none';
-      if(note)note.textContent='V7.6.9.17 多人模式：一般領料員完成請料後會自動上傳該張新單；下載只更新人員／權限，歷史只顯示本人，不下載全公司歷史與 918 筆材料。';
+      if(note)note.textContent='V7.6.9.18 多人模式：一般領料員完成請料後會自動上傳該張新單；下載只更新人員／權限，歷史只顯示本人，不下載全公司歷史與 918 筆材料。';
     }
     let roleEl=document.getElementById('ww76-role'),u=currentUser();
     if(roleEl)roleEl.textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+r;
@@ -3307,8 +3372,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
   function patchPanel(){
     let b=document.getElementById('ww76-panel-btn');
-    if(b)b.textContent='🛡️ V7.6.9.17 同步';
-    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.17 多人同步';
+    if(b)b.textContent='🛡️ V7.6.9.18 同步';
+    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.18 多人同步';
     let p=document.querySelector('#ww76-card h2 + p');if(p)p.textContent='60 人增量請料同步：手機只送新單、只下載權限；管理端統一收單與匯出。';
     if(b){
       let old=b.onclick;
@@ -3329,7 +3394,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.17 舊歷史刪除工具權限核心（無全頁監控） ===
+// === V7.6.9.18 舊歷史刪除工具權限核心（無全頁監控） ===
 (function(){
   window.__wwCanDeleteHistory=function(){
     try{
@@ -3345,7 +3410,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.17 手機人員／權限下載 + 同步視窗版面修正 ===
+// === V7.6.9.18 手機人員／權限下載 + 同步視窗版面修正 ===
 (function(){
   function wirePersonnelDownload(){
     var b=document.getElementById('ww76-person-down');
@@ -3368,7 +3433,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.17 手機同步按鈕權限修正 ===
+// === V7.6.9.18 手機同步按鈕權限修正 ===
 (function(){
   function isMobile76917(){
     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
@@ -3385,7 +3450,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     // 手機版永遠不提供「收集全部請料單」。
     if(down){
       var txt=(down.textContent||'').trim();
-      if(txt.indexOf('收集全部請料單')>=0){
+      if(txt.indexOf('收集全部請料單')>=0 || txt.indexOf('下載全部請料單 Excel')>=0){
         down.style.display='none';
       }
     }
