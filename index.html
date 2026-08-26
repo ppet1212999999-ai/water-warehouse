@@ -92,8 +92,8 @@ t=t.map(function(o){if(o.name==="朱忠正"){o.role="超級管理員";o.locked=!
   if(!confirm(`重設 ${l} 密碼為 ${X}？`))return;
   try{localStorage.setItem(Lu+l,X)}catch{}
   _e(`${l} 已重設為 ${X}`)
-}let Pc=D.useMemo(()=>{let l=e.filter((T)=>T.type==="water"||T.sku.startsWith("W-")).length,S=e.filter((T)=>T.type==="electric"||T.sku.startsWith("E-")).length;return{all:e.length||918,water:l||516,electric:S||402}},[e]),I=D.useMemo(()=>{let l=In;return{issue:!!Nu["領料作業"][l],history:!!Nu["歷史紀錄"][l],inventory:!!Nu["盤點"][l],personnel:!!Nu["人員設定"][l]}},[In]),Ru=(I.issue?1:0)+(I.history?1:0)+(I.inventory?1:0)+(I.personnel?1:0);D.useEffect(()=>{if(!t)return;if(Ru===0)return;if(y==="issue"&&!I.issue){if(I.history)m("history");else if(I.inventory)m("inventory");else if(I.personnel)m("personnel")}else if(y==="history"&&!I.history){if(I.issue)m("issue");else if(I.inventory)m("inventory");else if(I.personnel)m("personnel")}else if(y==="inventory"&&!I.inventory){if(I.issue)m("issue");else if(I.history)m("history");else if(I.personnel)m("personnel")}else if(y==="personnel"&&!I.personnel){if(I.issue)m("issue");else if(I.history)m("history");else if(I.inventory)m("inventory")}},[I,Ru,t,y]);let nn=D.useMemo(()=>e.filter((l)=>{if(W==="water"&&!(l.type==="water"||l.sku.startsWith("W-")))return!1;if(W==="electric"&&!(l.type==="electric"||l.sku.startsWith("E-")))return!1;if(!V)return!0;let S=V.toLowerCase();return l.orig_code.toLowerCase().includes(S)||l.sku.toLowerCase().includes(S)||l.name.toLowerCase().includes(S)||(l.spec||"").toLowerCase().includes(S)}),[e,W,V]),fn=D.useMemo(()=>e.filter((l)=>{if(P==="water"&&!(l.type==="water"||l.sku.startsWith("W-")))return!1;if(P==="electric"&&!(l.type==="electric"||l.sku.startsWith("E-")))return!1;if(!H)return!0;let S=H.toLowerCase();return l.orig_code.toLowerCase().includes(S)||l.sku.toLowerCase().includes(S)||l.name.toLowerCase().includes(S)}),[e,P,H]),D2=nn,w2=fn,Ku=D.useMemo(()=>Math.max(1,Math.ceil(nn.length/ot)),[nn]),Tc=D.useMemo(()=>Math.max(1,Math.ceil(fn.length/Au)),[fn]),Fc=D.useMemo(()=>nn.slice((ct-1)*ot,ct*ot),[nn,ct]),Vc=D.useMemo(()=>fn.slice((qt-1)*Au,qt*Au),[fn,qt]);D.useEffect(()=>{Ac(1)},[W,V]),D.useEffect(()=>{Nc(1)},[P,H]);let mn=In==="超級管理員"||In==="系統管理員",$u=["倉管","超級管理員","系統管理員"].includes(In),Hh=D.useMemo(()=> $u?h:h.filter((l)=>String(l.applicant||"").trim()===String(wp||"").trim()),[h,$u,wp]);D.useEffect(()=>{if(typeof window>"u")return;if(window.XLSX){Dc(!0);return}if(document.querySelector("script[data-xlsx]"))return;let l=document.createElement("script");l.src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",l.async=!0,l.setAttribute("data-xlsx","1"),l.onload=()=>Dc(!0),document.head.appendChild(l)},[]);function Xu(){let l=window.XLSX;if(!l)return alert("Excel 套件載入中，請稍後再試 (需網路)"),null;return l}function Op(){let l=Xu();if(!l)return;let S=nn.map((x)=>({SKU:x.sku,原始編號_orig_code:x.orig_code,名稱:x.name,規格_spec:x.spec||"",單位:x.unit||"",類型:x.type,庫存:x.stock??"",分類:x.category||""})),N=l.utils.json_to_sheet(S),T=l.utils.book_new();l.utils.book_append_sheet(T,N,"材料清單");let b=`材料清單_${W}_${new Date().toISOString().slice(0,10)}.xlsx`;l.writeFile(T,b),_e(`已匯出 ${S.length} 筆`)}function Mp(){let l=Xu();if(!l)return;if(Hh.length===0){alert("無歷史紀錄");return}let S=[];Hh.forEach((b)=>{b.items.forEach((x)=>{S.push({單號:b.id,日期:b.date,領料人:b.applicant,工令類型:b.workOrderType,工令單號:b.workOrderNo||"",地點:b.location,SKU:x.sku,原始編號:x.orig_code,名稱:x.name,規格:x.spec,動作:x.action,數量:x.qty})})});let N=l.utils.json_to_sheet(S),T=l.utils.book_new();l.utils.book_append_sheet(T,N,"歷史紀錄"),l.writeFile(T,`歷史紀錄_${new Date().toISOString().slice(0,10)}.xlsx`),_e(`已匯出 ${Hh.length} 單 / ${S.length} 項`)}function Ip(){let l=Xu();if(!l)return;let S=fn.map((b)=>({SKU:b.sku,原始編號:b.orig_code,名稱:b.name,規格:b.spec||"",單位:b.unit||"",類型:b.type,庫存:b.stock??100,盤點數:""})),N=l.utils.json_to_sheet(S),T=l.utils.book_new();l.utils.book_append_sheet(T,N,"盤點清單"),l.writeFile(T,`盤點清單_${P}_${new Date().toISOString().slice(0,10)}.xlsx`),_e(`已匯出 ${S.length} 筆`)}function Bp(l){let S=l.trim();if(!S)return;return e.find((N)=>N.orig_code===S||N.sku===S||N.sku.toLowerCase()===S.toLowerCase())}function Gu(l){Ye((S)=>{if(S.find((T)=>T.sku===l.sku)){_e(`${l.orig_code} 已在清單中，數量保持1，請手動修改`);return S;}return[...S,{sku:l.sku,orig_code:l.orig_code,name:l.name,spec:l.spec||"",type:l.type,qty:1,action:"領料"}]}),_e(`已加入 ${l.orig_code} 數量1`)}function tn(l,S=!1){let N=Bp(l);if(!N){alert(`查無材料: ${l}
-請確認原始編號 ${l} 或 SKU 如 W-1-1 / E-1`);return}if(S)Tp(N.sku),F(N.type==="water"||N.sku.startsWith("W-")?"water":"electric"),setTimeout(()=>{document.getElementById(`inv-${N.sku}`)?.scrollIntoView({behavior:"smooth",block:"center"})},100),_e(`定位 ${N.orig_code}`);else Gu(N),A(N.type==="water"||N.sku.startsWith("W-")?"water":"electric"),mc(""),Ec("")}function Hc(){if(me.length===0){alert("請先加入材料");return}if(!Pu){alert("請輸入單位地點");return}if(Je==="工令單號"&&!Qr.trim()){alert("請輸入工令單號");return}let l=Je==="電話請修"?Qr.trim()||"電話請修":Qr.trim(),S=t?.name||wp,N={id:`M-${Date.now().toString().slice(-6)}-${Math.floor(Math.random()*90+10)}`,date:new Date().toLocaleString("zh-TW"),applicant:S,workOrderType:Je,workOrderNo:l,location:Pu,items:me,status:"已領料"};if(Bn)E((T)=>T.map((b)=>b.id===Bn.id?{...N,id:Bn.id}:b)),jr(null);else E((T)=>[N,...T]),(!$u&&setTimeout(()=>{try{window.WW769?.uploadMyOrders?.()}catch{}},900));Ye([]),Tu(""),qr(""),alert(`單號 ${N.id} 已建立${!$u?"，系統將自動上傳":""}`)}function zp(l){if(!mn)return;Ye(l.items),kc(l.workOrderType),qr(l.workOrderNo||""),Tu(l.location),jr(l),m("issue"),window.scrollTo({top:0,behavior:"smooth"})}D.useEffect(()=>{if(typeof window>"u")return;if(window.Html5Qrcode)return;if(document.querySelector("script[data-html5-qrcode]"))return;let l=document.createElement("script");l.src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",l.async=!0,l.setAttribute("data-html5-qrcode","1"),document.head.appendChild(l)},[]);async function Rp(){if(window.Html5Qrcode)return window.Html5Qrcode;return new Promise((l,S)=>{let N=document.querySelector("script[data-html5-qrcode]");if(N){if(window.Html5Qrcode){l(window.Html5Qrcode);return}N.addEventListener("load",()=>l(window.Html5Qrcode)),N.addEventListener("error",()=>S("cdn load error"));return}let T=document.createElement("script");T.src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",T.async=!0,T.setAttribute("data-html5-qrcode","1"),T.onload=()=>l(window.Html5Qrcode),T.onerror=()=>S("cdn fail"),document.head.appendChild(T)})}async function Uu(){try{if(at.current){await at.current.stop();try{await at.current.clear()}catch{}}}catch{}at.current=null}D.useEffect(()=>{if(!$t&&!xr){Uu();return}let l=!0,S=$t?"qr-reader-issue":"qr-reader-inv",N=xr;return(async()=>{Pe("相機啟動中... 請允許權限 (需 https)");try{let T=0;while(T<20){if(document.getElementById(S))break;await new Promise((lt)=>setTimeout(lt,100)),T++}let b=await Rp();if(!l)return;if(!b){Pe("套件載入失敗，請檢查網路並重試");return}if(await Uu(),!document.getElementById(S)){Pe("找不到相機容器");return}let zn=new b(S);at.current=zn;let Le=(Ie)=>{if(!l)return;let now=Date.now();if(window.__lastScan===Ie&&now-(window.__lastScanTime||0)<2500)return;window.__lastScan=Ie;window.__lastScanTime=now;try{navigator.vibrate?.(60)}catch{}tn(Ie,N)},j=(Ie)=>{};try{if(await zn.start({facingMode:"environment"},{fps:10,qrbox:250},Le,j),l)Pe("✅ 相機已啟動，對準 QR 自動加入 (後鏡頭)")}catch(Ie){let lt=Ie?.name||"",$p=Ie?.message||String(Ie);if(console.warn("env camera fail",Ie),lt==="NotAllowedError"||$p.includes("Permission")){if(l)Pe("❌ 請允許相機並用 https 開啟 (NotAllowedError)");return}try{if(await zn.start({facingMode:"user"},{fps:10,qrbox:250},Le,j),l)Pe("⚠️ 後鏡頭未找到，已切換前鏡頭")}catch(Mc){let eo=Mc?.name||"";if(eo==="NotFoundError"||eo==="OverconstrainedError"){if(l)Pe("❌ 未找到相機，請檢查裝置或用 https / 改用手動輸入")}else if(eo==="NotAllowedError"){if(l)Pe("❌ 請允許相機並用 https 開啟")}else if(l)Pe("❌ 相機無法啟動："+(Mc?.message||eo||"未知")+"，請改用手動輸入或掃碼槍")}}}catch(T){if(l)Pe("❌ 相機載入異常："+(T?.message||T)+"，請改用手動輸入")}})(),()=>{l=!1,Uu()}},[$t,xr]),D.useEffect(()=>{let l=(S)=>{if(!S.target.closest("[data-user-menu]"))Jt(!1)};if(Yt)document.addEventListener("click",l);return()=>document.removeEventListener("click",l)},[Yt]),D.useEffect(()=>{if(t){let l=C.find((S)=>S.name===t.name);if(l&&l.role!==t.role){let S={...t,role:l.role};r(S);try{localStorage.setItem(Cu,JSON.stringify(S))}catch{}}}},[t,C]);function Kp({title:l}){return k("div",{className:"bg-zinc-50 rounded-xl border border-zinc-200 p-2.5 max-h-[32vh] overflow-auto",children:[k("div",{className:"flex justify-between items-center mb-2",children:[k("span",{className:"text-[11px] font-bold",children:[l||"即時領料車"," · ",me.length,"項 · \uD83D\uDD12 ",t?.name]}),k("span",{className:"text-[10px] text-zinc-500",children:[me.reduce((S,N)=>S+N.qty,0),"件"]})]}),me.length===0?g("div",{className:"text-[11px] text-zinc-400 py-3 text-center border border-dashed rounded-lg",children:"尚未加入材料，掃碼後自動出現在此"}):g("div",{className:"space-y-1.5",children:me.slice(-8).reverse().map((S)=>k("div",{className:"flex items-center gap-2 bg-white border rounded-lg px-2 py-1.5",children:[g(Rt,{text:S.orig_code,size:22,className:"!border-0"}),g("span",{className:"font-mono text-[11px] font-bold bg-zinc-900 text-white px-1.5 py-0.5 rounded",children:S.orig_code}),g("span",{className:"text-[11px] truncate flex-1",children:S.name}),k("span",{className:"text-[10px] bg-zinc-100 px-1.5 py-0.5 rounded-full",children:["x",S.qty]})]},S.sku))})]})}let bc=({current:l,total:S,pageSize:N,totalCount:T,onChange:b})=>{let x=(l-1)*N+1,zn=Math.min(l*N,T),Le=[];if(S<=10)for(let j=1;j<=S;j++)Le.push(j);else{if(Le.push(1),l>3)Le.push(-1);for(let j=Math.max(2,l-1);j<=Math.min(S-1,l+1);j++)Le.push(j);if(l<S-2)Le.push(-2);Le.push(S)}return k("div",{className:"flex flex-col md:flex-row gap-2 md:items-center justify-between py-3 px-1",children:[k("div",{className:"text-[11px] text-zinc-500",children:["共 ",T," 筆，目前顯示 第 ",l," 頁 ",x,"-",zn," · 每頁 ",N," 筆 · ",S," 頁"]}),k("div",{className:"flex items-center gap-1 overflow-x-auto scrollbar-none",children:[g("button",{disabled:l===1,onClick:()=>b(Math.max(1,l-1)),className:"px-2.5 py-1 rounded-full border text-[12px] bg-white disabled:opacity-40",children:"‹ 上一頁"}),Le.map((j,Ie)=>{if(j<0)return g("span",{className:"px-1 text-zinc-400",children:"…"},"e"+Ie);return g("button",{onClick:()=>b(j),className:`min-w-[32px] h-[28px] px-2 rounded-full text-[12px] border font-medium ${j===l?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:j},j)}),g("button",{disabled:l===S,onClick:()=>b(Math.min(S,l+1)),className:"px-2.5 py-1 rounded-full border text-[12px] bg-white disabled:opacity-40",children:"下一頁 ›"})]})]})},Oc=({value:l,onChange:S,countsObj:N})=>k("div",{className:"flex gap-2 overflow-x-auto scrollbar-none pb-1",children:[k("button",{onClick:()=>S("all"),className:`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition ${l==="all"?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:["全部材料 (",N.all,")"]}),k("button",{onClick:()=>S("water"),className:`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition flex items-center gap-1.5 ${l==="water"?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:[g("span",{className:`w-2 h-2 rounded-full ${l==="water"?"bg-white":"bg-sky-500"}`}),"水材料 (",N.water,")"]}),k("button",{onClick:()=>S("electric"),className:`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition flex items-center gap-1.5 ${l==="electric"?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:[g("span",{className:`w-2 h-2 rounded-full ${l==="electric"?"bg-white":"bg-amber-500"}`}),"電材料 (",N.electric,")"]})]});if(!t)return k("div",{className:"min-h-screen bg-[#f7f7f5] flex items-center justify-center p-4 font-[Noto Sans TC, PingFang TC, Microsoft JhengHei, sans-serif] notranslate",translate:"no",children:[g("style",{children:"@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');"}),k("div",{className:"w-full max-w-[420px]",children:[k("div",{className:"bg-white rounded-[28px] border border-zinc-200 shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-7 md:p-8",children:[k("div",{className:"flex items-center gap-3 mb-6",children:[g("div",{className:"w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold notranslate",translate:"no",children:g("span",{className:"notranslate",translate:"no",children:"水電"})}),k("div",{children:[g("div",{className:"font-bold text-[18px] leading-none notranslate",translate:"no",children:"水電倉庫登入 v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版"}),g("div",{className:"text-[12px] text-zinc-500 mt-1 notranslate",translate:"no",children:"全部預設 11111 · 可改密碼 · 當事人鎖定 · 權限分頁+Excel · 修復亂碼"})]})]}),k("div",{className:"space-y-4",children:[k("div",{children:[k("label",{className:"text-[12px] font-medium text-zinc-700 flex items-center gap-1",children:["帳號 ",g("span",{className:"text-[11px] text-zinc-400",children:"(姓名 3~5字)"})]}),g("input",{list:"personnelList",value:o,onChange:(l)=>u(l.target.value),placeholder:"例如 朱忠正",className:"mt-1.5 w-full px-4 py-3 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-500 outline-none text-[14px]",onKeyDown:(l)=>{if(l.key==="Enter")zu()}}),g("datalist",{id:"personnelList",children:Bu.map((l)=>g("option",{value:l.name,children:`${l.name} - ${Ap(l.role)}`},l.id))}),g("div",{className:"text-[11px] text-zinc-400 mt-1.5",children:"需存在於人員名單 60人內，含 朱忠正"})]}),k("div",{children:[k("label",{className:"text-[12px] font-medium text-zinc-700 flex items-center gap-1",children:["密碼 ",g("span",{className:"text-[11px] text-zinc-400",children:"(5碼數字 預設 11111)"})]}),k("div",{className:"mt-1.5 relative",children:[g("input",{type:s?"text":"password",value:i,onChange:(l)=>a(l.target.value.replace(/\D/g,"").slice(0,5)),placeholder:"預設 11111",className:"w-full px-4 py-3 pr-12 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-500 outline-none text-[14px] tracking-widest",onKeyDown:(l)=>{if(l.key==="Enter")zu()},inputMode:"numeric"}),g("button",{type:"button",onClick:()=>_(!s),className:"absolute right-1 top-1 bottom-1 px-3 rounded-full bg-white border border-zinc-200 text-[11px] text-zinc-600 hover:bg-zinc-50",children:s?"隱藏":"顯示"})]}),k("div",{className:"text-[11px] text-zinc-400 mt-1.5",children:["全部帳號預設 ",X,"，朱忠正 亦可 12345 相容，首次自動建立"]})]}),c&&g("div",{className:"px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700",children:c}),p&&g("div",{className:"px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[12px] text-amber-800",children:p}),g("button",{onClick:zu,className:"w-full py-3 rounded-full bg-blue-600 text-white font-medium text-[14px] hover:bg-blue-700 transition",children:"登入倉庫"}),k("div",{className:"pt-2 border-t border-zinc-100 space-y-1",children:[g("div",{className:"text-[11px] font-medium text-zinc-700 notranslate",translate:"no",children:"登入規則 v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版 修復亂碼："}),k("ul",{className:"text-[11px] text-zinc-500 list-disc pl-4 space-y-0.5 notranslate",translate:"no",children:[g("li",{children:"帳號 3~5字，必須為人員名單內姓名 (trim)"}),k("li",{children:["密碼 /^\\d",5,"$/，全部預設 ",X]}),k("li",{children:["若 localStorage 無 pwd_姓名，輸入 ",X," 自動建立並登入"]}),g("li",{children:"首次登入提示：首次登入，預設密碼 11111，請登入後更改"}),g("li",{children:"已存在則核對 stored 密碼，朱忠正 12345 向下相容"}),g("li",{children:"登入後 header 顯示 已登入: 名稱 (角色) 含 更改密碼/登出"}),g("li",{children:"權限：領料/倉管/系統管理員/超級管理員/檢視 + 分頁 1,2,3,4,5,6,7 + Excel + notranslate"})]})]}),k("div",{className:"text-[10px] text-zinc-400 text-center",children:["人員清單 ",Bu.length," 人 · 本地儲存 ",gn," · 無列印 · 繁中"]})]})]}),k("div",{className:"mt-4 bg-zinc-900 text-zinc-300 rounded-[16px] p-3 text-[11px] leading-relaxed notranslate",translate:"no",children:["測試：全部 ",g("span",{className:"text-white font-mono notranslate",children:X})," 即可登入",g("br",{}),"例如 ",g("span",{className:"text-white notranslate",children:"朱忠正 / 11111"})," → 超級管理員 (亦可 12345)",g("br",{}),"例如 ",g("span",{className:"text-white notranslate",children:"王財華 / 11111"})," 首次自動建立，之後可改密碼",g("br",{}),"v7.4.22 新增 notranslate 防止 水電→水力發電 / 領料作業→領英職位 自動翻譯"]})]})]});return k("div",{className:"min-h-screen bg-[#f7f7f5] text-zinc-900 font-[Noto Sans TC, PingFang TC, Microsoft JhengHei, sans-serif] notranslate",translate:"no",children:[g("style",{children:"@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap'); .scrollbar-none::-webkit-scrollbar{display:none} .notranslate{}"}),k("header",{className:"sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-zinc-200 notranslate",translate:"no",children:[k("div",{className:"max-w-[1280px] mx-auto px-4 md:px-6 h-[56px] flex items-center justify-between",children:[k("div",{className:"flex items-center gap-3",children:[g("div",{className:"w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm notranslate",translate:"no",children:g("span",{className:"notranslate",translate:"no",children:"水電"})}),k("div",{children:[g("div",{className:"font-bold text-[15px] leading-none notranslate",translate:"no",children:"水電倉庫 v7.5.32"}),g("div",{className:"text-[11px] text-zinc-500 notranslate",translate:"no",children:"鎖定當事人 · 真實QR 64x64 · orig_code原樣 · M-前綴 · 分頁1-7+Excel · 修復亂碼"})]})]}),k("div",{className:"flex items-center gap-2","data-user-menu":!0,children:[k("div",{className:"relative",children:[k("button",{onClick:()=>Jt(!Yt),className:"hidden md:flex items-center gap-2 text-xs bg-zinc-900 text-white px-3 py-1.5 rounded-full hover:bg-black",children:[g("span",{children:"\uD83D\uDD12 已登入:"}),g("span",{className:"font-bold",children:t.name}),k("span",{className:"text-zinc-300",children:["(",t.role,")"]}),g("span",{className:"ml-1",children:"▾"})]}),k("button",{onClick:()=>Jt(!Yt),className:"md:hidden flex items-center gap-1 text-xs bg-zinc-900 text-white px-3 py-1.5 rounded-full",children:[g("span",{className:"font-bold",children:t.name}),k("span",{className:"opacity-70 text-[10px]",children:["(",t.role.slice(0,2),")"]})]}),Yt&&k("div",{className:"absolute right-0 mt-2 w-[200px] bg-white rounded-[16px] border border-zinc-200 shadow-[0_8px_24px_rgba(0,0,0,0.12)] p-2 z-30",children:[k("div",{className:"px-3 py-2 border-b border-zinc-100 mb-1",children:[k("div",{className:"text-[12px] font-bold",children:["已登入: ",t.name]}),k("div",{className:"text-[11px] text-zinc-500",children:[t.role," · ",t.dept]}),k("div",{className:"text-[10px] text-zinc-400 mt-1",children:["預設 ",X," · 可改密碼"]})]}),g("button",{onClick:()=>{Jt(!1),Zt(!0),bu(""),Ou(""),Mu(""),it("")},className:"w-full text-left px-3 py-2 rounded-full text-[12px] hover:bg-zinc-100",children:"\uD83D\uDD11 更改密碼"}),g("button",{onClick:wc,className:"w-full text-left px-3 py-2 rounded-full text-[12px] hover:bg-red-50 text-red-600",children:"\uD83D\uDEAA 登出"})]})]}),g("div",{className:"w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs",children:t.name.slice(0,1)})]})]}),k("div",{className:"md:hidden px-4 pb-3 flex items-center gap-2 text-[11px]",children:[k("div",{className:"flex-1 bg-zinc-900 text-white px-3 py-1.5 rounded-full flex items-center gap-1",children:[g("span",{children:"\uD83D\uDD12 已登入:"}),g("span",{className:"font-bold",children:t.name}),k("span",{className:"opacity-70",children:["(",t.role,")"]})]}),g("span",{className:"text-[10px] px-2 py-1 bg-zinc-100 rounded-full",children:mn?"可編輯/刪除":$u?"可盤點":"僅檢視"})]})]}),k("div",{className:"max-w-[1280px] mx-auto px-4 md:px-6 pt-4 flex items-center gap-3 notranslate",translate:"no",children:[k("div",{className:"flex gap-1 bg-zinc-100 p-1 rounded-full w-fit notranslate",translate:"no",children:[I.issue&&g("button",{onClick:()=>{m("issue"),_e("已切換：領料作業")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="issue"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"領料作業"})}),I.history&&g("button",{onClick:()=>{m("history"),_e("已切換：歷史紀錄")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="history"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"歷史紀錄"})}),I.inventory&&g("button",{onClick:()=>{m("inventory"),_e("已切換：盤點")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="inventory"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"盤點"})}),I.personnel&&g("button",{onClick:()=>{m("personnel"),_e("已切換：人員")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="personnel"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"人員設定"})})]}),vc&&g("div",{className:"text-[11px] px-3 py-1 rounded-full bg-zinc-900 text-white animate-pulse notranslate",translate:"no",children:vc}),p&&g("div",{className:"text-[11px] px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 notranslate",translate:"no",children:p})]}),g("main",{className:"max-w-[1280px] mx-auto px-4 md:px-6 py-4 md:py-6 grid grid-cols-12 gap-4 md:gap-6 pb-[96px] lg:pb-6",children:Ru===0?g("div",{className:"col-span-12 flex items-center justify-center min-h-[60vh]",children:k("div",{className:"bg-white rounded-[20px] border border-zinc-200 p-10 text-center shadow-sm max-w-[420px]",children:[g("div",{className:"w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-4 text-xl",children:"\uD83D\uDD12"}),g("div",{className:"font-bold text-[16px] mb-2",children:"此帳號為檢視角色，無可操作頁籤，請聯絡管理員"}),k("div",{className:"text-[12px] text-zinc-500 leading-relaxed notranslate",translate:"no",children:["目前角色：",In,"（",t.name,"）",g("br",{}),"可見權限：無",g("br",{}),"請聯絡 系統管理員 / 超級管理員 調整為 領料 / 倉管 等角色",g("br",{}),"LocalStorage ",gn," · v7.4.22 修復亂碼 notranslate"]}),k("div",{className:"text-[12px] text-zinc-500 leading-relaxed notranslate",translate:"no",children:["目前角色：",In,"（",t.name,"）",g("br",{}),"可見權限：無",g("br",{}),"請聯絡 系統管理員 / 超級管理員 調整為 領料 / 倉管 等角色",g("br",{}),"LocalStorage ",gn," · v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版"]}),g("button",{onClick:wc,className:"mt-4 px-4 py-2 rounded-full bg-zinc-900 text-white text-[12px]",children:"登出切換帳號"})]})}):k(Zr,{children:[k("div",{className:"col-span-12 lg:col-span-8 space-y-4",children:[I.issue&&y==="issue"&&k(Zr,{children:[k("div",{className:"bg-white rounded-[20px] border border-zinc-200 p-4 md:p-5 shadow-sm space-y-3",children:[k("div",{className:"flex gap-2",children:[k("div",{className:"flex-1 relative",children:[g("span",{className:"absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm",children:"\uD83D\uDD0D"}),g("input",{value:V,onChange:(l)=>G(l.target.value),placeholder:"搜尋 名稱 / 原始編號 / 規格 / SKU",className:"w-full pl-9 pr-3 py-2.5 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-400 outline-none text-sm"})]}),g("button",{type:"button","aria-expanded":$t,"data-scan-btn":"issue","aria-label":"掃碼領料",onClick:()=>{Xt(!0),Pe(""),_e("掃碼領料已開啟")},className:"whitespace-nowrap px-4 py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700",children:"\uD83D\uDCF7 掃碼"}),g("button",{onClick:Op,className:"whitespace-nowrap px-3 py-2.5 rounded-full bg-white border border-zinc-200 text-sm font-medium hover:bg-zinc-50",children:"\uD83D\uDCCA 匯出Excel"})]}),g(Oc,{value:W,onChange:A,countsObj:Pc}),k("div",{className:"flex gap-2 items-center",children:[g("div",{className:"text-[11px] text-zinc-500 whitespace-nowrap",children:"掃碼槍輸入:"}),g("input",{value:Kt,onChange:(l)=>mc(l.target.value),onKeyDown:(l)=>{if(l.key==="Enter")tn(Kt,!1)},placeholder:"原始編號如 1 或 1-1 按Enter自動加入",className:"flex-1 px-3 py-2 rounded-full border border-dashed border-zinc-300 bg-amber-50/60 text-sm outline-none focus:border-blue-400"}),g("button",{onClick:()=>tn(Kt,!1),className:"px-3 py-2 rounded-full bg-zinc-900 text-white text-xs",children:"加入"})]}),k("div",{className:"text-[11px] text-zinc-400 notranslate",translate:"no",children:["v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版 修復亂碼：共",nn.length,"筆 / 每頁",ot,"筆 / 第",ct,"/",Ku,"頁 · 真實QR 64x64 · 鎖定 ",t.name," · ",gn," · ",Vp?"Excel就緒":"Excel載入中"," · notranslate"]})]}),k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 md:p-5 border-b border-zinc-100 flex justify-between items-center",children:[k("h3",{className:"font-bold text-[14px] notranslate",translate:"no",children:["材料清單 · 共 ",nn.length," 筆 · 本頁 ",Fc.length," · ",ct,"/",Ku," · 正版QR"]}),k("span",{className:"text-[11px] text-zinc-500 hidden md:block notranslate",translate:"no",children:["orig_code原樣 · 分頁 1,2,3,4,5,6,7 · ",ot,"/頁 · notranslate"]})]}),g("div",{className:"divide-y divide-zinc-100 max-h-[70vh] overflow-auto",children:Fc.map((l)=>k("div",{className:"p-3 md:p-4 flex gap-3 hover:bg-zinc-50 transition items-center",children:[g("div",{onClick:()=>ut(l),className:"cursor-pointer",children:g(Rt,{text:l.orig_code,size:64})}),k("div",{className:"flex-1 min-w-0",onClick:()=>ut(l),children:[k("div",{className:"flex items-center gap-2 flex-wrap",children:[g("span",{className:"font-mono font-bold text-[13px] bg-zinc-900 text-white px-2 py-0.5 rounded",children:l.orig_code}),g("span",{className:"text-[11px] font-mono text-zinc-500 border border-zinc-200 rounded px-1.5 py-0.5",children:l.sku}),g("span",{className:`text-[11px] px-2 py-0.5 rounded-full font-medium ${l.type==="water"||l.sku.startsWith("W-")?"bg-sky-100 text-sky-700":"bg-amber-100 text-amber-700"}`,children:l.type==="water"||l.sku.startsWith("W-")?"水":"電"})]}),g("div",{className:"mt-1 font-medium text-[13px] truncate",children:l.name}),k("div",{className:"text-[12px] text-zinc-500 truncate",children:[l.spec||"無規格"," · ",l.unit," · 庫存 ",l.stock]})]}),g("button",{onClick:()=>Gu(l),className:"self-center px-3 py-1.5 rounded-full bg-white border border-zinc-200 text-xs font-medium hover:bg-zinc-900 hover:text-white transition shrink-0",children:"加入 +"})]},l.sku))}),g("div",{className:"border-t border-zinc-100 px-3",children:g(bc,{current:ct,total:Ku,pageSize:ot,totalCount:nn.length,onChange:Ac})})]})]}),y==="inventory"&&$u&&k(Zr,{children:[k("div",{className:"bg-white rounded-[20px] border border-zinc-200 p-4 md:p-5 shadow-sm space-y-3",children:[k("div",{className:"flex gap-2",children:[k("div",{className:"flex-1 relative",children:[g("span",{className:"absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm",children:"\uD83D\uDD0D"}),g("input",{value:H,onChange:(l)=>Ce(l.target.value),placeholder:"盤點搜尋 名稱 / 原始編號 / SKU",className:"w-full pl-9 pr-3 py-2.5 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-400 outline-none text-sm"})]}),g("button",{onClick:()=>{Gt(!0),Pe(""),_e("開啟掃碼盤點")},className:"whitespace-nowrap px-4 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-medium hover:bg-black",children:"\uD83D\uDCF7 掃碼"}),g("button",{onClick:Ip,className:"whitespace-nowrap px-3 py-2.5 rounded-full bg-white border border-zinc-200 text-sm font-medium",children:"\uD83D\uDCCA Excel"})]}),g(Oc,{value:P,onChange:F,countsObj:Pc}),k("div",{className:"flex gap-2 items-center",children:[g("div",{className:"text-[11px] text-zinc-500 whitespace-nowrap",children:"掃碼槍輸入:"}),g("input",{value:Du,onChange:(l)=>wu(l.target.value),onKeyDown:(l)=>{if(l.key==="Enter")tn(Du,!0),wu("")},placeholder:"原始編號如 1 或 1-1 按Enter定位",className:"flex-1 px-3 py-2 rounded-full border border-dashed border-zinc-300 bg-sky-50/60 text-sm outline-none focus:border-blue-400"}),g("button",{onClick:()=>{tn(Du,!0),wu("")},className:"px-3 py-2 rounded-full bg-zinc-900 text-white text-xs",children:"定位"})]})]}),k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 border-b border-zinc-100 flex justify-between",children:[k("h3",{className:"font-bold text-[14px]",children:["盤點清單 · 共 ",fn.length," 筆 · 本頁 ",Vc.length," · 聚焦 ",Ut?Ut:"—"]}),k("span",{className:"text-[11px] text-zinc-500",children:["分頁 ",qt,"/",Tc]})]}),g("div",{className:"divide-y divide-zinc-100 max-h-[70vh] overflow-auto",children:Vc.map((l)=>k("div",{id:`inv-${l.sku}`,className:`p-3 md:p-4 flex gap-3 transition items-center ${Ut===l.sku?"bg-blue-50 border-l-4 border-l-blue-600":"hover:bg-zinc-50"}`,children:[g(Rt,{text:l.orig_code,size:52}),k("div",{className:"flex-1 min-w-0",children:[k("div",{className:"flex items-center gap-2",children:[g("span",{className:"font-mono font-bold text-[13px] bg-zinc-900 text-white px-2 py-0.5 rounded",children:l.orig_code}),g("span",{className:"text-[11px] font-mono text-zinc-500 border border-zinc-200 rounded px-1.5 py-0.5",children:l.sku}),g("span",{className:`text-[11px] px-2 py-0.5 rounded-full ${l.type==="water"||l.sku.startsWith("W-")?"bg-sky-100 text-sky-700":"bg-amber-100 text-amber-700"}`,children:l.type==="water"||l.sku.startsWith("W-")?"水":"電"}),Ut===l.sku&&g("span",{className:"text-[11px] px-2 py-0.5 rounded-full bg-blue-600 text-white",children:"已定位"})]}),g("div",{className:"mt-1 font-medium text-[13px]",children:l.name}),g("div",{className:"text-[12px] text-zinc-500",children:l.spec})]}),k("div",{className:"flex flex-col items-end gap-1",children:[k("div",{className:"text-xs",children:["庫存 ",l.stock]}),g("input",{type:"number",placeholder:"盤點數",className:"w-20 px-2 py-1 rounded-full border border-zinc-200 text-xs"})]})]},l.sku))}),g("div",{className:"border-t border-zinc-100 px-3",children:g(bc,{current:qt,total:Tc,pageSize:Au,totalCount:fn.length,onChange:Nc})})]})]}),y==="history"&&k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 md:p-5 border-b border-zinc-100 flex justify-between items-center",children:[k("h3",{className:"font-bold text-[14px]",children:["歷史紀錄 · ",Hh.length," 筆"]}),k("div",{className:"flex items-center gap-2",children:[g("span",{className:"text-[11px] text-zinc-500",children:mn?"可編輯/刪除":$u?"倉管僅檢視":"僅檢視"}),g("button",{onClick:Mp,className:"px-3 py-1 rounded-full bg-white border border-zinc-200 text-[11px] hover:bg-zinc-50",children:"\uD83D\uDCCA 匯出Excel"})]})]}),k("div",{className:"divide-y divide-zinc-100",children:[Hh.length===0&&g("div",{className:"p-8 text-center text-zinc-400 text-sm",children:"尚無自己的領料紀錄"}),Hh.map((l)=>k("div",{className:"p-4 space-y-2",children:[k("div",{className:"flex justify-between items-start",children:[k("div",{children:[g("div",{className:"font-mono font-bold text-sm",children:l.id}),k("div",{className:"text-[11px] text-zinc-500 flex flex-wrap gap-1.5 items-center mt-1",children:[g("span",{children:l.date}),k("span",{children:["· ",l.applicant]}),g("span",{className:`px-1.5 py-0.5 rounded-full text-[10px] ${l.workOrderType==="工令單號"?"bg-blue-100 text-blue-700":"bg-amber-100 text-amber-700"}`,children:l.workOrderType}),g("span",{className:"font-mono font-bold text-zinc-700 bg-zinc-100 px-1.5 py-0.5 rounded",children:l.workOrderNo||(l.workOrderType==="電話請修"?"電話請修":"-")}),k("span",{children:["· ",l.location]})]})]}),k("div",{className:"flex gap-1",children:[mn&&g("button",{onClick:()=>zp(l),className:"px-2.5 py-1 rounded-full bg-zinc-100 text-xs hover:bg-zinc-900 hover:text-white",children:"編輯"}),mn&&g("button",{onClick:()=>{if(window._forceDelete||confirm(`刪除 ${l.id}?`))E((S)=>S.filter((N)=>N.id!==l.id))},className:"px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-xs hover:bg-red-600 hover:text-white",children:"刪除"}),!mn&&g("span",{className:"px-2.5 py-1 rounded-full bg-zinc-100 text-[11px]",children:"檢視"})]})]}),g("div",{className:"flex flex-wrap gap-1.5",children:l.items.map((S)=>k("span",{className:"inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[11px]",children:[g(Rt,{text:S.orig_code,size:20,className:"!border-0"}),g("span",{className:"font-mono font-bold",children:S.orig_code}),g("span",{className:"text-zinc-500",children:S.sku}),g("span",{children:S.name}),k("span",{className:"px-1.5 py-0.5 rounded-full bg-white border text-[10px]",children:[S.action," x",S.qty]})]},S.sku))})]},l.id))]})]}),y==="personnel"&&mn&&k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 md:p-5 border-b border-zinc-100 flex justify-between items-center",children:[k("h3",{className:"font-bold text-[14px]",children:["人員設定 · ",C.length," 人 · 5種角色 · 可重設 ",X]}),k("span",{className:"text-[11px] text-zinc-500",children:["朱忠正 鎖定超級管理員 · 當前 ",t.role," · 預設 ",X]})]}),g("div",{className:"divide-y divide-zinc-100",children:C.map((l)=>k("div",{className:"p-3 md:p-4 flex items-center gap-3",children:[g("div",{className:"w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs",children:l.name.slice(0,1)}),k("div",{className:"flex-1",children:[k("div",{className:"font-medium text-sm flex items-center gap-2",children:[l.name," ",l.locked&&g("span",{className:"text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white",children:"鎖定"})]}),g("div",{className:"text-[11px] text-zinc-500",children:l.dept})]}),g("select",{disabled:l.name==="朱忠正"||l.locked,value:l.name==="朱忠正"?"超級管理員":l.role,onChange:(S)=>{if(l.name==="朱忠正")return;f((N)=>N.map((T)=>T.id===l.id?{...T,role:S.target.value}:T))},className:"border border-zinc-200 rounded-full px-3 py-1.5 text-xs bg-white disabled:bg-zinc-100 shrink-0",children:(l.name==="朱忠正"?["超級管理員"]:L2).map((S)=>g("option",{value:S,children:S},S))}),k("div",{className:"flex flex-col items-end gap-1",children:[g("span",{className:"text-[10px] text-zinc-400 font-mono",children:(()=>{try{
+}let Pc=D.useMemo(()=>{let l=e.filter((T)=>T.type==="water"||T.sku.startsWith("W-")).length,S=e.filter((T)=>T.type==="electric"||T.sku.startsWith("E-")).length;return{all:e.length||918,water:l||516,electric:S||402}},[e]),I=D.useMemo(()=>{let l=In;return{issue:!!Nu["領料作業"][l],history:!!Nu["歷史紀錄"][l],inventory:!!Nu["盤點"][l],personnel:!!Nu["人員設定"][l]}},[In]),Ru=(I.issue?1:0)+(I.history?1:0)+(I.inventory?1:0)+(I.personnel?1:0);D.useEffect(()=>{if(!t)return;if(Ru===0)return;if(y==="issue"&&!I.issue){if(I.history)m("history");else if(I.inventory)m("inventory");else if(I.personnel)m("personnel")}else if(y==="history"&&!I.history){if(I.issue)m("issue");else if(I.inventory)m("inventory");else if(I.personnel)m("personnel")}else if(y==="inventory"&&!I.inventory){if(I.issue)m("issue");else if(I.history)m("history");else if(I.personnel)m("personnel")}else if(y==="personnel"&&!I.personnel){if(I.issue)m("issue");else if(I.history)m("history");else if(I.inventory)m("inventory")}},[I,Ru,t,y]);let nn=D.useMemo(()=>e.filter((l)=>{if(W==="water"&&!(l.type==="water"||l.sku.startsWith("W-")))return!1;if(W==="electric"&&!(l.type==="electric"||l.sku.startsWith("E-")))return!1;if(!V)return!0;let S=V.toLowerCase();return l.orig_code.toLowerCase().includes(S)||l.sku.toLowerCase().includes(S)||l.name.toLowerCase().includes(S)||(l.spec||"").toLowerCase().includes(S)}),[e,W,V]),fn=D.useMemo(()=>e.filter((l)=>{if(P==="water"&&!(l.type==="water"||l.sku.startsWith("W-")))return!1;if(P==="electric"&&!(l.type==="electric"||l.sku.startsWith("E-")))return!1;if(!H)return!0;let S=H.toLowerCase();return l.orig_code.toLowerCase().includes(S)||l.sku.toLowerCase().includes(S)||l.name.toLowerCase().includes(S)}),[e,P,H]),D2=nn,w2=fn,Ku=D.useMemo(()=>Math.max(1,Math.ceil(nn.length/ot)),[nn]),Tc=D.useMemo(()=>Math.max(1,Math.ceil(fn.length/Au)),[fn]),Fc=D.useMemo(()=>nn.slice((ct-1)*ot,ct*ot),[nn,ct]),Vc=D.useMemo(()=>fn.slice((qt-1)*Au,qt*Au),[fn,qt]);D.useEffect(()=>{Ac(1)},[W,V]),D.useEffect(()=>{Nc(1)},[P,H]);let mn=In==="超級管理員"||In==="系統管理員",$u=["倉管","超級管理員","系統管理員"].includes(In),Hh=D.useMemo(()=>mn?h:h.filter((l)=>String(l.applicant||"").trim()===String(wp||"").trim()),[h,mn,wp]);D.useEffect(()=>{if(typeof window>"u")return;if(window.XLSX){Dc(!0);return}if(document.querySelector("script[data-xlsx]"))return;let l=document.createElement("script");l.src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",l.async=!0,l.setAttribute("data-xlsx","1"),l.onload=()=>Dc(!0),document.head.appendChild(l)},[]);function Xu(){let l=window.XLSX;if(!l)return alert("Excel 套件載入中，請稍後再試 (需網路)"),null;return l}function Op(){let l=Xu();if(!l)return;let S=nn.map((x)=>({SKU:x.sku,原始編號_orig_code:x.orig_code,名稱:x.name,規格_spec:x.spec||"",單位:x.unit||"",類型:x.type,庫存:x.stock??"",分類:x.category||""})),N=l.utils.json_to_sheet(S),T=l.utils.book_new();l.utils.book_append_sheet(T,N,"材料清單");let b=`材料清單_${W}_${new Date().toISOString().slice(0,10)}.xlsx`;l.writeFile(T,b),_e(`已匯出 ${S.length} 筆`)}function Mp(){let l=Xu();if(!l)return;if(Hh.length===0){alert("無歷史紀錄");return}let S=[];Hh.forEach((b)=>{b.items.forEach((x)=>{S.push({單號:b.id,日期:b.date,領料人:b.applicant,工令類型:b.workOrderType,工令單號:b.workOrderNo||"",正式工令號:b.officialWorkOrderNo||"",地點:b.location,SKU:x.sku,原始編號:x.orig_code,名稱:x.name,規格:x.spec,動作:x.action,數量:x.qty})})});let N=l.utils.json_to_sheet(S),T=l.utils.book_new();l.utils.book_append_sheet(T,N,"歷史紀錄"),l.writeFile(T,`歷史紀錄_${new Date().toISOString().slice(0,10)}.xlsx`),_e(`已匯出 ${Hh.length} 單 / ${S.length} 項`)}function Ip(){let l=Xu();if(!l)return;let S=fn.map((b)=>({SKU:b.sku,原始編號:b.orig_code,名稱:b.name,規格:b.spec||"",單位:b.unit||"",類型:b.type,庫存:b.stock??100,盤點數:""})),N=l.utils.json_to_sheet(S),T=l.utils.book_new();l.utils.book_append_sheet(T,N,"盤點清單"),l.writeFile(T,`盤點清單_${P}_${new Date().toISOString().slice(0,10)}.xlsx`),_e(`已匯出 ${S.length} 筆`)}function Bp(l){let S=l.trim();if(!S)return;return e.find((N)=>N.orig_code===S||N.sku===S||N.sku.toLowerCase()===S.toLowerCase())}function Gu(l){Ye((S)=>{if(S.find((T)=>T.sku===l.sku)){_e(`${l.orig_code} 已在清單中，數量保持1，請手動修改`);return S;}return[...S,{sku:l.sku,orig_code:l.orig_code,name:l.name,spec:l.spec||"",type:l.type,qty:1,action:"領料"}]}),_e(`已加入 ${l.orig_code} 數量1`)}function tn(l,S=!1){let N=Bp(l);if(!N){alert(`查無材料: ${l}
+請確認原始編號 ${l} 或 SKU 如 W-1-1 / E-1`);return}if(S)Tp(N.sku),F(N.type==="water"||N.sku.startsWith("W-")?"water":"electric"),setTimeout(()=>{document.getElementById(`inv-${N.sku}`)?.scrollIntoView({behavior:"smooth",block:"center"})},100),_e(`定位 ${N.orig_code}`);else Gu(N),A(N.type==="water"||N.sku.startsWith("W-")?"water":"electric"),mc(""),Ec("")}function Hc(){if(me.length===0){alert("請先加入材料");return}if(!Pu){alert("請輸入單位地點");return}if(Je==="工令單號"&&!Qr.trim()){alert("請輸入工令單號");return}let l=Je==="電話請修"?Qr.trim()||"電話請修":Qr.trim(),S=t?.name||wp,N={id:`M-${Date.now().toString().slice(-6)}-${Math.floor(Math.random()*90+10)}`,date:new Date().toLocaleString("zh-TW"),applicant:S,workOrderType:Je,workOrderNo:l,location:Pu,items:me,status:"已領料"};if(Bn){N={...N,id:Bn.id,date:Bn.date||N.date,applicant:Bn.cloudSubmittedBy||Bn.submittedBy||Bn.applicant||S,submittedBy:Bn.submittedBy,cloudSubmittedBy:Bn.cloudSubmittedBy,officialWorkOrderNo:Bn.officialWorkOrderNo||"",officialWorkOrderLinkedAt:Bn.officialWorkOrderLinkedAt,officialWorkOrderLinkedBy:Bn.officialWorkOrderLinkedBy};E((T)=>T.map((b)=>b.id===Bn.id?N:b));jr(null);setTimeout(()=>{try{window.WW719?.updateOrder?.(N)}catch{}},80)}else E((T)=>[N,...T]),(!$u&&setTimeout(()=>{try{window.WW769?.uploadMyOrders?.()}catch{}},900));Ye([]),Tu(""),qr(""),alert(`單號 ${N.id} 已建立${!$u?"，系統將自動上傳":""}`)}function zp(l){if(!mn)return;Ye(l.items),kc(l.workOrderType),qr(l.workOrderNo||""),Tu(l.location),jr(l),m("issue"),window.scrollTo({top:0,behavior:"smooth"})}D.useEffect(()=>{if(typeof window>"u")return;if(window.Html5Qrcode)return;if(document.querySelector("script[data-html5-qrcode]"))return;let l=document.createElement("script");l.src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",l.async=!0,l.setAttribute("data-html5-qrcode","1"),document.head.appendChild(l)},[]);async function Rp(){if(window.Html5Qrcode)return window.Html5Qrcode;return new Promise((l,S)=>{let N=document.querySelector("script[data-html5-qrcode]");if(N){if(window.Html5Qrcode){l(window.Html5Qrcode);return}N.addEventListener("load",()=>l(window.Html5Qrcode)),N.addEventListener("error",()=>S("cdn load error"));return}let T=document.createElement("script");T.src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",T.async=!0,T.setAttribute("data-html5-qrcode","1"),T.onload=()=>l(window.Html5Qrcode),T.onerror=()=>S("cdn fail"),document.head.appendChild(T)})}async function Uu(){try{if(at.current){await at.current.stop();try{await at.current.clear()}catch{}}}catch{}at.current=null}D.useEffect(()=>{if(!$t&&!xr){Uu();return}let l=!0,S=$t?"qr-reader-issue":"qr-reader-inv",N=xr;return(async()=>{Pe("相機啟動中... 請允許權限 (需 https)");try{let T=0;while(T<20){if(document.getElementById(S))break;await new Promise((lt)=>setTimeout(lt,100)),T++}let b=await Rp();if(!l)return;if(!b){Pe("套件載入失敗，請檢查網路並重試");return}if(await Uu(),!document.getElementById(S)){Pe("找不到相機容器");return}let zn=new b(S);at.current=zn;let Le=(Ie)=>{if(!l)return;let now=Date.now();if(window.__lastScan===Ie&&now-(window.__lastScanTime||0)<2500)return;window.__lastScan=Ie;window.__lastScanTime=now;try{navigator.vibrate?.(60)}catch{}tn(Ie,N)},j=(Ie)=>{};try{if(await zn.start({facingMode:"environment"},{fps:10,qrbox:250},Le,j),l)Pe("✅ 相機已啟動，對準 QR 自動加入 (後鏡頭)")}catch(Ie){let lt=Ie?.name||"",$p=Ie?.message||String(Ie);if(console.warn("env camera fail",Ie),lt==="NotAllowedError"||$p.includes("Permission")){if(l)Pe("❌ 請允許相機並用 https 開啟 (NotAllowedError)");return}try{if(await zn.start({facingMode:"user"},{fps:10,qrbox:250},Le,j),l)Pe("⚠️ 後鏡頭未找到，已切換前鏡頭")}catch(Mc){let eo=Mc?.name||"";if(eo==="NotFoundError"||eo==="OverconstrainedError"){if(l)Pe("❌ 未找到相機，請檢查裝置或用 https / 改用手動輸入")}else if(eo==="NotAllowedError"){if(l)Pe("❌ 請允許相機並用 https 開啟")}else if(l)Pe("❌ 相機無法啟動："+(Mc?.message||eo||"未知")+"，請改用手動輸入或掃碼槍")}}}catch(T){if(l)Pe("❌ 相機載入異常："+(T?.message||T)+"，請改用手動輸入")}})(),()=>{l=!1,Uu()}},[$t,xr]),D.useEffect(()=>{let l=(S)=>{if(!S.target.closest("[data-user-menu]"))Jt(!1)};if(Yt)document.addEventListener("click",l);return()=>document.removeEventListener("click",l)},[Yt]),D.useEffect(()=>{if(t){let l=C.find((S)=>S.name===t.name);if(l&&l.role!==t.role){let S={...t,role:l.role};r(S);try{localStorage.setItem(Cu,JSON.stringify(S))}catch{}}}},[t,C]);function Kp({title:l}){return k("div",{className:"bg-zinc-50 rounded-xl border border-zinc-200 p-2.5 max-h-[32vh] overflow-auto",children:[k("div",{className:"flex justify-between items-center mb-2",children:[k("span",{className:"text-[11px] font-bold",children:[l||"即時領料車"," · ",me.length,"項 · \uD83D\uDD12 ",t?.name]}),k("span",{className:"text-[10px] text-zinc-500",children:[me.reduce((S,N)=>S+N.qty,0),"件"]})]}),me.length===0?g("div",{className:"text-[11px] text-zinc-400 py-3 text-center border border-dashed rounded-lg",children:"尚未加入材料，掃碼後自動出現在此"}):g("div",{className:"space-y-1.5",children:me.slice(-8).reverse().map((S)=>k("div",{className:"flex items-center gap-2 bg-white border rounded-lg px-2 py-1.5",children:[g(Rt,{text:S.orig_code,size:22,className:"!border-0"}),g("span",{className:"font-mono text-[11px] font-bold bg-zinc-900 text-white px-1.5 py-0.5 rounded",children:S.orig_code}),g("span",{className:"text-[11px] truncate flex-1",children:S.name}),k("span",{className:"text-[10px] bg-zinc-100 px-1.5 py-0.5 rounded-full",children:["x",S.qty]})]},S.sku))})]})}let bc=({current:l,total:S,pageSize:N,totalCount:T,onChange:b})=>{let x=(l-1)*N+1,zn=Math.min(l*N,T),Le=[];if(S<=10)for(let j=1;j<=S;j++)Le.push(j);else{if(Le.push(1),l>3)Le.push(-1);for(let j=Math.max(2,l-1);j<=Math.min(S-1,l+1);j++)Le.push(j);if(l<S-2)Le.push(-2);Le.push(S)}return k("div",{className:"flex flex-col md:flex-row gap-2 md:items-center justify-between py-3 px-1",children:[k("div",{className:"text-[11px] text-zinc-500",children:["共 ",T," 筆，目前顯示 第 ",l," 頁 ",x,"-",zn," · 每頁 ",N," 筆 · ",S," 頁"]}),k("div",{className:"flex items-center gap-1 overflow-x-auto scrollbar-none",children:[g("button",{disabled:l===1,onClick:()=>b(Math.max(1,l-1)),className:"px-2.5 py-1 rounded-full border text-[12px] bg-white disabled:opacity-40",children:"‹ 上一頁"}),Le.map((j,Ie)=>{if(j<0)return g("span",{className:"px-1 text-zinc-400",children:"…"},"e"+Ie);return g("button",{onClick:()=>b(j),className:`min-w-[32px] h-[28px] px-2 rounded-full text-[12px] border font-medium ${j===l?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:j},j)}),g("button",{disabled:l===S,onClick:()=>b(Math.min(S,l+1)),className:"px-2.5 py-1 rounded-full border text-[12px] bg-white disabled:opacity-40",children:"下一頁 ›"})]})]})},Oc=({value:l,onChange:S,countsObj:N})=>k("div",{className:"flex gap-2 overflow-x-auto scrollbar-none pb-1",children:[k("button",{onClick:()=>S("all"),className:`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition ${l==="all"?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:["全部材料 (",N.all,")"]}),k("button",{onClick:()=>S("water"),className:`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition flex items-center gap-1.5 ${l==="water"?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:[g("span",{className:`w-2 h-2 rounded-full ${l==="water"?"bg-white":"bg-sky-500"}`}),"水材料 (",N.water,")"]}),k("button",{onClick:()=>S("electric"),className:`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition flex items-center gap-1.5 ${l==="electric"?"bg-blue-600 text-white border-blue-600 shadow":"bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"}`,children:[g("span",{className:`w-2 h-2 rounded-full ${l==="electric"?"bg-white":"bg-amber-500"}`}),"電材料 (",N.electric,")"]})]});if(!t)return k("div",{className:"min-h-screen bg-[#f7f7f5] flex items-center justify-center p-4 font-[Noto Sans TC, PingFang TC, Microsoft JhengHei, sans-serif] notranslate",translate:"no",children:[g("style",{children:"@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');"}),k("div",{className:"w-full max-w-[420px]",children:[k("div",{className:"bg-white rounded-[28px] border border-zinc-200 shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-7 md:p-8",children:[k("div",{className:"flex items-center gap-3 mb-6",children:[g("div",{className:"w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold notranslate",translate:"no",children:g("span",{className:"notranslate",translate:"no",children:"水電"})}),k("div",{children:[g("div",{className:"font-bold text-[18px] leading-none notranslate",translate:"no",children:"水電倉庫登入 v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版"}),g("div",{className:"text-[12px] text-zinc-500 mt-1 notranslate",translate:"no",children:"全部預設 11111 · 可改密碼 · 當事人鎖定 · 權限分頁+Excel · 修復亂碼"})]})]}),k("div",{className:"space-y-4",children:[k("div",{children:[k("label",{className:"text-[12px] font-medium text-zinc-700 flex items-center gap-1",children:["帳號 ",g("span",{className:"text-[11px] text-zinc-400",children:"(姓名 3~5字)"})]}),g("input",{list:"personnelList",value:o,onChange:(l)=>u(l.target.value),placeholder:"例如 朱忠正",className:"mt-1.5 w-full px-4 py-3 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-500 outline-none text-[14px]",onKeyDown:(l)=>{if(l.key==="Enter")zu()}}),g("datalist",{id:"personnelList",children:Bu.map((l)=>g("option",{value:l.name,children:`${l.name} - ${Ap(l.role)}`},l.id))}),g("div",{className:"text-[11px] text-zinc-400 mt-1.5",children:"需存在於人員名單 60人內，含 朱忠正"})]}),k("div",{children:[k("label",{className:"text-[12px] font-medium text-zinc-700 flex items-center gap-1",children:["密碼 ",g("span",{className:"text-[11px] text-zinc-400",children:"(5碼數字 預設 11111)"})]}),k("div",{className:"mt-1.5 relative",children:[g("input",{type:s?"text":"password",value:i,onChange:(l)=>a(l.target.value.replace(/\D/g,"").slice(0,5)),placeholder:"預設 11111",className:"w-full px-4 py-3 pr-12 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-500 outline-none text-[14px] tracking-widest",onKeyDown:(l)=>{if(l.key==="Enter")zu()},inputMode:"numeric"}),g("button",{type:"button",onClick:()=>_(!s),className:"absolute right-1 top-1 bottom-1 px-3 rounded-full bg-white border border-zinc-200 text-[11px] text-zinc-600 hover:bg-zinc-50",children:s?"隱藏":"顯示"})]}),k("div",{className:"text-[11px] text-zinc-400 mt-1.5",children:["全部帳號預設 ",X,"，朱忠正 亦可 12345 相容，首次自動建立"]})]}),c&&g("div",{className:"px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700",children:c}),p&&g("div",{className:"px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[12px] text-amber-800",children:p}),g("button",{onClick:zu,className:"w-full py-3 rounded-full bg-blue-600 text-white font-medium text-[14px] hover:bg-blue-700 transition",children:"登入倉庫"}),k("div",{className:"pt-2 border-t border-zinc-100 space-y-1",children:[g("div",{className:"text-[11px] font-medium text-zinc-700 notranslate",translate:"no",children:"登入規則 v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版 修復亂碼："}),k("ul",{className:"text-[11px] text-zinc-500 list-disc pl-4 space-y-0.5 notranslate",translate:"no",children:[g("li",{children:"帳號 3~5字，必須為人員名單內姓名 (trim)"}),k("li",{children:["密碼 /^\\d",5,"$/，全部預設 ",X]}),k("li",{children:["若 localStorage 無 pwd_姓名，輸入 ",X," 自動建立並登入"]}),g("li",{children:"首次登入提示：首次登入，預設密碼 11111，請登入後更改"}),g("li",{children:"已存在則核對 stored 密碼，朱忠正 12345 向下相容"}),g("li",{children:"登入後 header 顯示 已登入: 名稱 (角色) 含 更改密碼/登出"}),g("li",{children:"權限：領料/倉管/系統管理員/超級管理員/檢視 + 分頁 1,2,3,4,5,6,7 + Excel + notranslate"})]})]}),k("div",{className:"text-[10px] text-zinc-400 text-center",children:["人員清單 ",Bu.length," 人 · 本地儲存 ",gn," · 無列印 · 繁中"]})]})]}),k("div",{className:"mt-4 bg-zinc-900 text-zinc-300 rounded-[16px] p-3 text-[11px] leading-relaxed notranslate",translate:"no",children:["測試：全部 ",g("span",{className:"text-white font-mono notranslate",children:X})," 即可登入",g("br",{}),"例如 ",g("span",{className:"text-white notranslate",children:"朱忠正 / 11111"})," → 超級管理員 (亦可 12345)",g("br",{}),"例如 ",g("span",{className:"text-white notranslate",children:"王財華 / 11111"})," 首次自動建立，之後可改密碼",g("br",{}),"v7.4.22 新增 notranslate 防止 水電→水力發電 / 領料作業→領英職位 自動翻譯"]})]})]});return k("div",{className:"min-h-screen bg-[#f7f7f5] text-zinc-900 font-[Noto Sans TC, PingFang TC, Microsoft JhengHei, sans-serif] notranslate",translate:"no",children:[g("style",{children:"@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap'); .scrollbar-none::-webkit-scrollbar{display:none} .notranslate{}"}),k("header",{className:"sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-zinc-200 notranslate",translate:"no",children:[k("div",{className:"max-w-[1280px] mx-auto px-4 md:px-6 h-[56px] flex items-center justify-between",children:[k("div",{className:"flex items-center gap-3",children:[g("div",{className:"w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm notranslate",translate:"no",children:g("span",{className:"notranslate",translate:"no",children:"水電"})}),k("div",{children:[g("div",{className:"font-bold text-[15px] leading-none notranslate",translate:"no",children:"水電倉庫 v7.5.32"}),g("div",{className:"text-[11px] text-zinc-500 notranslate",translate:"no",children:"鎖定當事人 · 真實QR 64x64 · orig_code原樣 · M-前綴 · 分頁1-7+Excel · 修復亂碼"})]})]}),k("div",{className:"flex items-center gap-2","data-user-menu":!0,children:[k("div",{className:"relative",children:[k("button",{onClick:()=>Jt(!Yt),className:"hidden md:flex items-center gap-2 text-xs bg-zinc-900 text-white px-3 py-1.5 rounded-full hover:bg-black",children:[g("span",{children:"\uD83D\uDD12 已登入:"}),g("span",{className:"font-bold",children:t.name}),k("span",{className:"text-zinc-300",children:["(",t.role,")"]}),g("span",{className:"ml-1",children:"▾"})]}),k("button",{onClick:()=>Jt(!Yt),className:"md:hidden flex items-center gap-1 text-xs bg-zinc-900 text-white px-3 py-1.5 rounded-full",children:[g("span",{className:"font-bold",children:t.name}),k("span",{className:"opacity-70 text-[10px]",children:["(",t.role.slice(0,2),")"]})]}),Yt&&k("div",{className:"absolute right-0 mt-2 w-[200px] bg-white rounded-[16px] border border-zinc-200 shadow-[0_8px_24px_rgba(0,0,0,0.12)] p-2 z-30",children:[k("div",{className:"px-3 py-2 border-b border-zinc-100 mb-1",children:[k("div",{className:"text-[12px] font-bold",children:["已登入: ",t.name]}),k("div",{className:"text-[11px] text-zinc-500",children:[t.role," · ",t.dept]}),k("div",{className:"text-[10px] text-zinc-400 mt-1",children:["預設 ",X," · 可改密碼"]})]}),g("button",{onClick:()=>{Jt(!1),Zt(!0),bu(""),Ou(""),Mu(""),it("")},className:"w-full text-left px-3 py-2 rounded-full text-[12px] hover:bg-zinc-100",children:"\uD83D\uDD11 更改密碼"}),g("button",{onClick:wc,className:"w-full text-left px-3 py-2 rounded-full text-[12px] hover:bg-red-50 text-red-600",children:"\uD83D\uDEAA 登出"})]})]}),g("div",{className:"w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs",children:t.name.slice(0,1)})]})]}),k("div",{className:"md:hidden px-4 pb-3 flex items-center gap-2 text-[11px]",children:[k("div",{className:"flex-1 bg-zinc-900 text-white px-3 py-1.5 rounded-full flex items-center gap-1",children:[g("span",{children:"\uD83D\uDD12 已登入:"}),g("span",{className:"font-bold",children:t.name}),k("span",{className:"opacity-70",children:["(",t.role,")"]})]}),g("span",{className:"text-[10px] px-2 py-1 bg-zinc-100 rounded-full",children:mn?"可編輯/刪除":$u?"可盤點":"僅檢視"})]})]}),k("div",{className:"max-w-[1280px] mx-auto px-4 md:px-6 pt-4 flex items-center gap-3 notranslate",translate:"no",children:[k("div",{className:"flex gap-1 bg-zinc-100 p-1 rounded-full w-fit notranslate",translate:"no",children:[I.issue&&g("button",{onClick:()=>{m("issue"),_e("已切換：領料作業")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="issue"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"領料作業"})}),I.history&&g("button",{onClick:()=>{m("history"),_e("已切換：歷史紀錄")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="history"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"歷史紀錄"})}),I.inventory&&g("button",{onClick:()=>{m("inventory"),_e("已切換：盤點")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="inventory"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"盤點"})}),I.personnel&&g("button",{onClick:()=>{m("personnel"),_e("已切換：人員")},translate:"no",className:`notranslate px-4 py-1.5 rounded-full text-sm font-medium transition ${y==="personnel"?"bg-white shadow text-zinc-900":"text-zinc-500 hover:text-zinc-800"}`,children:g("span",{className:"notranslate",translate:"no",children:"人員設定"})})]}),vc&&g("div",{className:"text-[11px] px-3 py-1 rounded-full bg-zinc-900 text-white animate-pulse notranslate",translate:"no",children:vc}),p&&g("div",{className:"text-[11px] px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 notranslate",translate:"no",children:p})]}),g("main",{className:"max-w-[1280px] mx-auto px-4 md:px-6 py-4 md:py-6 grid grid-cols-12 gap-4 md:gap-6 pb-[96px] lg:pb-6",children:Ru===0?g("div",{className:"col-span-12 flex items-center justify-center min-h-[60vh]",children:k("div",{className:"bg-white rounded-[20px] border border-zinc-200 p-10 text-center shadow-sm max-w-[420px]",children:[g("div",{className:"w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-4 text-xl",children:"\uD83D\uDD12"}),g("div",{className:"font-bold text-[16px] mb-2",children:"此帳號為檢視角色，無可操作頁籤，請聯絡管理員"}),k("div",{className:"text-[12px] text-zinc-500 leading-relaxed notranslate",translate:"no",children:["目前角色：",In,"（",t.name,"）",g("br",{}),"可見權限：無",g("br",{}),"請聯絡 系統管理員 / 超級管理員 調整為 領料 / 倉管 等角色",g("br",{}),"LocalStorage ",gn," · v7.4.22 修復亂碼 notranslate"]}),k("div",{className:"text-[12px] text-zinc-500 leading-relaxed notranslate",translate:"no",children:["目前角色：",In,"（",t.name,"）",g("br",{}),"可見權限：無",g("br",{}),"請聯絡 系統管理員 / 超級管理員 調整為 領料 / 倉管 等角色",g("br",{}),"LocalStorage ",gn," · v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版"]}),g("button",{onClick:wc,className:"mt-4 px-4 py-2 rounded-full bg-zinc-900 text-white text-[12px]",children:"登出切換帳號"})]})}):k(Zr,{children:[k("div",{className:"col-span-12 lg:col-span-8 space-y-4",children:[I.issue&&y==="issue"&&k(Zr,{children:[k("div",{className:"bg-white rounded-[20px] border border-zinc-200 p-4 md:p-5 shadow-sm space-y-3",children:[k("div",{className:"flex gap-2",children:[k("div",{className:"flex-1 relative",children:[g("span",{className:"absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm",children:"\uD83D\uDD0D"}),g("input",{value:V,onChange:(l)=>G(l.target.value),placeholder:"搜尋 名稱 / 原始編號 / 規格 / SKU",className:"w-full pl-9 pr-3 py-2.5 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-400 outline-none text-sm"})]}),g("button",{type:"button","aria-expanded":$t,"data-scan-btn":"issue","aria-label":"掃碼領料",onClick:()=>{Xt(!0),Pe(""),_e("掃碼領料已開啟")},className:"whitespace-nowrap px-4 py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700",children:"\uD83D\uDCF7 掃碼"}),g("button",{onClick:Op,className:"whitespace-nowrap px-3 py-2.5 rounded-full bg-white border border-zinc-200 text-sm font-medium hover:bg-zinc-50",children:"\uD83D\uDCCA 匯出Excel"})]}),g(Oc,{value:W,onChange:A,countsObj:Pc}),k("div",{className:"flex gap-2 items-center",children:[g("div",{className:"text-[11px] text-zinc-500 whitespace-nowrap",children:"掃碼槍輸入:"}),g("input",{value:Kt,onChange:(l)=>mc(l.target.value),onKeyDown:(l)=>{if(l.key==="Enter")tn(Kt,!1)},placeholder:"原始編號如 1 或 1-1 按Enter自動加入",className:"flex-1 px-3 py-2 rounded-full border border-dashed border-zinc-300 bg-amber-50/60 text-sm outline-none focus:border-blue-400"}),g("button",{onClick:()=>tn(Kt,!1),className:"px-3 py-2 rounded-full bg-zinc-900 text-white text-xs",children:"加入"})]}),k("div",{className:"text-[11px] text-zinc-400 notranslate",translate:"no",children:["v7.4.22 分頁+Excel鎖定版 關閉彈窗+強制人員版 修復亂碼：共",nn.length,"筆 / 每頁",ot,"筆 / 第",ct,"/",Ku,"頁 · 真實QR 64x64 · 鎖定 ",t.name," · ",gn," · ",Vp?"Excel就緒":"Excel載入中"," · notranslate"]})]}),k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 md:p-5 border-b border-zinc-100 flex justify-between items-center",children:[k("h3",{className:"font-bold text-[14px] notranslate",translate:"no",children:["材料清單 · 共 ",nn.length," 筆 · 本頁 ",Fc.length," · ",ct,"/",Ku," · 正版QR"]}),k("span",{className:"text-[11px] text-zinc-500 hidden md:block notranslate",translate:"no",children:["orig_code原樣 · 分頁 1,2,3,4,5,6,7 · ",ot,"/頁 · notranslate"]})]}),g("div",{className:"divide-y divide-zinc-100 max-h-[70vh] overflow-auto",children:Fc.map((l)=>k("div",{className:"p-3 md:p-4 flex gap-3 hover:bg-zinc-50 transition items-center",children:[g("div",{onClick:()=>ut(l),className:"cursor-pointer",children:g(Rt,{text:l.orig_code,size:64})}),k("div",{className:"flex-1 min-w-0",onClick:()=>ut(l),children:[k("div",{className:"flex items-center gap-2 flex-wrap",children:[g("span",{className:"font-mono font-bold text-[13px] bg-zinc-900 text-white px-2 py-0.5 rounded",children:l.orig_code}),g("span",{className:"text-[11px] font-mono text-zinc-500 border border-zinc-200 rounded px-1.5 py-0.5",children:l.sku}),g("span",{className:`text-[11px] px-2 py-0.5 rounded-full font-medium ${l.type==="water"||l.sku.startsWith("W-")?"bg-sky-100 text-sky-700":"bg-amber-100 text-amber-700"}`,children:l.type==="water"||l.sku.startsWith("W-")?"水":"電"})]}),g("div",{className:"mt-1 font-medium text-[13px] truncate",children:l.name}),k("div",{className:"text-[12px] text-zinc-500 truncate",children:[l.spec||"無規格"," · ",l.unit," · 庫存 ",l.stock]})]}),g("button",{onClick:()=>Gu(l),className:"self-center px-3 py-1.5 rounded-full bg-white border border-zinc-200 text-xs font-medium hover:bg-zinc-900 hover:text-white transition shrink-0",children:"加入 +"})]},l.sku))}),g("div",{className:"border-t border-zinc-100 px-3",children:g(bc,{current:ct,total:Ku,pageSize:ot,totalCount:nn.length,onChange:Ac})})]})]}),y==="inventory"&&$u&&k(Zr,{children:[k("div",{className:"bg-white rounded-[20px] border border-zinc-200 p-4 md:p-5 shadow-sm space-y-3",children:[k("div",{className:"flex gap-2",children:[k("div",{className:"flex-1 relative",children:[g("span",{className:"absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm",children:"\uD83D\uDD0D"}),g("input",{value:H,onChange:(l)=>Ce(l.target.value),placeholder:"盤點搜尋 名稱 / 原始編號 / SKU",className:"w-full pl-9 pr-3 py-2.5 rounded-full border border-zinc-200 bg-zinc-50 focus:bg-white focus:border-blue-400 outline-none text-sm"})]}),g("button",{onClick:()=>{Gt(!0),Pe(""),_e("開啟掃碼盤點")},className:"whitespace-nowrap px-4 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-medium hover:bg-black",children:"\uD83D\uDCF7 掃碼"}),g("button",{onClick:Ip,className:"whitespace-nowrap px-3 py-2.5 rounded-full bg-white border border-zinc-200 text-sm font-medium",children:"\uD83D\uDCCA Excel"})]}),g(Oc,{value:P,onChange:F,countsObj:Pc}),k("div",{className:"flex gap-2 items-center",children:[g("div",{className:"text-[11px] text-zinc-500 whitespace-nowrap",children:"掃碼槍輸入:"}),g("input",{value:Du,onChange:(l)=>wu(l.target.value),onKeyDown:(l)=>{if(l.key==="Enter")tn(Du,!0),wu("")},placeholder:"原始編號如 1 或 1-1 按Enter定位",className:"flex-1 px-3 py-2 rounded-full border border-dashed border-zinc-300 bg-sky-50/60 text-sm outline-none focus:border-blue-400"}),g("button",{onClick:()=>{tn(Du,!0),wu("")},className:"px-3 py-2 rounded-full bg-zinc-900 text-white text-xs",children:"定位"})]})]}),k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 border-b border-zinc-100 flex justify-between",children:[k("h3",{className:"font-bold text-[14px]",children:["盤點清單 · 共 ",fn.length," 筆 · 本頁 ",Vc.length," · 聚焦 ",Ut?Ut:"—"]}),k("span",{className:"text-[11px] text-zinc-500",children:["分頁 ",qt,"/",Tc]})]}),g("div",{className:"divide-y divide-zinc-100 max-h-[70vh] overflow-auto",children:Vc.map((l)=>k("div",{id:`inv-${l.sku}`,className:`p-3 md:p-4 flex gap-3 transition items-center ${Ut===l.sku?"bg-blue-50 border-l-4 border-l-blue-600":"hover:bg-zinc-50"}`,children:[g(Rt,{text:l.orig_code,size:52}),k("div",{className:"flex-1 min-w-0",children:[k("div",{className:"flex items-center gap-2",children:[g("span",{className:"font-mono font-bold text-[13px] bg-zinc-900 text-white px-2 py-0.5 rounded",children:l.orig_code}),g("span",{className:"text-[11px] font-mono text-zinc-500 border border-zinc-200 rounded px-1.5 py-0.5",children:l.sku}),g("span",{className:`text-[11px] px-2 py-0.5 rounded-full ${l.type==="water"||l.sku.startsWith("W-")?"bg-sky-100 text-sky-700":"bg-amber-100 text-amber-700"}`,children:l.type==="water"||l.sku.startsWith("W-")?"水":"電"}),Ut===l.sku&&g("span",{className:"text-[11px] px-2 py-0.5 rounded-full bg-blue-600 text-white",children:"已定位"})]}),g("div",{className:"mt-1 font-medium text-[13px]",children:l.name}),g("div",{className:"text-[12px] text-zinc-500",children:l.spec})]}),k("div",{className:"flex flex-col items-end gap-1",children:[k("div",{className:"text-xs",children:["庫存 ",l.stock]}),g("input",{type:"number",placeholder:"盤點數",className:"w-20 px-2 py-1 rounded-full border border-zinc-200 text-xs"})]})]},l.sku))}),g("div",{className:"border-t border-zinc-100 px-3",children:g(bc,{current:qt,total:Tc,pageSize:Au,totalCount:fn.length,onChange:Nc})})]})]}),y==="history"&&k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 md:p-5 border-b border-zinc-100 flex justify-between items-center",children:[k("h3",{className:"font-bold text-[14px]",children:["歷史紀錄 · ",Hh.length," 筆"]}),k("div",{className:"flex flex-wrap items-center justify-end gap-2",children:[g("span",{className:"text-[11px] text-zinc-500",children:mn?"可編輯/封存":In==="倉管"?"倉管僅檢視自己的紀錄":"僅檢視自己的紀錄"}),g("button",{onClick:()=>window.WW719?.filterOfficial?.("all"),"data-ww-official-filter":"all",className:"px-3 py-1 rounded-full bg-white border border-zinc-200 text-[11px] hover:bg-zinc-50",children:"全部"}),g("button",{onClick:()=>window.WW719?.filterOfficial?.("pending"),"data-ww-official-filter":"pending",className:"px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] hover:bg-amber-100",children:"☎️ 待補工令"}),g("button",{onClick:()=>window.WW719?.filterOfficial?.("linked"),"data-ww-official-filter":"linked",className:"px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] hover:bg-emerald-100",children:"✅ 已補工令"}),mn&&g("button",{onClick:()=>window.WW719?.bulkOfficialFromChecks?.(),className:"px-3 py-1 rounded-full bg-blue-600 text-white text-[11px] hover:bg-blue-700",children:"🔗 合併補正式工令"}),g("button",{onClick:Mp,className:"px-3 py-1 rounded-full bg-white border border-zinc-200 text-[11px] hover:bg-zinc-50",children:"\uD83D\uDCCA 匯出Excel"})]})]}),k("div",{className:"divide-y divide-zinc-100",children:[Hh.length===0&&g("div",{className:"p-8 text-center text-zinc-400 text-sm",children:mn?"目前沒有正式歷史紀錄":"尚無自己的領料紀錄"}),Hh.map((l)=>k("div",{className:"p-4 space-y-2","data-ww-history-order":"1","data-ww-order-id":l.id,"data-ww-work-type":l.workOrderType,"data-ww-official-no":l.officialWorkOrderNo||"",children:[k("div",{className:"flex justify-between items-start",children:[k("div",{children:[k("div",{className:"flex items-center gap-2",children:[mn&&l.workOrderType==="電話請修"&&g("input",{type:"checkbox","data-ww-official-id":l.id,title:"勾選 2 張以上電話請修，可共用同一個正式工令號",className:"w-4 h-4"}),g("div",{className:"font-mono font-bold text-sm",children:l.id})]}),k("div",{className:"text-[11px] text-zinc-500 flex flex-wrap gap-1.5 items-center mt-1",children:[g("span",{children:l.date}),k("span",{children:["· ",g("strong",{style:{fontWeight:900,fontSize:"1.12rem",lineHeight:1.35,color:"#27272a"},children:l.applicant})]}),g("span",{"data-ww-phone-badge":l.workOrderType==="電話請修"?"1":void 0,className:`px-1.5 py-0.5 rounded-full text-[10px] ${l.workOrderType==="工令單號"?"bg-blue-100 text-blue-700":"bg-amber-100 text-amber-700"}`,children:l.workOrderType}),g("span",{"data-ww-workorder-no":"1",className:"font-mono font-bold text-zinc-700 bg-zinc-100 px-1.5 py-0.5 rounded",children:l.workOrderNo||(l.workOrderType==="電話請修"?"電話請修":"-")}),l.workOrderType==="電話請修"&&g("span",{"data-ww-official-label":"1",className:l.officialWorkOrderNo?"px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200":"px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200",children:l.officialWorkOrderNo?"正式工令："+l.officialWorkOrderNo:"待補正式工令"}),k("span",{"data-ww-location-label":"1",children:["· ",l.location]})]})]}),k("div",{className:"flex gap-1",children:[mn&&l.workOrderType==="電話請修"&&g("button",{onClick:()=>window.WW719?.promptOfficialOrder?.([l.id],l.officialWorkOrderNo||""),className:l.officialWorkOrderNo?"px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs hover:bg-emerald-600 hover:text-white":"px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs hover:bg-blue-600 hover:text-white",children:l.officialWorkOrderNo?"修改工令號":"補正式工令"}),mn&&g("button",{onClick:()=>zp(l),className:"px-2.5 py-1 rounded-full bg-zinc-100 text-xs hover:bg-zinc-900 hover:text-white",children:"編輯"}),mn&&g("button",{onClick:async()=>{if(confirm(`封存 ${l.id}?\n這張請料單會從正式歷史移到雲端封存區，不會永久刪除。`)){let ok=window.WW719?await window.WW719.deleteOrder(l.id):false;if(ok)E((S)=>S.filter((N)=>N.id!==l.id))}},className:"px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-xs hover:bg-red-600 hover:text-white",children:"封存"}),!mn&&g("span",{className:"px-2.5 py-1 rounded-full bg-zinc-100 text-[11px]",children:"檢視"})]})]}),g("div",{className:"flex flex-wrap gap-1.5",children:l.items.map((S)=>k("span",{className:"inline-flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[11px]",children:[g(Rt,{text:S.orig_code,size:20,className:"!border-0"}),g("span",{className:"font-mono font-bold",children:S.orig_code}),g("span",{className:"text-zinc-500",children:S.sku}),g("span",{children:S.name}),k("span",{className:"px-1.5 py-0.5 rounded-full bg-white border text-[10px]",children:[S.action," x",S.qty]})]},S.sku))})]},l.id))]})]}),y==="personnel"&&mn&&k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm",children:[k("div",{className:"p-4 md:p-5 border-b border-zinc-100 flex justify-between items-center",children:[k("h3",{className:"font-bold text-[14px]",children:["人員設定 · ",C.length," 人 · 5種角色 · 可重設 ",X]}),k("span",{className:"text-[11px] text-zinc-500",children:["朱忠正 鎖定超級管理員 · 當前 ",t.role," · 預設 ",X]})]}),g("div",{className:"divide-y divide-zinc-100",children:C.map((l)=>k("div",{className:"p-3 md:p-4 flex items-center gap-3",children:[g("div",{className:"w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs",children:l.name.slice(0,1)}),k("div",{className:"flex-1",children:[k("div",{className:"font-medium text-sm flex items-center gap-2",children:[l.name," ",l.locked&&g("span",{className:"text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white",children:"鎖定"})]}),g("div",{className:"text-[11px] text-zinc-500",children:l.dept})]}),g("select",{disabled:l.name==="朱忠正"||l.locked,value:l.name==="朱忠正"?"超級管理員":l.role,onChange:(S)=>{if(l.name==="朱忠正")return;f((N)=>N.map((T)=>T.id===l.id?{...T,role:S.target.value}:T))},className:"border border-zinc-200 rounded-full px-3 py-1.5 text-xs bg-white disabled:bg-zinc-100 shrink-0",children:(l.name==="朱忠正"?["超級管理員"]:L2).map((S)=>g("option",{value:S,children:S},S))}),k("div",{className:"flex flex-col items-end gap-1",children:[g("span",{className:"text-[10px] text-zinc-400 font-mono",children:(()=>{try{
   if(In!=="超級管理員"&&l.name!==t.name)return "密碼受保護";
   let S=localStorage.getItem(Lu+l.name);return S?`pwd:${S}`:`預設${X}`
 }catch{return"—"}})()}),(In==="超級管理員"||l.name===t.name)&&k("button",{onClick:()=>bp(l.name),className:"px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] hover:bg-amber-200",children:["重設",X]})]})]},l.id))})]})]}),g("div",{className:"col-span-12 lg:col-span-4",children:k("div",{className:"lg:sticky lg:top-[72px] space-y-4",children:[k("div",{className:"bg-white rounded-[20px] border border-zinc-200 shadow-sm p-4 md:p-5",children:[k("div",{className:"flex justify-between items-center mb-3",children:[k("h3",{className:"font-bold text-[14px]",children:["領料車 · ",me.length," 項"]}),Bn&&k("span",{className:"text-[11px] px-2 py-1 rounded-full bg-amber-100 text-amber-700",children:["編輯 ",Bn.id]})]}),k("div",{className:"space-y-3 mb-4",children:[k("div",{className:"bg-zinc-900 text-white rounded-full px-4 py-2.5 flex items-center justify-between",children:[k("span",{className:"text-[12px] flex items-center gap-1.5",children:["\uD83D\uDD12 領料人鎖定 ",g("span",{className:"font-bold",children:t.name})," ",k("span",{className:"opacity-60",children:["(",t.role,")"]})]}),g("span",{className:"text-[10px] px-2 py-0.5 rounded-full bg-white/15",children:"不能代領"})]}),k("div",{children:[g("label",{className:"text-[11px] text-zinc-500",children:"工令類型 (2選項)"}),g("select",{value:Je,onChange:(l)=>kc(l.target.value),className:"w-full mt-1 border border-zinc-200 rounded-full px-3 py-2 text-sm bg-white",children:Lp.map((l)=>g("option",{value:l,children:l},l))})]}),k("div",{children:[k("label",{className:"text-[11px] text-zinc-500 flex items-center gap-1",children:[Je==="工令單號"?"工令單號":"電話請修單號",g("span",{className:`text-[10px] px-1.5 py-0.5 rounded-full ${Je==="工令單號"?"bg-red-100 text-red-600":"bg-zinc-100 text-zinc-500"}`,children:Je==="工令單號"?"必填":"選填/自動"})]}),g("input",{value:Qr,onChange:(l)=>qr(l.target.value),placeholder:Je==="工令單號"?"請輸入工令單號":"電話請修/手寫待補單 (留白自動為 電話請修)",className:`w-full mt-1 border rounded-full px-3 py-2 text-sm outline-none focus:border-blue-400 ${Je==="工令單號"?"border-zinc-200 bg-white":"border-dashed border-amber-300 bg-amber-50/60"}`})]}),k("div",{children:[g("label",{className:"text-[11px] text-zinc-500",children:"單位地點"}),g("input",{value:Pu,onChange:(l)=>Tu(l.target.value),placeholder:"例如 B棟 3F 機房 / 101教室",className:"w-full mt-1 border border-zinc-200 rounded-full px-3 py-2 text-sm outline-none focus:border-blue-400"})]})]}),k("div",{className:"space-y-2 max-h-[40vh] overflow-auto pr-1",children:[me.length===0&&k("div",{className:"py-8 text-center text-zinc-400 text-xs border border-dashed border-zinc-200 rounded-xl",children:["掃碼或搜尋加入材料",g("br",{}),"支援 原始編號 1 / 1-1 / SKU W-1-1",g("br",{}),"每項含真實QR"]}),me.map((l)=>k("div",{className:"border border-zinc-200 rounded-xl p-2.5",children:[k("div",{className:"flex justify-between items-start gap-2",children:[k("div",{className:"flex gap-2 min-w-0",children:[g(Rt,{text:l.orig_code,size:36}),k("div",{className:"min-w-0",children:[k("div",{className:"flex items-center gap-1.5",children:[g("span",{className:"font-mono font-bold text-xs bg-zinc-900 text-white px-1.5 py-0.5 rounded",children:l.orig_code}),g("span",{className:"text-[10px] font-mono text-zinc-500",children:l.sku})]}),g("div",{className:"text-[12px] font-medium truncate mt-1",children:l.name}),g("div",{className:"text-[11px] text-zinc-500 truncate",children:l.spec})]})]}),g("button",{onClick:()=>Ye((S)=>S.filter((N)=>N.sku!==l.sku)),className:"text-[11px] text-zinc-400 hover:text-red-600",children:"✕"})]}),k("div",{className:"mt-2 flex items-center gap-2",children:[g("div",{className:"flex items-center gap-1 bg-zinc-100 rounded-full p-1",children:["領料","借料","退料"].map((S)=>g("button",{onClick:()=>Ye((N)=>N.map((T)=>T.sku===l.sku?{...T,action:S}:T)),className:`px-2.5 py-1 rounded-full text-[11px] font-medium transition ${l.action===S?"bg-zinc-900 text-white shadow":"text-zinc-600 hover:bg-white"}`,children:S},S))}),k("div",{className:"ml-auto flex items-center gap-1",children:[g("button",{onClick:()=>Ye((S)=>S.map((N)=>N.sku===l.sku?{...N,qty:Math.max(1,N.qty-1)}:N)),className:"w-6 h-6 rounded-full border border-zinc-200 text-xs",children:"-"}),g("span",{className:"w-6 text-center text-xs font-mono",children:l.qty}),g("button",{onClick:()=>Ye((S)=>S.map((N)=>N.sku===l.sku?{...N,qty:N.qty+1}:N)),className:"w-6 h-6 rounded-full border border-zinc-200 text-xs",children:"+"})]})]})]},l.sku))]}),k("div",{className:"mt-4 space-y-2",children:[g("button",{onClick:Hc,disabled:me.length===0,className:"w-full py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-zinc-200 disabled:text-zinc-400",children:Bn?`更新 ${Bn.id}`:"建立領料單 M-前綴"}),g("button",{onClick:()=>{Ye([]),jr(null),qr("")},className:"w-full py-2 rounded-full bg-zinc-100 text-zinc-600 text-xs",children:"清空"}),k("div",{className:"text-[10px] text-zinc-400 text-center",children:["localStorage ",gn," · 無列印 · 繁中 · 真實QR Canvas · 預設",X]})]})]}),k("div",{className:"bg-zinc-900 text-zinc-100 rounded-[20px] p-4 text-[11px] leading-relaxed",children:[g("div",{className:"font-bold text-xs mb-1 notranslate",translate:"no",children:"v7.4.22 修復亂碼 / notranslate 版 ✅"}),k("ul",{className:"list-disc pl-4 space-y-0.5 text-zinc-300 notranslate",translate:"no",children:[g("li",{children:'新增 html lang="zh-TW" translate="no" + meta google notranslate + class notranslate'}),g("li",{children:"標題固定 水電倉庫 v7.5.32 防止 水電→水力發電"}),g("li",{children:"頁籤固定 領料作業 / 歷史紀錄 / 盤點 / 人員設定 防止 領料→領英"}),k("li",{children:["全部預設 ",X,"，若無 pwd_姓名 自動建立"]}),g("li",{children:"Header 已登入: 名稱(角色) 下拉含 更改密碼 / 登出"}),g("li",{children:"真實QR 64x64 orig_code verbatim，3 finder，180大圖"}),g("li",{children:"相機 Html5Qrcode facingMode environment + fallback"}),g("li",{children:"行動版 sticky bottom cart + scan 底部30% 即時車"}),k("li",{children:["篩選 [全部918][水516][電402] · 分頁 ",ot,"/頁 · M-前綴 · ",gn]})]})]})]})})]})}),k("div",{className:"lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-zinc-200 px-3 py-2.5 flex items-center gap-2",children:[k("div",{className:"flex-1 min-w-0 bg-zinc-900 text-white rounded-full px-3 py-2 flex items-center justify-between",children:[k("span",{className:"text-[11px] truncate",children:["\uD83D\uDED2 ",me.length,"項 · ",me.reduce((l,S)=>l+S.qty,0),"件 · \uD83D\uDD12",t.name]}),me.length>0&&g("span",{className:"text-[10px] bg-white/20 px-2 py-0.5 rounded-full",children:Je==="電話請修"?"電話":"工令"})]}),g("button",{onClick:()=>Xt(!0),className:"px-3 py-2 rounded-full bg-blue-600 text-white text-[12px] font-medium",children:"\uD83D\uDCF7掃碼"}),g("button",{onClick:Hc,disabled:me.length===0,className:"px-3 py-2 rounded-full bg-zinc-900 text-white text-[12px] font-medium disabled:bg-zinc-200 disabled:text-zinc-400",children:"建立"})]}),ke&&k("div",{className:"fixed inset-0 z-50 flex items-center justify-center p-4",children:[g("div",{className:"absolute inset-0 bg-black/60 backdrop-blur-sm",onClick:()=>ut(null)}),k("div",{className:"relative bg-white rounded-[24px] w-full max-w-[380px] p-6 shadow-2xl",children:[k("div",{className:"flex justify-between items-start mb-4",children:[k("div",{children:[g("div",{className:"font-bold text-[16px]",children:ke.name}),k("div",{className:"flex gap-2 mt-1",children:[g("span",{className:"font-mono font-bold text-sm bg-zinc-900 text-white px-2 py-0.5 rounded",children:ke.orig_code}),g("span",{className:"text-xs font-mono text-zinc-500 border px-1.5 py-0.5 rounded",children:ke.sku}),g("span",{className:`text-xs px-2 py-0.5 rounded-full ${ke.type==="water"||ke.sku.startsWith("W-")?"bg-sky-100 text-sky-700":"bg-amber-100 text-amber-700"}`,children:ke.type==="water"||ke.sku.startsWith("W-")?"水材料":"電材料"})]})]}),g("button",{onClick:()=>ut(null),className:"w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center",children:"✕"})]}),k("div",{className:"flex flex-col items-center gap-4",children:[g("div",{className:"p-3 bg-white rounded-[16px] border border-zinc-200 shadow-sm",children:g(Rt,{text:ke.orig_code,size:180})}),k("div",{className:"text-center",children:[k("div",{className:"font-mono text-sm font-bold",children:["編碼內容: ",ke.orig_code]}),k("div",{className:"text-[11px] text-zinc-500 mt-1",children:["此為真實QR，含3個定位點，掃碼槍/手機可直接識別",g("br",{}),"ECC M · 純文字 · 非網址 · 1/1方形無拉伸"]}),k("div",{className:"text-[11px] text-zinc-400 mt-1",children:[ke.spec," · 庫存 ",ke.stock," · ",ke.unit]})]}),k("div",{className:"flex gap-2 w-full",children:[g("button",{onClick:()=>{Gu(ke),ut(null)},className:"flex-1 py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium",children:"加入領料車"}),g("button",{onClick:()=>ut(null),className:"px-5 py-2.5 rounded-full bg-zinc-100 text-sm",children:"關閉"})]})]})]})]}),$t&&k("div",{className:"fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4",children:[g("div",{className:"absolute inset-0 bg-black/60 backdrop-blur-sm",onClick:()=>{Xt(!1)}}),k("div",{className:"relative bg-white rounded-t-[24px] md:rounded-[20px] w-full max-w-[520px] max-h-[92vh] flex flex-col shadow-2xl overflow-hidden",children:[k("div",{className:"p-5 border-b border-zinc-100",children:[k("div",{className:"flex justify-between items-center mb-3",children:[k("h4",{className:"font-bold text-sm",children:["掃碼領料 · 相機 ",t.name," 鎖定"]}),g("button",{onClick:()=>{Xt(!1)},className:"w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center",children:"✕"})]}),k("div",{className:"rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 relative",children:[g("div",{id:"qr-reader-issue",className:"w-full",style:{width:"100%",height:"300px"}}),k("div",{className:"absolute top-2 left-2 right-2 flex justify-between items-center pointer-events-none",children:[g("span",{className:"text-[10px] px-2 py-1 rounded-full bg-black/60 text-white",children:Lc||"載入中..."}),g("span",{className:"text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white",children:"environment"})]})]}),k("div",{className:"mt-4 space-y-2",children:[g("label",{className:"text-[11px] text-zinc-500",children:"手動輸入代碼 (原始編號或 SKU) · 真QR掃描 · 失敗看提示"}),k("div",{className:"flex gap-2",children:[g("input",{value:Fu,onChange:(l)=>Ec(l.target.value),onKeyDown:(l)=>{if(l.key==="Enter")tn(Fu,!1)},placeholder:"如 1 / 1-1 / W-1-1 / E-1",className:"flex-1 px-3 py-2.5 rounded-full border border-zinc-200 text-sm outline-none focus:border-blue-500",autoFocus:!0}),g("button",{onClick:()=>tn(Fu,!1),className:"px-4 py-2.5 rounded-full bg-blue-600 text-white text-sm",children:"領料"})]}),g("div",{className:"text-[10px] text-zinc-400",children:"掃到真實QR後會自動加入購物車。相機需 https + 允許權限。若顯示 ❌ 請允許相機並用https開啟，或改用手動輸入。"})]})]}),k("div",{className:"p-3 bg-[#f7f7f5] border-t border-zinc-200 overflow-auto",style:{maxHeight:"30vh"},children:[g(Kp,{title:"掃碼中即時車 (底部30%)"}),k("div",{className:"mt-2 flex gap-2",children:[g("button",{onClick:()=>{Xt(!1)},className:"flex-1 py-2 rounded-full bg-zinc-900 text-white text-[12px]",children:"完成，關閉掃碼"}),g("button",{onClick:()=>Ye([]),className:"px-4 py-2 rounded-full bg-white border text-[12px]",children:"清空車"})]})]})]})]}),xr&&k("div",{className:"fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4",children:[g("div",{className:"absolute inset-0 bg-black/60 backdrop-blur-sm",onClick:()=>{Gt(!1)}}),k("div",{className:"relative bg-white rounded-t-[24px] md:rounded-[20px] w-full max-w-[520px] max-h-[92vh] flex flex-col shadow-2xl overflow-hidden",children:[k("div",{className:"p-5 border-b",children:[k("div",{className:"flex justify-between items-center mb-3",children:[g("h4",{className:"font-bold text-sm",children:"掃碼盤點 · 相機"}),g("button",{onClick:()=>{Gt(!1)},className:"w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center",children:"✕"})]}),k("div",{className:"rounded-xl overflow-hidden border bg-zinc-900 relative",children:[g("div",{id:"qr-reader-inv",className:"w-full",style:{width:"100%",height:"300px"}}),g("div",{className:"absolute top-2 left-2 text-[10px] px-2 py-1 rounded-full bg-black/60 text-white pointer-events-none",children:Lc||"載入中..."})]}),k("div",{className:"mt-4 space-y-2",children:[g("label",{className:"text-[11px] text-zinc-500",children:"手動輸入定位"}),k("div",{className:"flex gap-2",children:[g("input",{value:Vu,onChange:(l)=>Pp(l.target.value),onKeyDown:(l)=>{if(l.key==="Enter")tn(Vu,!0),Gt(!1)},placeholder:"如 1 / 1-1 / W-1-1",className:"flex-1 px-3 py-2.5 rounded-full border border-zinc-200 text-sm outline-none focus:border-blue-500",autoFocus:!0}),g("button",{onClick:()=>{tn(Vu,!0),Gt(!1)},className:"px-4 py-2.5 rounded-full bg-zinc-900 text-white text-sm",children:"定位"})]})]})]}),k("div",{className:"p-3 bg-[#f7f7f5] border-t",style:{maxHeight:"30vh"},children:[k("div",{className:"text-[11px] font-bold mb-2",children:["聚焦：",Ut||"尚未定位"]}),g("div",{className:"text-[10px] text-zinc-500",children:"掃描後自動聚焦材料列，支援手動輸入。相機需 https，失敗提示如 ❌ 請允許相機。"})]})]})]}),Fp&&k("div",{className:"fixed inset-0 z-50 flex items-center justify-center p-4",children:[g("div",{className:"absolute inset-0 bg-black/60 backdrop-blur-sm",onClick:()=>Zt(!1)}),k("div",{className:"relative bg-white rounded-[20px] w-full max-w-[400px] p-6 shadow-2xl",children:[k("div",{className:"flex justify-between items-center mb-4",children:[k("h4",{className:"font-bold text-[15px]",children:["更改密碼 · ",t.name]}),g("button",{onClick:()=>Zt(!1),className:"w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center",children:"✕"})]}),k("div",{className:"space-y-3",children:[k("div",{children:[k("label",{className:"text-[11px] text-zinc-600",children:["舊密碼 (5碼數字，預設 ",X,")"]}),g("input",{type:"password",inputMode:"numeric",value:Hu,onChange:(l)=>bu(l.target.value.replace(/\D/g,"").slice(0,5)),placeholder:"舊密碼",className:"mt-1 w-full px-4 py-2.5 rounded-full border border-zinc-200 text-sm outline-none focus:border-blue-500 tracking-widest"})]}),k("div",{children:[k("label",{className:"text-[11px] text-zinc-600",children:["新密碼 /^\\d",5,"$/"]}),g("input",{type:"password",inputMode:"numeric",value:Qt,onChange:(l)=>Ou(l.target.value.replace(/\D/g,"").slice(0,5)),placeholder:"新密碼 5碼數字",className:"mt-1 w-full px-4 py-2.5 rounded-full border border-zinc-200 text-sm outline-none focus:border-blue-500 tracking-widest"})]}),k("div",{children:[g("label",{className:"text-[11px] text-zinc-600",children:"確認新密碼"}),g("input",{type:"password",inputMode:"numeric",value:Wc,onChange:(l)=>Mu(l.target.value.replace(/\D/g,"").slice(0,5)),placeholder:"再次輸入新密碼",className:"mt-1 w-full px-4 py-2.5 rounded-full border border-zinc-200 text-sm outline-none focus:border-blue-500 tracking-widest"})]}),Sc&&g("div",{className:"px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700",children:Sc}),Cc&&g("div",{className:"px-3 py-2 rounded-xl bg-green-50 border border-green-200 text-[12px] text-green-700",children:Cc}),k("div",{className:"flex gap-2 pt-2",children:[g("button",{onClick:Hp,className:"flex-1 py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium",children:"儲存新密碼"}),g("button",{onClick:()=>Zt(!1),className:"px-5 py-2.5 rounded-full bg-zinc-100 text-sm",children:"取消"})]}),k("div",{className:"text-[10px] text-zinc-400 text-center",children:["儲存至 localStorage pwd_",t.name," · 規則 /^\\d",5,"$/ · 預設 ",X]})]})]})]})]})}Dp.createRoot(document.getElementById("root")).render(g(Np.default.StrictMode,{children:g(fc,{})}));
@@ -257,7 +257,7 @@ localStorage.setItem = function(k,v){
 // 強制綁定新 GAS
 localStorage.setItem('gasUrl', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
 console.log('GAS URL updated to', 'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec');
-// V7.6.9.18: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
+// V7.6.9.47: legacy 3-second uploader disabled; V7.6 management uses manual safe sync only.
 if(false) setInterval(()=>{
   var hist=null;
   try{ var raw=localStorage.getItem('v7_4_22'); if(raw){ var obj=JSON.parse(raw); if(obj && obj.orders) hist=obj.orders; } }catch(e){}
@@ -343,7 +343,7 @@ async function downloadCloudFinalForce(){
 }
 </script>
 <script>
-// V7.6.9.18: removed obsolete "old 13 records resurrection" global fetch interceptor.
+// V7.6.9.47: removed obsolete "old 13 records resurrection" global fetch interceptor.
 // Full V7.6 payloads may legitimately contain personnel names that matched the old blocker.
 </script>
 <script>
@@ -727,9 +727,17 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     });
     return true;
   };
-  // 每0.8秒強制檢查，保證不消失
-  setInterval(function(){ window._addDatabaseTab(); window._addPersonnelTopBar(); },800);
-  setTimeout(function(){ window._addDatabaseTab(); window._addPersonnelTopBar(); },500);
+  // V7.6.9.47：改成事件驅動，不再每 0.8 秒掃描整頁。
+  function initTopTools(){
+    try{window._addDatabaseTab();window._addPersonnelTopBar();}catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(initTopTools,60));
+  else setTimeout(initTopTools,60);
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.textContent||'').trim();
+    if(t.indexOf('人員設定')>=0||t.indexOf('資料庫')>=0||t.indexOf('登入')>=0||t.indexOf('登出')>=0)
+      setTimeout(initTopTools,80);
+  });
   document.addEventListener('click', function(e){
     if(e.target.id==='db-close') document.getElementById('db-panel').classList.remove('show');
     if(e.target.id==='db-a4-all'){var mats=getMats(); var w=window.open('','_blank'); var h=mats.map(function(m){return '<div style="border:1px dashed #aaa;padding:6px;text-align:center"><img src="'+m.qrDataUrl+'" style="width:110px;height:110px"><div style="font-weight:900">'+m.orig_code+'</div><div>'+m.sku+'</div></div>';}).join(''); w.document.write('<html><head><meta charset="utf-8"><style>@page{size:A4;margin:5mm}.g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}</style></head><body><button onclick="window.print()">全部 '+mats.length+'</button><div class="g">'+h+'</div><style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body></html>'); w.document.close();}
@@ -827,8 +835,15 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     // 初始
     renderQR(fOrig.value||'');
   }
-  setInterval(fixMat, 800);
-  setTimeout(fixMat, 500);
+  setTimeout(fixMat,80);
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.textContent||'').trim();
+    if(t.indexOf('材料管理')>=0||t.indexOf('新增材料')>=0)setTimeout(fixMat,80);
+  });
+  new MutationObserver(function(){
+    if(document.getElementById('mat-modal')&&document.getElementById('mat-modal').style.display!=='none')
+      setTimeout(fixMat,40);
+  }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 <script>
@@ -942,8 +957,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       }
     });
   }
-  setInterval(scan, 800);
-  setTimeout(scan, 400);
+  setTimeout(scan,120);
+  document.addEventListener('click',function(){setTimeout(scan,100)},true);
 })();
 </script>
 <!-- v7.6 removed duplicate XLSX loader -->
@@ -1052,1082 +1067,28 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
   getLocs();
   new MutationObserver(()=>{ injectDropdown(); injectBtn(); }).observe(document.body,{childList:true, subtree:true});
-  setInterval(()=>{ injectDropdown(); injectBtn(); }, 1000);
-  setTimeout(()=>{ injectDropdown(); injectBtn(); }, 500);
+  setTimeout(()=>{ injectDropdown(); injectBtn(); }, 60);
 })();
 </script>
 <script>window.__lastScan='';window.__lastScanTime=0;console.log('防連加已啟用 數量固定1');</script>
-<script>
-// === v7.4.76 歷史紀錄批量刪除：勾選/全選/刪除全部 ===
-(function(){
-  var GN='v7_4_22';
-  function getOrders(){
-    try{
-      var raw=localStorage.getItem(GN);
-      if(!raw) return [];
-      var j=JSON.parse(raw);
-      return j.orders||[];
-    }catch(e){return [];}
-  }
-  function saveOrders(orders){
-    try{
-      var raw=localStorage.getItem(GN);
-      var j=raw?JSON.parse(raw):{};
-      j.orders=orders;
-      localStorage.setItem(GN, JSON.stringify(j));
-    }catch(e){}
-  }
-  function getRole(){
-    try{
-      var u=JSON.parse(localStorage.getItem('v7_loginUser')||'null');
-      if(u&&u.role) return u.role;
-    }catch(e){}
-    return '';
-  }
-  function isAdmin(){
-    var r=getRole();
-    return r.includes('超級')||r.includes('系統管理員')||r.includes('倉管');
-  }
-
-  var selected=new Set();
-
-  function injectToolbar(){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){
-      var _tb=document.getElementById('bulk-del-toolbar'); if(_tb) _tb.remove();
-      document.querySelectorAll('.history-chk').forEach(function(e){e.remove()});
-      return;
-    }
-    // 找歷史紀錄容器
-    var headers=[...document.querySelectorAll('div')].filter(d=> (d.textContent||'').trim()==='尚無紀錄，請先領料' || (d.textContent||'').includes('歷史紀錄') );
-    var historyContainer=null;
-    // 找包含 h.map 的父容器：有 p-4 space-y-2 的 div 的父
-    var cards=[...document.querySelectorAll('div.p-4.space-y-2')];
-    if(cards.length===0) return;
-    historyContainer=cards[0].parentElement;
-    if(!historyContainer) return;
-    if(document.getElementById('bulk-del-toolbar')) return;
-
-    var toolbar=document.createElement('div');
-    toolbar.id='bulk-del-toolbar';
-    toolbar.style.cssText='position:sticky;top:0;z-index:20;background:#fff;border:2px solid #111;border-radius:16px;padding:10px 14px;margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.1)';
-    toolbar.innerHTML=`
-      <label style="display:flex;align-items:center;gap:6px;font-weight:800;cursor:pointer"><input id="bulk-select-all" type="checkbox" style="width:18px;height:18px"> 全選 (${cards.length})</label>
-      <button id="bulk-del-selected" style="padding:6px 12px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:700;cursor:pointer">🗑️ 刪除選取 (<span id="bulk-count">0</span>)</button>
-      <button id="bulk-del-all" style="padding:6px 12px;border-radius:999px;background:#111;color:#fff;border:none;font-weight:700;cursor:pointer">⚠️ 刪除全部</button>
-      <span style="font-size:11px;color:#666">僅測試用，正式運作前可用</span>
-    `;
-    historyContainer.parentElement.insertBefore(toolbar, historyContainer);
-
-    toolbar.querySelector('#bulk-select-all').addEventListener('change', function(e){
-      var checked=e.target.checked;
-      document.querySelectorAll('.history-chk').forEach(function(chk){
-        chk.checked=checked;
-        if(checked) selected.add(chk.dataset.id);
-        else selected.delete(chk.dataset.id);
-      });
-      updateCount();
-    });
-
-    toolbar.querySelector('#bulk-del-selected').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(selected.size===0){ alert('請先勾選要刪除的清單'); return; }
-      if(!confirm('確定刪除選取的 '+selected.size+' 筆領料單？此動作無法復原')) return;
-      var orders=getOrders();
-      var newOrders=orders.filter(function(o){ return !selected.has(o.id); });
-      saveOrders(newOrders);
-      alert('已刪除 '+selected.size+' 筆，重新整理後生效');
-      location.reload();
-    });
-
-    toolbar.querySelector('#bulk-del-all').addEventListener('click', function(){
-      if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; } var orders=getOrders();
-      if(orders.length===0){ alert('已經沒有紀錄'); return; }
-      if(!confirm('⚠️ 確定要刪除全部 '+orders.length+' 筆歷史紀錄？\n測試用，正式運作前清空用，無法復原！')) return;
-      if(!confirm('再確認一次：真的要全部刪除？')) return;
-      saveOrders([]);
-      alert('已全部刪除，重新整理');
-      location.reload();
-    });
-  }
-
-  function injectCheckboxes(){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){
-      var _tb=document.getElementById('bulk-del-toolbar'); if(_tb) _tb.remove();
-      document.querySelectorAll('.history-chk').forEach(function(e){e.remove()});
-      return;
-    }
-    var cards=[...document.querySelectorAll('div.p-4.space-y-2')];
-    cards.forEach(function(card){
-      if(card.querySelector('.history-chk')) return;
-      // 從卡片內找 id 文字 font-mono font-bold
-      var idEl=card.querySelector('div.font-mono.font-bold');
-      if(!idEl) return;
-      var id=idEl.textContent.trim();
-      var chk=document.createElement('input');
-      chk.type='checkbox';
-      chk.className='history-chk';
-      chk.dataset.id=id;
-      chk.style.cssText='width:20px;height:20px;accent-color:#e11d48;cursor:pointer;flex-shrink:0';
-      chk.addEventListener('change', function(e){
-        if(e.target.checked) selected.add(id);
-        else selected.delete(id);
-        updateCount();
-        // 同步全選狀態
-        var all=document.querySelectorAll('.history-chk');
-        var allChecked=[...all].every(c=>c.checked);
-        var selAll=document.getElementById('bulk-select-all');
-        if(selAll) selAll.checked=allChecked;
-      });
-      // 插入到卡片標題列
-      var header=card.querySelector('div.flex.justify-between');
-      if(header){
-        header.insertBefore(chk, header.firstChild);
-        header.style.gap='8px';
-        header.style.alignItems='center';
-      } else {
-        card.insertBefore(chk, card.firstChild);
-      }
-    });
-  }
-
-  function updateCount(){
-    var el=document.getElementById('bulk-count');
-    if(el) el.textContent=selected.size;
-  }
-
-  // 監聽歷史頁籤出現
-  var obs=new MutationObserver(function(){
-    var hasHistory=document.body.innerText.includes('歷史紀錄');
-    if(hasHistory){
-      injectToolbar();
-      injectCheckboxes();
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
-  setInterval(function(){
-    injectToolbar();
-    injectCheckboxes();
-  }, 1000);
-  setTimeout(function(){ injectToolbar(); injectCheckboxes(); }, 800);
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.82 完整版：保留大樓+設定+拖曳 + 批量刪除修復 ===
-(function(){
-  function getCards(){ return [...document.querySelectorAll('div.p-4.space-y-2')]; }
-  function findDeleteBtn(card){
-    var btns=[...card.querySelectorAll('button')];
-    for(var b of btns){ if((b.textContent||'').trim()==='刪除') return b; }
-    return null;
-  }
-  var selected=new Set();
-
-  function injectToolbar(){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){
-      var _tb=document.getElementById('bulk-del-toolbar'); if(_tb) _tb.remove();
-      document.querySelectorAll('.history-chk').forEach(function(e){e.remove()});
-      return;
-    }
-    var cards=getCards();
-    if(cards.length===0){
-      var tb=document.getElementById('bulk-del-toolbar');
-      if(tb) tb.innerHTML='<div style="padding:10px;font-weight:900;color:#16a34a">✅ 已清空</div>';
-      return;
-    }
-    if(document.getElementById('bulk-del-toolbar')) return;
-    var container=cards[0].parentElement;
-    if(!container) return;
-    var toolbar=document.createElement('div');
-    toolbar.id='bulk-del-toolbar';
-    toolbar.style.cssText='position:sticky;top:0;z-index:40;background:#fff;border:2px solid #111;border-radius:16px;padding:10px 14px;margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.15)';
-    toolbar.innerHTML=`
-      <label style="display:flex;align-items:center;gap:6px;font-weight:900"><input id="bulk-select-all" type="checkbox" style="width:20px;height:20px"> 全選 (<span id="total-count">${cards.length}</span>)</label>
-      <button id="bulk-del-selected" style="padding:8px 14px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:800">🗑️ 刪除選取 (<span id="bulk-count">0</span>)</button>
-      <button id="bulk-del-all" style="padding:8px 14px;border-radius:999px;background:#111;color:#fff;border:none;font-weight:800">⚠️ 刪除全部</button>
-      <button id="bulk-force" style="padding:8px 14px;border-radius:999px;background:#f59e0b;color:#fff;border:none;font-weight:800">💥 強制清空</button>
-    `;
-    container.parentElement.insertBefore(toolbar, container);
-
-    toolbar.querySelector('#bulk-select-all').addEventListener('change', function(e){
-      var checked=e.target.checked;
-      document.querySelectorAll('.history-chk').forEach(function(chk){
-        chk.checked=checked;
-        if(checked) selected.add(chk.dataset.id);
-        else selected.delete(chk.dataset.id);
-      });
-      updateCount();
-    });
-
-    toolbar.querySelector('#bulk-del-selected').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(selected.size===0){ alert('請先勾選'); return; }
-      if(!confirm('確定刪除選取的 '+selected.size+' 筆？')) return;
-      window._forceDelete=true;
-      var ids=[...selected];
-      var cards=getCards();
-      var toDelete=cards.filter(function(c){
-        var idEl=c.querySelector('div.font-mono.font-bold');
-        return idEl && ids.includes(idEl.textContent.trim());
-      });
-      var i=0;
-      function next(){
-        if(i>=toDelete.length){ window._forceDelete=false; setTimeout(function(){ location.reload(); }, 600); return; }
-        var btn=findDeleteBtn(toDelete[i]);
-        if(btn) btn.click();
-        i++;
-        setTimeout(next, 280);
-      }
-      next();
-    });
-
-    toolbar.querySelector('#bulk-del-all').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(!confirm('確定刪除全部 '+getCards().length+' 筆？')) return;
-      if(!confirm('再確認一次')) return;
-      window._forceDelete=true;
-      function delNext(){
-        var cur=getCards();
-        if(cur.length===0){ window._forceDelete=false; setTimeout(function(){ location.reload(); }, 600); return; }
-        var btn=findDeleteBtn(cur[0]);
-        if(btn) btn.click();
-        else { window._forceDelete=false; return; }
-        setTimeout(delNext, 300);
-      }
-      delNext();
-    });
-
-    toolbar.querySelector('#bulk-force').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(!confirm('強制清空所有歷史紀錄？ (會設定旗標)')) return;
-      var GN='v7_4_22';
-      var keys=['v7_4_22','v7_4_21','v7_4_20','v7_4_15','v7_4_14','v7_4_12'];
-      keys.forEach(function(k){
-        try{
-          var raw=localStorage.getItem(k);
-          if(!raw) return;
-          var j=JSON.parse(raw);
-          if(j && j.orders){ j.orders=[]; localStorage.setItem(k, JSON.stringify(j)); }
-        }catch(e){ try{ localStorage.removeItem(k); }catch(e2){} }
-      });
-      try{ localStorage.setItem('force_clear_orders','1'); localStorage.setItem(GN, JSON.stringify({orders:[], personnel: JSON.parse(localStorage.getItem(GN)||'{}').personnel||[] })); }catch(e){}
-      location.reload();
-    });
-  }
-
-  function injectCheckboxes(){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){
-      var _tb=document.getElementById('bulk-del-toolbar'); if(_tb) _tb.remove();
-      document.querySelectorAll('.history-chk').forEach(function(e){e.remove()});
-      return;
-    }
-    var cards=getCards();
-    cards.forEach(function(card){
-      if(card.querySelector('.history-chk')) return;
-      var idEl=card.querySelector('div.font-mono.font-bold');
-      if(!idEl) return;
-      var id=idEl.textContent.trim();
-      var chk=document.createElement('input');
-      chk.type='checkbox';
-      chk.className='history-chk';
-      chk.dataset.id=id;
-      chk.style.cssText='width:22px;height:22px;accent-color:#e11d48;cursor:pointer;';
-      chk.addEventListener('change', function(e){
-        if(e.target.checked) selected.add(id);
-        else selected.delete(id);
-        updateCount();
-      });
-      var header=card.querySelector('div.flex.justify-between');
-      if(header) header.insertBefore(chk, header.firstChild);
-    });
-  }
-
-  function updateCount(){
-    var el=document.getElementById('bulk-count');
-    if(el) el.textContent=selected.size;
-    var total=document.getElementById('total-count');
-    if(total) total.textContent=getCards().length;
-  }
-
-  var obs=new MutationObserver(function(){
-    if(document.body.innerText.includes('歷史紀錄')){
-      injectToolbar();
-      injectCheckboxes();
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
-  setInterval(function(){ injectToolbar(); injectCheckboxes(); }, 1000);
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === 手機版精簡同步：只留上傳雲端 + 清空此裝置 ===
-(function(){
-  function isMobileDevice(){
-    // 只用 UA 判斷，避免電腦版視窗縮小時被誤判為手機
-    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  }
-  var isMobile = isMobileDevice();
-  console.log('是否手機版', isMobile);
-
-  // 手機版：預設關閉自動同步（避免60人互相同步造成重複）
-  if(isMobile){
-    localStorage.setItem('autoSyncEnabled','0');
-    window._autoSyncEnabled = false;
-    // 攔截下載函式
-    var origDownload = window.downloadCloudFinal;
-    window.downloadCloudFinal = function(){
-      // 手機版禁止自動下載，若是手動點按也提示
-      var stack = (new Error()).stack || '';
-      var isAutoCall = stack.includes('setTimeout') || stack.includes('setInterval') || stack.includes('addEventListener');
-      if(isMobile){
-        console.log('手機版已停用下載');
-        var statusEl = document.getElementById('syncStatusFinal');
-        if(statusEl) statusEl.textContent = '● 手機版僅上傳，不自動下載 (避免60人資料重複)';
-        return;
-      }
-      if(origDownload) return origDownload.apply(this, arguments);
-    };
-    // 攔截自動上傳的過度頻繁？保留上傳，但降低頻率
-    // 手機版隱藏不需要的按鈕
-    function hideMobileButtons(){
-      var modal = document.getElementById('syncModal');
-      if(!modal) return;
-      // 找按鈕
-      var btns = modal.querySelectorAll('button');
-      btns.forEach(function(b){
-        var txt = (b.textContent||'').trim();
-        if(txt.includes('下載雲端') || txt.includes('強制覆蓋雲端') || txt.includes('清空雲端')){
-          b.style.display = 'none';
-        }
-        if(txt.includes('上傳雲端')){
-          b.style.display = 'inline-block';
-          b.style.background = '#2563eb';
-          b.style.fontSize = '16px';
-          b.style.padding = '14px 28px';
-        }
-        if(txt.includes('清空此裝置')){
-          b.style.display = 'inline-block';
-          b.style.background = '#f59e0b';
-          b.style.fontSize = '16px';
-          b.style.padding = '14px 28px';
-        }
-      });
-      // 隱藏自動同步勾選
-      var autoCheck = document.getElementById('autoSyncCheck');
-      if(autoCheck){
-        var label = autoCheck.closest('label');
-        if(label) label.style.display = 'none';
-      }
-      // 改說明文字
-      var desc = modal.querySelector('div[style*="font-size:11px"]');
-      if(desc && isMobile){
-        desc.innerHTML = '📱 <b>手機精簡版</b><br>• 僅保留：⬆️ 上傳雲端 / 🧹 清空此裝置<br>• 已停用自動下載，避免60人資料重複<br>• 電腦版保持完整同步';
-        desc.style.background = '#fef3c7';
-        desc.style.border = '2px solid #f59e0b';
-        desc.style.padding = '8px';
-        desc.style.borderRadius = '8px';
-      }
-      // 改標題
-      var title = modal.querySelector('b');
-      if(title && isMobile){
-        title.textContent = '☁️ 手機版同步 (精簡版 - 僅上傳)';
-      }
-    }
-
-    // 監聽 modal 開啟
-    var origOpen = window.openSyncModal;
-    window.openSyncModal = function(){
-      if(origOpen) origOpen.apply(this, arguments);
-      setTimeout(hideMobileButtons, 100);
-      setTimeout(hideMobileButtons, 500);
-    };
-
-    // 定時也嘗試隱藏
-    setInterval(function(){
-      if(isMobile && document.getElementById('syncModal') && document.getElementById('syncModal').style.display!=='none'){
-        hideMobileButtons();
-      }
-    }, 1000);
-
-    // 阻止原本的自動下載定時器：覆蓋 setInterval 中對 downloadCloudFinal 的呼叫
-    // 我們已經把 downloadCloudFinal 變成 no-op，所以定時器會空轉，不會下載
-
-    console.log('手機版精簡同步已啟用：只留上傳+清空');
-  } else {
-    console.log('電腦版：保持完整同步功能');
-    // 電腦版不變
-  }
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === 電腦版同步權限：僅系統管理員+超級管理員可操作 ===
-(function(){
-  function getCurrentRole(){
-    try{
-      // 嘗試多種儲存位置
-      var u = null;
-      try{ u = JSON.parse(localStorage.getItem('v7_loginUser')||'null'); }catch(e){}
-      if(!u){ try{ u = JSON.parse(localStorage.getItem('water_warehouse_current_user')||'null'); }catch(e){} }
-      if(!u){ try{ u = JSON.parse(localStorage.getItem('currentUser')||'null'); }catch(e){} }
-      if(u && u.role) return u.role;
-      if(u && u.user && u.user.role) return u.user.role;
-      // 從頁面上找
-      var el = document.querySelector('[class*="超級"] , [class*="系統管理員"]');
-      if(el) return el.textContent;
-    }catch(e){}
-    return '';
-  }
-  function isAdminRole(){
-    var r = getCurrentRole();
-    return r.includes('超級') || r.includes('系統管理員');
-  }
-
-  // 攔截 openSyncModal
-  var origOpenSync = window.openSyncModal;
-  window.openSyncModal = function(){
-    var role = getCurrentRole();
-    var isAdmin = isAdminRole();
-    console.log('開啟同步，角色:', role, '是否管理員:', isAdmin);
-    if(!isAdmin){
-      // 非管理員：禁止進入，或只允許查看但不能操作危險按鈕
-      if(!confirm('⚠️ 同步設定僅限 系統管理員 / 超級管理員 操作\n\n你的角色：'+(role||'一般人員')+'\n\n確定要以「僅檢視」模式進入嗎？ (危險按鈕將隱藏)')){
-        return;
-      }
-    }
-    if(origOpenSync) origOpenSync.apply(this, arguments);
-    setTimeout(function(){
-      var modal = document.getElementById('syncModal');
-      if(!modal) return;
-      var isAdminNow = isAdminRole();
-      if(!isAdminNow){
-        // 隱藏危險操作
-        var btns = modal.querySelectorAll('button');
-        btns.forEach(function(b){
-          var txt = (b.textContent||'').trim();
-          if(txt.includes('清空雲端') || txt.includes('強制覆蓋') || txt.includes('清空此裝置')){
-            b.style.display = 'none';
-          }
-          if(txt.includes('下載雲端')){
-            // 一般人員可下載但不能清空
-            b.style.opacity = '0.5';
-          }
-        });
-        // 禁用自動同步勾選
-        var autoCheck = document.getElementById('autoSyncCheck');
-        if(autoCheck){
-          autoCheck.disabled = true;
-          var label = autoCheck.closest('label');
-          if(label){
-            label.title = '僅管理員可設定';
-            label.style.opacity = '0.5';
-          }
-        }
-        var statusEl = document.getElementById('syncStatusFinal');
-        if(statusEl){
-          statusEl.textContent = '● 檢視模式 (非管理員，危險操作已隱藏)';
-          statusEl.style.color = '#f59e0b';
-        }
-      } else {
-        // 管理員：顯示完整
-        var statusEl2 = document.getElementById('syncStatusFinal');
-        if(statusEl2 && !statusEl2.textContent.includes('管理員')){
-          statusEl2.textContent += ' (管理員模式)';
-        }
-      }
-    }, 150);
-  };
-
-  // 也攔截直接呼叫的危險函式
-  var origClearCloud = window.clearCloudFinal;
-  window.clearCloudFinal = function(){
-    if(!isAdminRole()){
-      alert('⛔ 僅 系統管理員 / 超級管理員 可清空雲端');
-      return;
-    }
-    if(origClearCloud) return origClearCloud.apply(this, arguments);
-  };
-  var origForceUpload = window.forceUploadFinal;
-  window.forceUploadFinal = function(){
-    if(!isAdminRole()){
-      alert('⛔ 僅 系統管理員 / 超級管理員 可強制覆蓋雲端');
-      return;
-    }
-    if(origForceUpload) return origForceUpload.apply(this, arguments);
-  };
-  var origClearLocal = window.clearLocalFinal;
-  window.clearLocalFinal = function(){
-    // 清空此裝置允許一般人員（手機版需要），但電腦版非管理員也提醒
-    var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if(!isMobile && !isAdminRole()){
-      if(!confirm('確定要清空此裝置的資料嗎？ (非管理員)')) return;
-    }
-    if(origClearLocal) return origClearLocal.apply(this, arguments);
-  };
-
-  console.log('同步權限控管已啟用：僅管理員可操作危險功能');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === 手機版同步視窗大小修復 ===
-(function(){
-  function fixModalSize(){
-    var modal = document.getElementById('syncModal');
-    if(!modal) return;
-    var inner = modal.querySelector('div[style*="max-height"]') || modal.firstElementChild;
-    if(!inner) return;
-    
-    var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if(isMobile){
-      // 手機版縮小視窗
-      modal.style.padding = '10px';
-      modal.style.alignItems = 'flex-start';
-      modal.style.paddingTop = '20px';
-      if(inner){
-        inner.style.width = '95vw';
-        inner.style.maxWidth = '95vw';
-        inner.style.maxHeight = '85vh';
-        inner.style.margin = '0 auto';
-        inner.style.fontSize = '14px';
-        // 確保關閉按鈕可見
-        var closeBtn = inner.querySelector('button[onclick="closeSyncModal()"]');
-        if(closeBtn){
-          closeBtn.style.position = 'sticky';
-          closeBtn.style.top = '0';
-          closeBtn.style.zIndex = '10';
-          closeBtn.style.background = '#fff';
-          closeBtn.style.padding = '8px 12px';
-          closeBtn.style.borderRadius = '20px';
-          closeBtn.style.border = '2px solid #111';
-          closeBtn.style.fontSize = '20px';
-        }
-      }
-    }
-  }
-
-  // 攔截 openSyncModal 再修一次
-  var origOpen = window.openSyncModal;
-  window.openSyncModal = function(){
-    if(origOpen) origOpen.apply(this, arguments);
-    setTimeout(fixModalSize, 50);
-    setTimeout(fixModalSize, 300);
-  };
-
-  // 點擊背景關閉
-  document.addEventListener('click', function(e){
-    var modal = document.getElementById('syncModal');
-    if(modal && e.target === modal){
-      if(window.closeSyncModal) window.closeSyncModal();
-    }
-  });
-
-  setInterval(fixModalSize, 1000);
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.90 終極修復：刪除 + 同步權限 + 手機精簡 ===
-(function(){
-  // --- 刪除邏輯 ---
-  function getCards(){ return [...document.querySelectorAll('div.p-4.space-y-2')]; }
-  function directDeleteIds(ids){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return false; }
-    try{
-      var keys=['v7_4_22','v7_4_21','v7_4_20','v7_4_15','v7_4_14','v7_4_12','hist','v7_hist'];
-      keys.forEach(function(k){
-        try{
-          var raw=localStorage.getItem(k);
-          if(!raw) return;
-          var obj=JSON.parse(raw);
-          if(Array.isArray(obj)){
-            localStorage.setItem(k, JSON.stringify(obj.filter(function(o){ return !ids.includes(o.id); })));
-          } else if(obj && Array.isArray(obj.orders)){
-            obj.orders=obj.orders.filter(function(o){ return !ids.includes(o.id); });
-            localStorage.setItem(k, JSON.stringify(obj));
-          }
-        }catch(e){}
-      });
-      return true;
-    }catch(e){ return false; }
-  }
-  function directClearAll(){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return false; }
-    try{
-      var keys=['v7_4_22','v7_4_21','v7_4_20','v7_4_15','v7_4_14','v7_4_12','hist','v7_hist'];
-      keys.forEach(function(k){
-        try{
-          var raw=localStorage.getItem(k);
-          if(!raw) return;
-          var obj=JSON.parse(raw);
-          if(Array.isArray(obj)) localStorage.setItem(k, JSON.stringify([]));
-          else if(obj && Array.isArray(obj.orders)){ obj.orders=[]; localStorage.setItem(k, JSON.stringify(obj)); }
-          else localStorage.removeItem(k);
-        }catch(e){ try{ localStorage.removeItem(k); }catch(e2){} }
-      });
-      localStorage.setItem('force_clear_orders','1');
-      localStorage.setItem('v7_4_22', JSON.stringify({orders:[], personnel: JSON.parse(localStorage.getItem('v7_4_22')||'{}').personnel||[] }));
-      return true;
-    }catch(e){ return false; }
-  }
-
-  // 批量刪除工具列重寫
-  function initBulkDel(){
-    if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){
-      var _tb=document.getElementById('bulk-del-toolbar'); if(_tb) _tb.remove();
-      document.querySelectorAll('.history-chk').forEach(function(e){e.remove()});
-      return;
-    }
-    var cards=getCards();
-    if(cards.length===0) return;
-    if(document.getElementById('bulk-del-toolbar')) return;
-    var container=cards[0].parentElement;
-    if(!container) return;
-    var toolbar=document.createElement('div');
-    toolbar.id='bulk-del-toolbar';
-    toolbar.style.cssText='position:sticky;top:0;z-index:40;background:#fff;border:2px solid #111;border-radius:16px;padding:10px 14px;margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.15)';
-    toolbar.innerHTML='<label style="display:flex;align-items:center;gap:6px;font-weight:900"><input id="bulk-select-all" type="checkbox" style="width:20px;height:20px"> 全選 (<span id="total-count">'+cards.length+'</span>)</label><button id="bulk-del-selected" style="padding:8px 14px;border-radius:999px;background:#e11d48;color:#fff;border:none;font-weight:800">🗑️ 刪除選取 (<span id="bulk-count">0</span>)</button><button id="bulk-del-all" style="padding:8px 14px;border-radius:999px;background:#111;color:#fff;border:none;font-weight:800">⚠️ 刪除全部</button><button id="bulk-force" style="padding:8px 14px;border-radius:999px;background:#f59e0b;color:#fff;border:none;font-weight:800">💥 強制清空</button>';
-    container.parentElement.insertBefore(toolbar, container);
-    var selected=new Set();
-    function updateCount(){ var el=document.getElementById('bulk-count'); if(el) el.textContent=selected.size; var t=document.getElementById('total-count'); if(t) t.textContent=getCards().length; }
-    toolbar.querySelector('#bulk-select-all').addEventListener('change', function(e){
-      var checked=e.target.checked;
-      document.querySelectorAll('.history-chk').forEach(function(chk){ chk.checked=checked; if(checked) selected.add(chk.dataset.id); else selected.delete(chk.dataset.id); });
-      updateCount();
-    });
-    toolbar.querySelector('#bulk-del-selected').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(selected.size===0){ alert('請先勾選'); return; }
-      if(!confirm('確定刪除選取的 '+selected.size+' 筆？')) return;
-      if(directDeleteIds([...selected])){ alert('已刪除 '+selected.size+' 筆'); location.reload(); }
-    });
-    toolbar.querySelector('#bulk-del-all').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(!confirm('確定刪除全部 '+getCards().length+' 筆？')) return;
-      if(!confirm('再確認一次')) return;
-      if(directClearAll()){ alert('已全部清空'); location.reload(); }
-    });
-    toolbar.querySelector('#bulk-force').addEventListener('click', function(){
-     if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }  if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){ alert('只有系統管理員或超級管理員可以刪除領料紀錄'); return; }
-      if(!confirm('強制清空所有歷史紀錄？')) return;
-      if(directClearAll()){ alert('已強制清空'); location.reload(); }
-    });
-    // checkboxes
-    function injectChk(){
-      if(!(window.__wwCanDeleteHistory&&window.__wwCanDeleteHistory())){
-        var _tb=document.getElementById('bulk-del-toolbar'); if(_tb) _tb.remove();
-        document.querySelectorAll('.history-chk').forEach(function(e){e.remove()});
-        return;
-      }
-      getCards().forEach(function(card){
-        if(card.querySelector('.history-chk')) return;
-        var idEl=card.querySelector('div.font-mono.font-bold');
-        if(!idEl) return;
-        var id=idEl.textContent.trim();
-        var chk=document.createElement('input');
-        chk.type='checkbox'; chk.className='history-chk'; chk.dataset.id=id;
-        chk.style.cssText='width:22px;height:22px;accent-color:#e11d48;cursor:pointer;';
-        chk.addEventListener('change', function(e){ if(e.target.checked) selected.add(id); else selected.delete(id); updateCount(); });
-        var header=card.querySelector('div.flex.justify-between');
-        if(header) header.insertBefore(chk, header.firstChild);
-      });
-    }
-    injectChk();
-    setInterval(function(){ injectChk(); updateCount(); }, 1000);
-  }
-
-  // --- 同步權限與手機精簡 ---
-  function isMobileUA(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-  function getRole(){
-    try{
-      var keys=['v7_loginUser','water_warehouse_current_user','currentUser','ww_current_user'];
-      for(var i=0;i<keys.length;i++){
-        try{
-          var v=localStorage.getItem(keys[i]);
-          if(v){ var j=JSON.parse(v); if(j && j.role) return j.role; if(j && j.user && j.user.role) return j.user.role; }
-        }catch(e){}
-      }
-      // 從頁面找已登入資訊
-      var el=document.querySelector('body');
-      if(el && el.innerHTML.includes('超級管理員')) return '超級管理員';
-      if(el && el.innerHTML.includes('系統管理員')) return '系統管理員';
-    }catch(e){}
-    return '';
-  }
-  function isAdmin(){ var r=getRole(); return r.includes('超級') || r.includes('系統'); }
-
-  // 保留原始函式
-  var origDownload = window.downloadCloudFinal;
-  var origUpload = window.uploadCloudFinal;
-  var origClearCloud = window.clearCloudFinal;
-  var origForceUpload = window.forceUploadFinal;
-
-  // 重寫 openSyncModal
-  var origOpenSync = window.openSyncModal;
-  window.openSyncModal = function(){
-    if(origOpenSync) origOpenSync.apply(this, arguments);
-    setTimeout(function(){
-      var modal=document.getElementById('syncModal');
-      if(!modal) return;
-      var isMobile=isMobileUA();
-      var admin=isAdmin();
-      console.log('同步開啟 isMobile',isMobile,'admin',admin,'role',getRole());
-      
-      // 手機版：只留上傳+清空此裝置
-      if(isMobile){
-        modal.querySelectorAll('button').forEach(function(b){
-          var t=(b.textContent||'').trim();
-          if(t.includes('下載雲端') || t.includes('強制覆蓋') || t.includes('清空雲端')) b.style.display='none';
-        });
-        var autoCheck=document.getElementById('autoSyncCheck');
-        if(autoCheck){ var lab=autoCheck.closest('label'); if(lab) lab.style.display='none'; }
-        var desc=modal.querySelector('div[style*="font-size:11px"]');
-        if(desc){ desc.innerHTML='📱 <b>手機精簡版</b><br>• 僅：⬆️ 上傳雲端 / 🧹 清空此裝置<br>• 已停用自動下載，避免60人重複<br>• 電腦版保持完整'; desc.style.background='#fef3c7'; desc.style.border='2px solid #f59e0b'; desc.style.padding='8px'; desc.style.borderRadius='8px'; }
-      } else {
-        // 電腦版：非管理員隱藏危險按鈕
-        if(!admin){
-          modal.querySelectorAll('button').forEach(function(b){
-            var t=(b.textContent||'').trim();
-            if(t.includes('清空雲端') || t.includes('強制覆蓋')){
-              b.style.display='none';
-            }
-          });
-          var statusEl=document.getElementById('syncStatusFinal');
-          if(statusEl){ statusEl.textContent='● 檢視模式 (非管理員，危險操作已隱藏) - 可上傳/下載'; statusEl.style.color='#f59e0b'; }
-        } else {
-          var statusEl2=document.getElementById('syncStatusFinal');
-          if(statusEl2){ statusEl2.textContent+=' (管理員模式)'; }
-        }
-      }
-      // 手機視窗大小修復
-      if(isMobile){
-        modal.style.padding='10px'; modal.style.alignItems='flex-start'; modal.style.paddingTop='20px';
-        var inner=modal.firstElementChild;
-        if(inner){ inner.style.width='95vw'; inner.style.maxWidth='95vw'; inner.style.maxHeight='85vh'; inner.style.margin='0 auto'; }
-      }
-    }, 100);
-  };
-
-  // 手機版攔截自動下載
-  window.downloadCloudFinal = function(){
-    if(isMobileUA()){
-      console.log('手機版已停用自動下載');
-      var statusEl=document.getElementById('syncStatusFinal');
-      if(statusEl) statusEl.textContent='● 手機版僅上傳，不自動下載';
-      // 若是手動想下載，仍允許：檢查是否為使用者點擊
-      // 這裡我們完全停用，若電腦版需要可改
-      // 為了避免誤判，電腦版用原始函式
-      if(!isMobileUA() && origDownload) return origDownload.apply(this, arguments);
-      return;
-    }
-    if(origDownload) return origDownload.apply(this, arguments);
-  };
-
-  // 危險操作僅管理員
-  window.clearCloudFinal = function(){
-    if(!isAdmin()){
-      alert('⛔ 僅 系統管理員 / 超級管理員 可清空雲端');
-      return;
-    }
-    if(origClearCloud) return origClearCloud.apply(this, arguments);
-  };
-  window.forceUploadFinal = function(){
-    if(!isAdmin()){
-      alert('⛔ 僅 系統管理員 / 超級管理員 可強制覆蓋雲端');
-      return;
-    }
-    if(origForceUpload) return origForceUpload.apply(this, arguments);
-  };
-
-  // 初始化
-  var obs=new MutationObserver(function(){
-    if(document.body.innerText.includes('歷史紀錄')) initBulkDel();
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
-  setInterval(initBulkDel, 1500);
-  console.log('v7.4.90 修復已載入');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.91 同步終極修復：預設關閉自動下載 + 清空雲端修復 ===
-(function(){
-  // 強制預設關閉自動同步，避免一打開就把雲端8筆拉回來
-  if(localStorage.getItem('autoSyncEnabled')===null){
-    localStorage.setItem('autoSyncEnabled','0');
-    window._autoSyncEnabled=false;
-  }
-  // 若目前是 1，也改成 0 讓正式版維持 0筆
-  var cur = localStorage.getItem('autoSyncEnabled');
-  if(cur==='1'){
-    // 保留管理員可手動開啟，但預設先關
-    // 不強制改，僅在本次載入時關閉自動下載定時器
-    window._autoSyncEnabled=false;
-  }
-
-  // 重寫 clearCloudFinal 為真正可用版
-  window.clearCloudFinal = async function(){
-    var role = (function(){
-      try{
-        var v=localStorage.getItem('v7_loginUser')||localStorage.getItem('water_warehouse_current_user')||'';
-        var j=JSON.parse(v); return j.role||'';
-      }catch(e){ return '超級管理員'; }
-    })();
-    if(!role.includes('超級') && !role.includes('系統')){
-      alert('⛔ 僅 超級管理員 / 系統管理員 可清空雲端');
-      return;
-    }
-    if(!confirm('確定要清空雲端上的所有資料嗎？此動作會讓雲端變 0 筆')) return;
-    if(!confirm('再確認一次，雲端清空後所有裝置下載都會是 0 筆')) return;
-    var gasUrl=localStorage.getItem('gasUrl')||'https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
-    var code=localStorage.getItem('syncCode')||'water-warehouse-v2-0822';
-    var statusEl=document.getElementById('syncStatusFinal');
-    try{
-      if(statusEl) statusEl.textContent='● 清空雲端中...';
-      // 先清主表
-      await fetch(gasUrl+'?code='+encodeURIComponent(code), {method:'POST', mode:'no-cors', body: JSON.stringify([])});
-      // 再清分段版
-      await fetch(gasUrl+'?code='+encodeURIComponent(code)+'&clear=1', {method:'POST', mode:'no-cors', body: '[]'});
-      // 再發一次空陣列確保
-      await fetch(gasUrl+'?code='+encodeURIComponent(code)+'&action=clear', {method:'POST', mode:'no-cors', body: '[]'});
-      if(statusEl) statusEl.textContent='● 雲端已清空 (0筆) '+new Date().toLocaleTimeString();
-      alert('✅ 雲端已清空，現在雲端是 0 筆\n\n請到各裝置按「清空此裝置」再重整，就不會再自動下載8筆了');
-      // 同時把本地的 lastUploadCount 歸零，避免又自動上傳
-      localStorage.setItem('lastUploadCount','0');
-    }catch(e){
-      alert('清空失敗:'+e.message+'\n請檢查網路，或直接到 Google Sheet 手動刪除');
-      if(statusEl) statusEl.textContent='● 清空失敗';
-    }
-  };
-
-  // 修復：取消勾選後，停止所有自動下載定時器
-  var origCheck = document.getElementById('autoSyncCheck');
-  // 用 MutationObserver 確保 checkbox 事件正確
-  setTimeout(function(){
-    var check=document.getElementById('autoSyncCheck');
-    if(check){
-      check.addEventListener('change', function(){
-        window._autoSyncEnabled=check.checked;
-        localStorage.setItem('autoSyncEnabled', check.checked?'1':'0');
-        var statusEl=document.getElementById('syncStatusFinal');
-        if(statusEl){
-          statusEl.textContent = check.checked ? '● 已開啟自動同步' : '● 已關閉自動同步 (不會自動下載雲端8筆)';
-        }
-        console.log('autoSyncEnabled', window._autoSyncEnabled);
-      });
-      // 初始化顯示
-      check.checked = (localStorage.getItem('autoSyncEnabled')==='1');
-      window._autoSyncEnabled = check.checked;
-    }
-  }, 500);
-
-  // 攔截原本的 setTimeout 自動下載，若 _autoSyncEnabled 為 false 就不執行
-  var origDownload = window.downloadCloudFinal;
-  var downloadWrapper = function(){
-    if(!window._autoSyncEnabled){
-      console.log('自動同步已關閉，跳過下載');
-      return;
-    }
-    if(origDownload) return origDownload.apply(this, arguments);
-  };
-  // 覆蓋全域的定時器呼叫：原本的 setTimeout 會直接呼叫 downloadCloudFinal，我們已經讓它檢查 flag
-  // 這裡不覆蓋 downloadCloudFinal 的手動呼叫，僅讓自動呼叫受控
-  // 為了區分，保留一個手動版
-  window.downloadCloudFinalManual = origDownload;
-  window.downloadCloudFinal = function(){
-    // 手動點擊下載時，無論是否開啟自動同步都允許
-    var isManual = true;
-    try{
-      var stack = new Error().stack||'';
-      if(stack.includes('setTimeout') || stack.includes('setInterval')) isManual=false;
-    }catch(e){}
-    if(!isManual && !window._autoSyncEnabled){
-      console.log('自動下載已停用');
-      return;
-    }
-    if(origDownload) return origDownload.apply(this, arguments);
-  };
-
-  console.log('v7.4.91 同步修復已載入，預設關閉自動下載');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.92 電腦版改手動同步：關閉所有自動上傳/下載 ===
-(function(){
-  // 強制關閉自動同步
-  localStorage.setItem('autoSyncEnabled','0');
-  window._autoSyncEnabled=false;
-
-  // 覆蓋 debounceUpload 為檢查旗標
-  var origDebounce = window.debounceUpload;
-  window.debounceUpload = function(){
-    if(!window._autoSyncEnabled){
-      console.log('手動模式：跳過自動上傳');
-      return;
-    }
-    if(origDebounce) return origDebounce.apply(this, arguments);
-  };
-
-  // 覆蓋 autoUpload 為檢查旗標
-  var origAutoUpload = window.autoUpload;
-  window.autoUpload = function(){
-    if(!window._autoSyncEnabled){
-      console.log('手動模式：跳過 autoUpload');
-      return;
-    }
-    if(origAutoUpload) return origAutoUpload.apply(this, arguments);
-  };
-
-  // 停用 localStorage.setItem 自動觸發上傳
-  // 原本有覆蓋 localStorage.setItem 去呼叫 debounceUpload，我們改成僅在開啟時才觸發
-  var origSetItem = localStorage.setItem;
-  // 保留但不再自動呼叫
-  // （如果之前已經被覆蓋，我們再覆蓋一次）
-  localStorage.setItem = function(k,v){
-    origSetItem.call(this,k,v);
-    // 手動模式：不自動上傳
-    if(window._autoSyncEnabled && (k==='v7_4_22' || k==='hist' || k==='v7_hist')){
-      if(window.debounceUpload) window.debounceUpload();
-    }
-  };
-
-  // 停用定時自動下載
-  // 清掉可能存在的定時器（無法直接清，只能讓 downloadCloudFinal 檢查 flag）
-  // 我們已經在上一版讓 downloadCloudFinal 檢查 _autoSyncEnabled
-
-  // UI 調整：把自動同步說明改成手動模式
-  setTimeout(function(){
-    var modal=document.getElementById('syncModal');
-    if(!modal) return;
-    var desc=modal.querySelector('div[style*="font-size:11px"]');
-    if(desc){
-      desc.innerHTML='🔧 <b>手動同步模式 v7.4.92</b><br>• 已關閉所有自動上傳/下載<br>• 電腦版請手動按「⬇️ 下載雲端」取得全部資料<br>• 再按「⬆️ 上傳雲端」備份<br>• 匯出存檔請在歷史紀錄按 Excel 匯出';
-      desc.style.background='#dbeafe';
-      desc.style.border='2px solid #2563eb';
-      desc.style.padding='8px';
-      desc.style.borderRadius='8px';
-    }
-    var check=document.getElementById('autoSyncCheck');
-    if(check){
-      var label=check.closest('label');
-      if(label){
-        label.innerHTML='<input type="checkbox" id="autoSyncCheck"> <b>開啟自動同步 (不建議，60人會重複)</b>';
-        // 重新綁定
-        var newCheck=document.getElementById('autoSyncCheck');
-        if(newCheck){
-          newCheck.checked=false;
-          newCheck.addEventListener('change', function(){
-            window._autoSyncEnabled=newCheck.checked;
-            localStorage.setItem('autoSyncEnabled', newCheck.checked?'1':'0');
-            alert(newCheck.checked ? '已開啟自動同步 (測試用)' : '已關閉，改為手動模式');
-          });
-        }
-      }
-    }
-    var statusEl=document.getElementById('syncStatusFinal');
-    if(statusEl){
-      statusEl.textContent='● 手動模式 (不會自動下載) - 請手動下載/上傳';
-      statusEl.style.color='#2563eb';
-    }
-  }, 500);
-
-  console.log('v7.4.92 手動同步模式已啟用：已關閉自動上傳/下載');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.93 手機版隱藏材料管理按鈕 ===
-(function(){
-  function isMobileUA(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-  function hideMatBtn(){
-    if(!isMobileUA()) return;
-    document.querySelectorAll('button').forEach(function(b){
-      var t=(b.textContent||'').trim();
-      if(t.includes('材料管理')){
-        b.style.display='none';
-      }
-    });
-    // 也包含 floating 材料管理 div
-    document.querySelectorAll('div').forEach(function(d){
-      var s=d.getAttribute('style')||'';
-      if(s.includes('position:fixed') && d.innerHTML.includes('材料管理')){
-        d.style.display='none';
-      }
-    });
-    var matAdmin = document.getElementById('mat-admin-btn');
-    if(matAdmin) matAdmin.style.display='none';
-  }
-  setInterval(hideMatBtn, 800);
-  setTimeout(hideMatBtn, 300);
-  setTimeout(hideMatBtn, 1500);
-  console.log('手機版已隱藏材料管理按鈕');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.94 手機版徹底移除材料管理 ===
-(function(){
-  function isMobileUA(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-  if(!isMobileUA()) return;
-
-  // 注入強制隱藏 CSS
-  var style=document.createElement('style');
-  style.id='hide-mat-style';
-  style.textContent=`
-    /* 用屬性選擇器強制隱藏 */
-    button[onclick*="mat"], button[onclick*="Mat"], #mat-admin-btn {
-      display:none !important;
-    }
-  `;
-  document.head.appendChild(style);
-
-  function removeMatButtons(){
-    var removed=false;
-    document.querySelectorAll('button').forEach(function(b){
-      var t=(b.textContent||'').trim();
-      if(t.includes('材料管理')){
-        // 徹底移除，不是隱藏，避免一閃一滅
-        b.remove();
-        removed=true;
-      }
-    });
-    // 移除浮動的 div 包著材料管理的
-    document.querySelectorAll('div').forEach(function(d){
-      if(d.innerHTML && d.innerHTML.includes('材料管理') && d.innerHTML.includes('🛠️')){
-        // 檢查是否為獨立按鈕容器 (通常是 fixed 定位)
-        var s=d.getAttribute('style')||'';
-        if(s.includes('fixed') || d.id==='mat-admin-btn' || d.className.includes('fixed')){
-          d.remove();
-        }
-      }
-    });
-    // 也移除 ID 為 mat-admin-btn 的
-    var el=document.getElementById('mat-admin-btn');
-    if(el) el.remove();
-  }
-
-  // 立即執行 + 持續監聽
-  removeMatButtons();
-  var obs=new MutationObserver(function(muts){
-    removeMatButtons();
-  });
-  obs.observe(document.body, {childList:true, subtree:true, attributes:true});
-  setInterval(removeMatButtons, 500);
-
-  console.log('v7.4.94 手機版材料管理已徹底移除');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
 <script>
@@ -2170,9 +1131,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   }
 
   // 延遲執行，避免一開始主內容還沒載入
-  setTimeout(removeBlackBox, 800);
-  setTimeout(removeBlackBox, 2000);
-  setInterval(removeBlackBox, 3000);
+  setTimeout(removeBlackBox, 150);
+  setTimeout(removeBlackBox, 1200);
 
   var obs=new MutationObserver(function(){
     // 只有當黑框出現時才刪
@@ -2184,478 +1144,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.4.97 自動同步按鈕縮小成材料管理大小 ===
-(function(){
-  function resizeSyncBtn(){
-    var matBtn=document.getElementById('mat-admin-btn');
-    var syncBtn=document.getElementById('floatingSyncBtnFinal');
-    if(!syncBtn) return;
-    // 改成跟材料管理一樣大小
-    syncBtn.style.padding='10px 14px';
-    syncBtn.style.borderRadius='999px';
-    syncBtn.style.fontSize='13px';
-    syncBtn.style.fontWeight='800';
-    syncBtn.style.bottom='90px';
-    syncBtn.style.right='16px';
-    syncBtn.style.boxShadow='0 4px 12px rgba(37,99,235,0.4)';
-    syncBtn.style.border='2px solid #fff';
-    syncBtn.style.background='#2563eb';
-    // 如果材料管理存在，讓兩個大小一致
-    if(matBtn){
-      matBtn.style.padding='10px 14px';
-      matBtn.style.fontSize='13px';
-      matBtn.style.borderRadius='999px';
-    }
-  }
-  setTimeout(resizeSyncBtn, 300);
-  setTimeout(resizeSyncBtn, 1000);
-  setInterval(resizeSyncBtn, 1500);
-  // 注入 CSS 強制
-  var style=document.createElement('style');
-  style.textContent=`
-    #floatingSyncBtnFinal{
-      padding:10px 14px !important;
-      border-radius:999px !important;
-      font-size:13px !important;
-      font-weight:800 !important;
-      bottom:90px !important;
-      right:16px !important;
-      box-shadow:0 4px 12px rgba(37,99,235,0.4) !important;
-      border:2px solid #fff !important;
-    }
-    #mat-admin-btn{
-      padding:10px 14px !important;
-      font-size:13px !important;
-      border-radius:999px !important;
-      bottom:140px !important;
-      right:16px !important;
-    }
-  `;
-  document.head.appendChild(style);
-  console.log('v7.4.97 按鈕大小已統一');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.5 高流量版：IndexedDB + 自動封存 + 虛擬化提示 ===
-(function(){
-  const DB_NAME='water_warehouse_v7_5';
-  const DB_VER=1;
-  const STORE='hist';
-  const ARCHIVE_STORE='archive_meta';
-  let _histCache=null;
-  let _db=null;
-
-  function openDB(){
-    return new Promise((resolve,reject)=>{
-      const req=indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded=function(e){
-        const db=e.target.result;
-        if(!db.objectStoreNames.contains(STORE)){
-          const os=db.createObjectStore(STORE,{keyPath:'id'});
-          os.createIndex('ts','ts');
-        }
-        if(!db.objectStoreNames.contains(ARCHIVE_STORE)){
-          db.createObjectStore(ARCHIVE_STORE,{keyPath:'month'});
-        }
-      };
-      req.onsuccess=function(){ _db=req.result; resolve(_db); };
-      req.onerror=function(){ reject(req.error); };
-    });
-  }
-
-  async function getAllHist(){
-    if(_histCache) return _histCache;
-    const db=await openDB();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction(STORE,'readonly');
-      const os=tx.objectStore(STORE);
-      const req=os.getAll();
-      req.onsuccess=()=>{ _histCache=req.result||[]; res(_histCache); };
-      req.onerror=()=>rej(req.error);
-    });
-  }
-
-  async function saveHistToIDB(hist){
-    const db=await openDB();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction(STORE,'readwrite');
-      const os=tx.objectStore(STORE);
-      os.clear().onsuccess=function(){
-        hist.forEach(r=>{ try{ os.add(r); }catch(e){} });
-      };
-      tx.oncomplete=()=>res();
-      tx.onerror=()=>rej(tx.error);
-    });
-  }
-
-  async function addOneToIDB(rec){
-    const db=await openDB();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction(STORE,'readwrite');
-      tx.objectStore(STORE).put(rec);
-      tx.oncomplete=()=>res();
-      tx.onerror=()=>rej(tx.error);
-    });
-  }
-
-  // 覆蓋原有讀寫函式
-  window.getLocalHistSync = function(){
-    // 同步版：回傳 cache，若還沒載入則回傳 localStorage 舊的
-    if(_histCache) return _histCache;
-    try{
-      const raw=localStorage.getItem('v7_4_22')||localStorage.getItem('hist')||'[]';
-      const arr=JSON.parse(raw);
-      if(Array.isArray(arr)) return arr;
-    }catch(e){}
-    return [];
-  };
-
-  // 攔截原本的 setItem，讓它也寫 IndexedDB
-  const origSetItem=localStorage.setItem.bind(localStorage);
-  localStorage.setItem=function(k,v){
-    origSetItem(k,v);
-    if(k==='v7_4_22' || k==='hist' || k==='v7_hist'){
-      try{
-        const arr=JSON.parse(v);
-        if(Array.isArray(arr)){
-          _histCache=arr;
-          // 非同步寫 IDB，不阻塞
-          saveHistToIDB(arr).then(()=>{
-            // 超過 1000筆自動封存舊月份
-            if(arr.length>1000){
-              autoArchive(arr);
-            }
-          });
-          // 為了避免 localStorage 爆掉，只保留最近 200筆在 localStorage，其餘放 IDB
-          if(arr.length>200){
-            const trimmed=arr.slice(-200);
-            origSetItem(k, JSON.stringify(trimmed));
-            console.log('高流量模式：localStorage 已精簡為 200筆，完整',arr.length,'筆在 IndexedDB');
-          }
-        }
-      }catch(e){}
-    }
-  };
-
-  async function autoArchive(hist){
-    if(hist.length<=1000) return;
-    // 依月份分組
-    const groups={};
-    hist.forEach(r=>{
-      const d=new Date(r.ts||r.time||Date.now());
-      const month=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-      if(!groups[month]) groups[month]=[];
-      groups[month].push(r);
-    });
-    const months=Object.keys(groups).sort();
-    // 保留最近 1個月在主庫，其餘移到 archive 提示
-    if(months.length<=1) return;
-    const toArchiveMonths=months.slice(0,-1);
-    let archivedCount=0;
-    toArchiveMonths.forEach(m=>{ archivedCount+=groups[m].length; });
-    console.log('需封存月份',toArchiveMonths,'共',archivedCount,'筆');
-
-    // 實際策略：主庫只留最近月份，其餘從主庫刪除，提示使用者已封存到 Excel
-    const keepMonths=months.slice(-1);
-    const keepHist=[];
-    keepMonths.forEach(m=>{ keepHist.push(...groups[m]); });
-    // 保留最近的，但如果還是 >1000，截斷
-    const finalKeep = keepHist.length>800 ? keepHist.slice(-800) : keepHist;
-    _histCache=finalKeep;
-    await saveHistToIDB(finalKeep);
-    origSetItem('v7_4_22', JSON.stringify(finalKeep.slice(-200)));
-
-    // 提示
-    const msg='⚠️ 已超過 1000筆，系統已自動封存 '+toArchiveMonths.join(',')+' 共'+archivedCount+'筆\n請在電腦版按「⬇️ 下載雲端」完整備份後，再手動 Excel 匯出封存檔';
-    if(document.getElementById('syncStatusFinal')){
-      document.getElementById('syncStatusFinal').textContent='● 已自動封存 '+archivedCount+'筆，現保留 '+finalKeep.length+'筆';
-    }
-    console.log(msg);
-  }
-
-  // 初始化：把 localStorage 舊資料搬到 IndexedDB
-  (async function initIDB(){
-    try{
-      await openDB();
-      let idbData=await getAllHist();
-      const lsRaw=localStorage.getItem('v7_4_22')||localStorage.getItem('hist')||'[]';
-      let lsData=[];
-      try{ lsData=JSON.parse(lsRaw); }catch(e){}
-      if(!Array.isArray(lsData)) lsData=[];
-
-      if(lsData.length>0 && idbData.length===0){
-        console.log('遷移 localStorage',lsData.length,'筆到 IndexedDB');
-        _histCache=lsData;
-        await saveHistToIDB(lsData);
-      }else if(lsData.length>idbData.length){
-        // 合併
-        const map=new Map();
-        idbData.forEach(r=>map.set(r.id,r));
-        lsData.forEach(r=>map.set(r.id,r));
-        const merged=[...map.values()];
-        _histCache=merged;
-        await saveHistToIDB(merged);
-        console.log('合併完成 IDB',idbData.length,'+ LS',lsData.length,'= ',merged.length);
-      }else{
-        _histCache=idbData;
-        // 回寫精簡版到 localStorage 避免空白
-        if(idbData.length>0){
-          origSetItem('v7_4_22', JSON.stringify(idbData.slice(-200)));
-        }
-      }
-
-      // 顯示儲存狀態
-      setTimeout(()=>{
-        const statusEl=document.getElementById('syncStatusFinal');
-        if(statusEl && _histCache){
-          const usedKB=Math.round(JSON.stringify(_histCache).length/1024);
-          statusEl.textContent='● 高流量模式：IndexedDB '+_histCache.length+'筆 約'+usedKB+'KB (localStorage 精簡)';
-          statusEl.style.color='#059669';
-        }
-      },1000);
-      console.log('v7.5 IndexedDB 初始化完成，共',(_histCache||[]).length,'筆');
-    }catch(e){
-      console.error('IndexedDB 初始化失敗',e);
-    }
-  })();
-
-  // 覆蓋 getLocalHist 讓舊程式碼能讀到完整資料
-  const tryOverride = ()=>{
-    if(window.getLocalHist){
-      const origGet=window.getLocalHist;
-      window.getLocalHist=function(){
-        if(_histCache) return _histCache;
-        return origGet();
-      };
-    }
-    // 額外提供 v7.5 API
-    window.getHistV75=()=>_histCache||[];
-    window.getHistCountV75=()=>_histCache? _histCache.length : 0;
-  };
-  setTimeout(tryOverride, 500);
-  setInterval(tryOverride, 2000);
-
-  console.log('v7.5 高流量版 IndexedDB 載入中');
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 
-<script>
-// === v7.5.1 修復材料管理大氣球 ===
-(function(){
-  function fixButtons(){
-    var mat=document.getElementById('mat-admin-btn');
-    var sync=document.getElementById('floatingSyncBtnFinal');
-    // 修復材料管理變大氣球：強制重置尺寸
-    if(mat){
-      mat.style.width='auto';
-      mat.style.height='auto';
-      mat.style.maxWidth='160px';
-      mat.style.maxHeight='44px';
-      mat.style.padding='10px 14px';
-      mat.style.borderRadius='999px';
-      mat.style.fontSize='13px';
-      mat.style.lineHeight='1';
-      // V7.6.9.18: 顯示/隱藏交由目前登入角色控制，不在尺寸修復器強制 display。
-      mat.style.alignItems='center';
-      mat.style.justifyContent='center';
-      mat.style.transform='none';
-      mat.style.scale='1';
-      mat.style.zoom='1';
-      // 防止被之前的氣球樣式影響
-      mat.style.position='fixed';
-      mat.style.bottom='140px';
-      mat.style.right='16px';
-      mat.style.zIndex='9998';
-    }
-    if(sync){
-      sync.style.width='auto';
-      sync.style.height='auto';
-      sync.style.maxWidth='160px';
-      sync.style.maxHeight='44px';
-      sync.style.padding='10px 14px';
-      sync.style.borderRadius='999px';
-      sync.style.fontSize='13px';
-      sync.style.lineHeight='1';
-      sync.style.transform='none';
-    }
-    // 刪除任何被誤放大的藍色大圓 div（直徑>200的）
-    document.querySelectorAll('div').forEach(function(d){
-      if(d.id==='mat-admin-btn' || d.id==='floatingSyncBtnFinal') return;
-      var t=(d.textContent||'').trim();
-      if(t==='材料管理' || t.includes('材料管理')){
-        var rect=d.getBoundingClientRect();
-        if(rect.width>200 || rect.height>200){
-          console.log('移除大氣球', rect);
-          d.remove();
-        }
-      }
-    });
-  }
-  setTimeout(fixButtons, 200);
-  setTimeout(fixButtons, 800);
-  setInterval(fixButtons, 2000);
-  
-  var style=document.createElement('style');
-  style.textContent=`
-    #mat-admin-btn, #floatingSyncBtnFinal{
-      width:auto !important;
-      height:auto !important;
-      max-width:160px !important;
-      max-height:44px !important;
-      min-width:0 !important;
-      min-height:0 !important;
-      transform:none !important;
-      scale:1 !important;
-      aspect-ratio:auto !important;
-    }
-  `;
-  document.head.appendChild(style);
-})();
-</script>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style></body>
 <style>#mat-admin-btn,#floatingSyncBtnFinal{box-sizing:border-box !important; white-space:nowrap !important;}</style>
-<script>
-// === v7.5.7 兩顆都可拖，大小永遠固定 130x36 ===
-(function(){
-  // 先把之前禁止拖曳的覆蓋清掉
-  window.makeDrag = undefined;
-  
-  // 強制固定尺寸 CSS
-  var css=document.createElement('style');
-  css.textContent=`
-    #mat-admin-btn, #floatingSyncBtnFinal{
-      width:130px !important;
-      min-width:130px !important;
-      max-width:130px !important;
-      height:36px !important;
-      min-height:36px !important;
-      max-height:36px !important;
-      padding:0 10px !important;
-      border-radius:999px !important;
-      font-size:12px !important;
-      font-weight:700 !important;
-      line-height:36px !important;
-      white-space:nowrap !important;
-      overflow:hidden !important;
-      text-overflow:ellipsis !important;
-      box-sizing:border-box !important;
-      text-align:center !important;
-      transform:none !important;
-      border:2px solid #fff !important;
-      box-shadow:0 4px 12px rgba(37,99,235,0.35) !important;
-      z-index:99999 !important;
-    }
-  `;
-  document.head.appendChild(css);
-
-  function restorePos(el){
-    try{
-      var saved=JSON.parse(localStorage.getItem('drag_'+el.id)||'null');
-      if(saved && saved.l && saved.t){
-        el.style.left=saved.l;
-        el.style.top=saved.t;
-        el.style.right='auto';
-        el.style.bottom='auto';
-        return true;
-      }
-    }catch(e){}
-    return false;
-  }
-  function savePos(el){
-    try{
-      localStorage.setItem('drag_'+el.id, JSON.stringify({l:el.style.left,t:el.style.top}));
-    }catch(e){}
-  }
-
-  function makeDragFixed(el){
-    if(!el || el._dragFixed77) return;
-    if(!el.style.position) el.style.position='fixed';
-    el.style.touchAction='none';
-    if(!restorePos(el)){
-      // 預設位置
-      if(el.id==='mat-admin-btn'){ el.style.right='16px'; el.style.bottom='70px'; el.style.left='auto'; el.style.top='auto'; }
-      if(el.id==='floatingSyncBtnFinal'){ el.style.right='16px'; el.style.bottom='20px'; el.style.left='auto'; el.style.top='auto'; }
-    }
-    el._dragFixed77=true;
-    el._dragFixed=true;
-    var dragging=false, moved=false, sx=0, sy=0, ox=0, oy=0;
-    var ow=130, oh=36; // 固定大小
-
-    function onDown(cx,cy){
-      dragging=true; moved=false;
-      sx=cx; sy=cy;
-      var r=el.getBoundingClientRect();
-      ox=r.left; oy=r.top;
-      ow=r.width; oh=r.height;
-      // 鎖死大小
-      el.style.width=ow+'px';
-      el.style.height=oh+'px';
-      el.style.transition='none';
-    }
-    function onMove(cx,cy){
-      if(!dragging) return;
-      var dx=cx-sx, dy=cy-sy;
-      if(Math.abs(dx)>3 || Math.abs(dy)>3) moved=true;
-      var nx=ox+dx, ny=oy+dy;
-      nx=Math.max(0, Math.min(window.innerWidth-ow, nx));
-      ny=Math.max(0, Math.min(window.innerHeight-oh, ny));
-      el.style.left=nx+'px';
-      el.style.top=ny+'px';
-      el.style.right='auto';
-      el.style.bottom='auto';
-    }
-    function onUp(){
-      if(!dragging) return;
-      dragging=false;
-      if(moved){
-        savePos(el);
-        setTimeout(function(){ moved=false; }, 150);
-      }
-    }
-    el.addEventListener('mousedown', function(e){ if(e.button!==0) return; onDown(e.clientX,e.clientY); e.preventDefault(); });
-    el.addEventListener('touchstart', function(e){ var t=e.touches[0]; if(!t) return; onDown(t.clientX,t.clientY); }, {passive:false});
-    window.addEventListener('mousemove', function(e){ onMove(e.clientX,e.clientY); }, true);
-    window.addEventListener('touchmove', function(e){ var t=e.touches[0]; if(!t) return; onMove(t.clientX,t.clientY); if(dragging) e.preventDefault(); }, {passive:false, capture:true});
-    window.addEventListener('mouseup', onUp, true);
-    window.addEventListener('touchend', onUp, true);
-    el.addEventListener('click', function(e){ if(moved){ e.stopPropagation(); e.preventDefault(); } }, true);
-  }
-
-  function init(){
-    var mat=document.getElementById('mat-admin-btn');
-    var sync=document.getElementById('floatingSyncBtnFinal');
-    // 重置舊標記
-    if(mat){ mat._dragFixed=false; mat._dragFixed77=false; }
-    if(sync){ sync._dragFixed=false; sync._dragFixed77=false; }
-    // 克隆一次清除舊監聽
-    if(mat){ var nm=mat.cloneNode(true); mat.parentNode.replaceChild(nm, mat); nm.id='mat-admin-btn'; }
-    if(sync){ var ns=sync.cloneNode(true); sync.parentNode.replaceChild(ns, sync); ns.id='floatingSyncBtnFinal'; }
-    setTimeout(function(){
-      var m=document.getElementById('mat-admin-btn');
-      var s=document.getElementById('floatingSyncBtnFinal');
-      if(m){ 
-        makeDragFixed(m); 
-        m.onclick=function(){ 
-          if(m._moved) return;
-          try{ if(window.render) render(); var modal=document.getElementById('mat-modal'); if(modal) modal.style.display='flex'; if(window.updateQRPreview) updateQRPreview(); if(window.setFilter) setFilter('all'); }catch(e){ var modal=document.getElementById('mat-modal'); if(modal) modal.style.display='flex'; }
-        };
-      }
-      if(s){ 
-        makeDragFixed(s); 
-        s.onclick=function(){ if(s._moved) return; if(window.openSyncModal) openSyncModal(); };
-      }
-    }, 200);
-  }
-
-  setTimeout(init, 500);
-  setTimeout(init, 1500);
-  console.log('v7.5.32 終極權限且固定130x36已載入');
-})();
-</script>
 </body>
 
 <!-- === Water Warehouse v7.6 unified data / permission / sync layer === -->
@@ -2679,7 +1173,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 <script>
 (function(){
   'use strict';
-  const VERSION='7.6.9.18';
+  const VERSION='7.6.9.19';
   const SUPER_NAME='朱忠正';
   const CORE_KEY='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
@@ -2873,14 +1367,14 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       }));
       XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(personnelRows),'人員');
       XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(snap.permissions),'權限');
-      let orderRows=[]; snap.orders.forEach(o=>{let items=Array.isArray(o.items)?o.items:[{}];items.forEach(it=>orderRows.push({單號:o.id||'',日期:o.date||'',領料人:o.applicant||'',工令類型:o.workOrderType||'',工令單號:o.workOrderNo||'',地點:o.location||'',SKU:it.sku||'',原始編號:it.orig_code||'',名稱:it.name||'',規格:it.spec||'',動作:it.action||'',數量:it.qty??''}))});
+      let orderRows=[]; snap.orders.forEach(o=>{let items=Array.isArray(o.items)?o.items:[{}];items.forEach(it=>orderRows.push({單號:o.id||'',日期:o.date||'',領料人:o.applicant||'',工令類型:o.workOrderType||'',工令單號:o.workOrderNo||'',正式工令號:o.officialWorkOrderNo||'',正式工令補登人:o.officialWorkOrderLinkedBy||'',正式工令補登時間:o.officialWorkOrderLinkedAt||'',地點:o.location||'',SKU:it.sku||'',原始編號:it.orig_code||'',名稱:it.name||'',規格:it.spec||'',動作:it.action||'',數量:it.qty??''}))});
       XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(orderRows),'歷史紀錄');
       let settingRows=[{項目:'版本',值:VERSION},{項目:'匯出時間',值:snap.exportedAt},{項目:'材料筆數',值:materialRows.length},{項目:'人員數',值:snap.personnel.length},{項目:'歷史單數',值:snap.orders.length},{項目:'雲端網址',值:snap.settings.gasUrl||''}];
       XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(settingRows),'系統資訊');
       XLSX.writeFile(wb,'Water-Warehouse-完整資料-'+stamp+'.xlsx');
       setStatus('✅ 完整資料已匯出：Excel 材料 '+materialRows.length+' 筆、人員 '+snap.personnel.length+' 人、歷史 '+snap.orders.length+' 單。另已同時下載 JSON 完整原始備份。');
     }catch(e){
-      console.error('V7.6.9.18 export error',e);
+      console.error('V7.6.9.47 export error',e);
       setStatus('❌ 完整資料匯出失敗：'+(e&&e.message?e.message:e));
       alert('完整資料匯出失敗：'+(e&&e.message?e.message:e));
     }
@@ -2913,7 +1407,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     let cfg=cloudConfig(), snap=await requireDataReady('雲端上傳'); if(!snap) return;
     let syncId='ww765-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
     let slimMaterials=cloudSafeMaterials(snap.materials);
-    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.18-slim-no-qr-base64'};
+    let payload={_v2:true,_v76:true,_syncId:syncId,version:VERSION,time:new Date().toISOString(),orders:snap.orders,personnel:snap.personnel,materials:slimMaterials,qrMap:snap.qrMap,cloudFormat:'V7.6.9.47-slim-no-qr-base64'};
     setStatus('☁️ 上傳中…QR 圖片快取不送雲端；送出後會立即回讀驗證。');
     try{
       await fetch(cfg.url+'?code='+encodeURIComponent(cfg.code)+'&v2=1&v76=1',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
@@ -2966,9 +1460,36 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   function setStatus(t){let e=document.getElementById('ww76-status');if(e)e.textContent=t;console.log('[WW76]',t)}
   function buildUI(){
     if(document.getElementById('ww76-panel-btn')) return;
-    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.18 管理';document.body.appendChild(b);
-    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.18 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><div class="ww76-row ww76-person-row"><button class="ww76-btn" id="ww76-person-down">👥 下載人員／權限</button></div><p class="ww76-note">V7.6.9.18 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
-    b.onclick=async()=>{let u=getCurrentUser();let rr=currentRole(),label=rr==='領料'?'一般領料員':rr==='倉管'?'倉管員':rr;document.getElementById('ww76-role').textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+label;m.style.display='flex';setStatus('正在讀取目前資料…');await refreshCurrentCounts('目前資料')};
+    let b=document.createElement('button');b.id='ww76-panel-btn';b.textContent='🛡️ V7.6.9.47 管理';document.body.appendChild(b);
+    let m=document.createElement('div');m.id='ww76-modal';m.innerHTML=`<div id="ww76-card"><button class="ww76-close" id="ww76-close">✕</button><h2>水電倉庫 V7.6.9.47 管理</h2><p>完整備份、唯一超級管理員保護、電腦／手機雲端同步。</p><div class="ww76-role" id="ww76-role"></div><div class="ww76-row"><button class="ww76-btn ww76-primary" id="ww76-export">💾 完整資料匯出</button><button class="ww76-btn" id="ww76-check">🔒 檢查權限</button></div><div class="ww76-row"><button class="ww76-btn" id="ww76-up">☁️ 上傳到雲端</button><button class="ww76-btn" id="ww76-down">⬇️ 從雲端下載</button></div><div class="ww76-row ww76-person-row"><button class="ww76-btn" id="ww76-person-down">👥 下載人員／權限</button></div><div class="ww76-row" id="ww719-history-row">
+<button class="ww76-btn" id="ww719-history-refresh">🔄 更新雲端歷史</button>
+<button class="ww76-btn" id="ww719-archive-export">📦 匯出封存 Excel</button>
+</div>
+<div class="ww76-row" id="ww719-archive-row" style="display:none">
+<button class="ww76-btn" id="ww719-archive-before">🗄️ 依日期封存</button>
+<button class="ww76-btn ww76-danger" id="ww719-purge-archive">🧹 清除封存區</button>
+</div><p class="ww76-note">V7.6.9.47 不會用「哪邊人數比較多」決定權限。超級管理員固定只有 1 位；系統管理員不能修改、刪除或降級超級管理員。</p><div class="ww76-status" id="ww76-status">尚未執行操作。</div></div>`;document.body.appendChild(m);
+    b.onclick=async()=>{let u=getCurrentUser();let rr=currentRole(),label=rr==='領料'?'一般領料員':rr==='倉管'?'倉管員':rr;document.getElementById('ww76-role').textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+label;
+      m.style.display='flex';
+      try{window.__wwApplyArchiveVisibilityHard&&window.__wwApplyArchiveVisibilityHard()}catch(e){}
+      try{if(window.WW719&&window.WW719.tune)window.WW719.tune()}catch(e){}
+      setTimeout(function(){
+        try{window.__wwApplyArchiveVisibilityHard&&window.__wwApplyArchiveVisibilityHard()}catch(e){}
+      },30);
+      setStatus('正在讀取目前資料…');await refreshCurrentCounts('目前資料');
+      try{window.__wwApplyArchiveVisibilityHard&&window.__wwApplyArchiveVisibilityHard()}catch(e){}
+    };
+    function applyArchiveVisibilityHard(){
+      let roleText=(document.getElementById('ww76-role')?.textContent||'');
+      let isSuperNow=roleText.indexOf('超級管理員')>=0;
+      let ar=document.getElementById('ww719-archive-row');
+      let purge=document.getElementById('ww719-purge-archive');
+      let arch=document.getElementById('ww719-archive-before');
+      if(ar) ar.style.setProperty('display',isSuperNow?'grid':'none','important');
+      if(purge) purge.style.setProperty('display',isSuperNow?'':'none','important');
+      if(arch) arch.style.setProperty('display',isSuperNow?'':'none','important');
+    }
+    window.__wwApplyArchiveVisibilityHard=applyArchiveVisibilityHard;
     document.getElementById('ww76-close').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target===m)m.style.display='none'};
     document.getElementById('ww76-export').onclick=exportFull;
     document.getElementById('ww76-check').onclick=()=>{let p=writePersonnelEverywhere(getPersonnel()), sup=p.filter(x=>x.role==='超級管理員');setStatus('✅ 權限檢查完成：共 '+p.length+' 人；超級管理員 '+sup.length+' 人（'+sup.map(x=>x.name).join('、')+'）。')};
@@ -3009,17 +1530,17 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 </script>
 
 <script>
-// === V7.6.9.18 舊同步正式退役層 ===
+// === V7.6.9.47 舊同步正式退役層 ===
 (function(){
   function retireLegacySync(){
     try{
       localStorage.setItem('autoSyncEnabled','0');
       window._autoSyncEnabled=false;
 
-      window.autoUpload=function(){ console.log('V7.6.9.18：舊 autoUpload 已退役'); };
-      window.debounceUpload=function(){ console.log('V7.6.9.18：舊 debounceUpload 已退役'); };
-      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.18 管理」的上傳到雲端。'); };
-      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.18 管理」的從雲端下載。'); };
+      window.autoUpload=function(){ console.log('V7.6.9.47：舊 autoUpload 已退役'); };
+      window.debounceUpload=function(){ console.log('V7.6.9.47：舊 debounceUpload 已退役'); };
+      window.uploadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.47 管理」的上傳到雲端。'); };
+      window.downloadCloudFinal=function(){ alert('舊同步已移除，請使用「🛡️ V7.6.9.47 管理」的從雲端下載。'); };
       window.clearCloudFinal=function(){ alert('舊同步清空功能已停用。'); };
 
       ['floatingSyncBtnFinal','syncModal','syncStatusFinal','autoSyncCheck'].forEach(function(id){
@@ -3033,12 +1554,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
       document.querySelectorAll('button,label,div').forEach(function(el){
         var t=(el.textContent||'').trim();
-        if(!t || t.indexOf('V7.6.9.18')>=0) return;
+        if(!t || t.indexOf('V7.6.9.47')>=0) return;
         if((t==='☁️ 自動同步' || t==='自動同步' || t.indexOf('自動同步：')===0) && t.length<80){
           try{el.remove();}catch(e){el.style.display='none';}
         }
       });
-    }catch(e){console.log('V7.6.9.18 retireLegacySync',e);}
+    }catch(e){console.log('V7.6.9.47 retireLegacySync',e);}
   }
   retireLegacySync();
   window.addEventListener('load',function(){
@@ -3046,16 +1567,16 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
     setTimeout(retireLegacySync,800);
     setTimeout(retireLegacySync,2200);
   });
-  setInterval(retireLegacySync,10000);
+
 })();
 </script>
 
 
 <script>
-// === V7.6.9.18 多人增量同步：60 人手機不再整包互蓋 ===
+// === V7.6.9.47 多人增量同步：60 人手機不再整包互蓋 ===
 (function(){
   'use strict';
-  const V='7.6.9.18';
+  const V='7.6.9.19';
   const CORE='v7_4_22';
   const PERSON_KEYS=['water_warehouse_personnel_v7','water-warehouse-personnel','personnel_list','ww_personnel','personnel','personnel_v7','users'];
   const GAS_DEFAULT='https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
@@ -3181,7 +1702,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       localStorage.setItem('ww7691_reconciledAt',new Date().toISOString());
       return;
     }
-    status('🔎 第一次使用 V7.6.9.18：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
+    status('🔎 第一次使用 V7.6.9.47：正在比對本機 '+ids.length+' 筆舊紀錄與雲端單號，避免重複上傳…');
     let found=[];
     // URL 不宜過長，分批 80 個 ID 查詢。
     for(let i=0;i<ids.length;i+=80){
@@ -3259,7 +1780,15 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       let px=await getJson('personnel');
       writePersonnel(px.personnel);
       let ox=await getJson('orders');
-      let cloud=Array.isArray(ox.orders)?ox.orders:[];
+      let cloud=(Array.isArray(ox.orders)?ox.orders:[]).slice().sort(function(a,b){
+        function tt(o){
+          var raw=String((o&&o.date)||'').trim();
+          var m=raw.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:\s*(上午|下午)?\s*(\d{1,2})[:：](\d{1,2})(?:[:：](\d{1,2}))?)?/);
+          if(m){var h=+(m[5]||0);if(m[4]==='下午'&&h<12)h+=12;if(m[4]==='上午'&&h===12)h=0;return new Date(+m[1],+m[2]-1,+m[3],h,+(m[6]||0),+(m[7]||0)).getTime()||0}
+          var t=Date.parse(raw);return isFinite(t)?t:0;
+        }
+        return tt(b)-tt(a);
+      });
       if(!cloud.length){status('ℹ️ 雲端目前沒有請料單可匯出。');return}
       if(!window.XLSX)throw new Error('Excel 元件尚未載入');
 
@@ -3273,6 +1802,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
             領料人:o.applicant||o.submittedBy||o.cloudSubmittedBy||'',
             工令類型:o.workOrderType||'',
             工令單號:o.workOrderNo||'',
+            正式工令號:o.officialWorkOrderNo||'',
             單位地點:o.location||'',
             原始編號:'',
             SKU:'',
@@ -3291,6 +1821,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
               領料人:o.applicant||o.submittedBy||o.cloudSubmittedBy||'',
               工令類型:o.workOrderType||'',
               工令單號:o.workOrderNo||'',
+              正式工令號:o.officialWorkOrderNo||'',
               單位地點:o.location||'',
               原始編號:it.orig_code||it.origCode||'',
               SKU:it.sku||'',
@@ -3351,12 +1882,12 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
       up.textContent='☁️ 上傳主資料＋我的新單';
       down.textContent='⬇️ 下載全部請料單 Excel';
       if(ex)ex.style.display='';if(ck)ck.style.display='';
-      if(note)note.textContent='V7.6.9.18 管理端：人員／權限與材料由管理端維護；雲端請料單直接下載成 Excel，不再寫回本機歷史，避免資料衝突。';
+      if(note)note.textContent='V7.6.9.47 管理端：人員／權限與材料由管理端維護；雲端請料單直接下載成 Excel，不再寫回本機歷史，避免資料衝突。';
     }else{
       up.textContent='☁️ 上傳我的新請料單';
       down.textContent='⬇️ 下載人員／權限';
       if(ex)ex.style.display='none';if(ck)ck.style.display='none';
-      if(note)note.textContent='V7.6.9.18 多人模式：一般領料員完成請料後會自動上傳該張新單；下載只更新人員／權限，歷史只顯示本人，不下載全公司歷史與 918 筆材料。';
+      if(note)note.textContent='V7.6.9.47 多人模式：一般領料員完成請料後會自動上傳該張新單；下載只更新人員／權限，歷史只顯示本人，不下載全公司歷史與 918 筆材料。';
     }
     let roleEl=document.getElementById('ww76-role'),u=currentUser();
     if(roleEl)roleEl.textContent='目前登入：'+(u?u.name:'未登入')+' ｜ '+r;
@@ -3372,8 +1903,8 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
   function patchPanel(){
     let b=document.getElementById('ww76-panel-btn');
-    if(b)b.textContent='🛡️ V7.6.9.18 同步';
-    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.18 多人同步';
+    if(b)b.textContent='🛡️ V7.6.9.47 同步';
+    let h=document.querySelector('#ww76-card h2');if(h)h.textContent='水電倉庫 V7.6.9.47 多人同步';
     let p=document.querySelector('#ww76-card h2 + p');if(p)p.textContent='60 人增量請料同步：手機只送新單、只下載權限；管理端統一收單與匯出。';
     if(b){
       let old=b.onclick;
@@ -3394,7 +1925,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.18 舊歷史刪除工具權限核心（無全頁監控） ===
+// === V7.6.9.47 舊歷史刪除工具權限核心（無全頁監控） ===
 (function(){
   window.__wwCanDeleteHistory=function(){
     try{
@@ -3410,7 +1941,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.18 手機人員／權限下載 + 同步視窗版面修正 ===
+// === V7.6.9.47 手機人員／權限下載 + 同步視窗版面修正 ===
 (function(){
   function wirePersonnelDownload(){
     var b=document.getElementById('ww76-person-down');
@@ -3433,7 +1964,7 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
 
 
 <script>
-// === V7.6.9.18 手機同步按鈕權限修正 ===
+// === V7.6.9.47 手機同步按鈕權限修正 ===
 (function(){
   function isMobile76917(){
     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
@@ -3485,6 +2016,688 @@ window.__MATS__ = [{"sku": "W-1-1", "orig_code": "1-1", "name": "面盆單孔龍
   document.addEventListener('click',function(e){
     if(e.target && e.target.id==='ww76-panel-btn') applyAfterOpen();
   });
+})();
+</script>
+
+
+<script>
+// === V7.6.9.47 雲端正式歷史 / 修改 / 刪除 / 封存 ===
+(function(){
+  'use strict';
+  const GAS_DEFAULT='https://script.google.com/macros/s/AKfycby4KadoGKmoVDmSQZI5dQTi0ms2lce6qXeIMEc188mX-7oMk3bYjhrPnWdrgl0NhNPV/exec';
+  const CODE_DEFAULT='water-warehouse-v2-0822';
+  const CORE='v7_4_22';
+
+  function j(raw,f){try{return JSON.parse(raw)}catch(e){return f}}
+  function cfg(){return {url:localStorage.getItem('gasUrl')||GAS_DEFAULT,code:localStorage.getItem('syncCode')||CODE_DEFAULT}}
+  function user(){return j(localStorage.getItem('v7_loginUser'),null)}
+  function role(){
+    let r=String((user()||{}).role||'');
+    if(r.includes('超級'))return '超級管理員';
+    if(r.includes('系統'))return '系統管理員';
+    if(r.includes('倉管'))return '倉管員';
+    return '一般領料員';
+  }
+  function isManager(){let r=role();return r==='超級管理員'||r==='系統管理員'}
+  function isSuper(){
+    let roleBox=document.getElementById('ww76-role');
+    let roleText=(roleBox&&roleBox.textContent)||'';
+    return roleText.indexOf('超級管理員')>=0||role()==='超級管理員';
+  }
+  function isMobile(){return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||window.matchMedia('(max-width:700px)').matches}
+  function status(t){let e=document.getElementById('ww76-status');if(e)e.textContent=t;console.log('[WW719]',t)}
+  async function getJson(action,extra){
+    let c=cfg(),q='?code='+encodeURIComponent(c.code)+'&action='+encodeURIComponent(action)+'&t='+Date.now();
+    if(extra)Object.keys(extra).forEach(k=>q+='&'+encodeURIComponent(k)+'='+encodeURIComponent(extra[k]));
+    let r=await fetch(c.url+q,{cache:'no-store'}),x=await r.json();
+    if(x&&x.ok===false)throw new Error(x.error||'雲端操作失敗');
+    return x;
+  }
+  async function post(action,payload,keepalive){
+    let c=cfg();
+    await fetch(c.url+'?code='+encodeURIComponent(c.code)+'&action='+encodeURIComponent(action)+'&t='+Date.now(),{
+      method:'POST',mode:'no-cors',keepalive:!!keepalive,
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(Object.assign({_v769:true,actor:(user()||{}).name||'',actorRole:role()},payload||{}))
+    });
+  }
+  async function verifyOrder(id,shouldExist){
+    let x=await getJson('checkOrders',{ids:id});
+    let yes=Array.isArray(x.ids)&&x.ids.map(String).includes(String(id));
+    return shouldExist?yes:!yes;
+  }
+  function orderTime(o){
+    if(!o)return 0;
+    let raw=String(o.date||'').trim();
+
+    // 支援主程式 new Date().toLocaleString("zh-TW") 產生的格式：
+    // 2026/8/26 上午11:55:00、2026/8/26 下午3:20:00
+    let m=raw.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:\s*(上午|下午)?\s*(\d{1,2})[:：](\d{1,2})(?:[:：](\d{1,2}))?)?/);
+    if(m){
+      let y=+m[1],mo=+m[2]-1,d=+m[3],ap=m[4]||'',h=+(m[5]||0),mi=+(m[6]||0),se=+(m[7]||0);
+      if(ap==='下午'&&h<12)h+=12;
+      if(ap==='上午'&&h===12)h=0;
+      let t=new Date(y,mo,d,h,mi,se).getTime();
+      if(Number.isFinite(t))return t;
+    }
+
+    let parsed=Date.parse(raw);
+    if(Number.isFinite(parsed))return parsed;
+
+    // 舊資料若日期格式無法解析，再以雲端時間作備援。
+    let backup=Date.parse(String(o.cloudUpdatedAt||o.cloudSubmittedAt||o.updatedAt||o.createdAt||''));
+    return Number.isFinite(backup)?backup:0;
+  }
+  function sortOrdersNewest(arr){
+    return (Array.isArray(arr)?arr:[]).slice().sort((a,b)=>{
+      let d=orderTime(b)-orderTime(a);
+      if(d!==0)return d;
+      return String(b.id||'').localeCompare(String(a.id||''),'zh-Hant',{numeric:true});
+    });
+  }
+  function orderSeq(arr){return (arr||[]).map(o=>String(o&&o.id||'')).join('|')}
+
+  function saveCloudOrders(arr){
+    arr=sortOrdersNewest(arr);
+    // 先存一份 V7.6.9.47 專用雲端歷史快取；舊補丁不會碰這個 key。
+    localStorage.setItem('ww719_cloud_orders_cache',JSON.stringify(arr));
+    localStorage.setItem('ww719_cloud_history_updated',new Date().toISOString());
+
+    // 再同步到主程式歷史來源，供 React 畫面顯示。
+    let c=j(localStorage.getItem(CORE),{})||{};
+    c.orders=arr;
+    if(!Array.isArray(c.personnel))c.personnel=[];
+    localStorage.setItem(CORE,JSON.stringify(c));
+    localStorage.setItem('hist',JSON.stringify(arr));
+  }
+  function sig(arr){
+    return (arr||[]).map(o=>String(o.id||'')+'|'+String(o.cloudUpdatedAt||o.date||'')).sort().join('~');
+  }
+  function showHistoryLoading(msg){
+    let ov=document.getElementById('ww719-history-loading');
+    if(!ov){
+      ov=document.createElement('div');ov.id='ww719-history-loading';
+      ov.style.cssText='position:fixed;inset:0;z-index:2147483646;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;padding:24px;';
+      ov.innerHTML='<div style="max-width:420px;width:100%;background:white;border:1px solid #e4e4e7;border-radius:18px;padding:24px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.12)"><div style="font-size:30px;margin-bottom:10px">☁️</div><div id="ww719-history-loading-text" style="font-weight:900;font-size:17px">正在更新雲端歷史…</div><div style="margin-top:8px;font-size:12px;color:#71717a">資料載入完成後會自動回到歷史紀錄，請勿關閉頁面。</div></div>';
+      document.body.appendChild(ov);
+    }
+    let tx=document.getElementById('ww719-history-loading-text');if(tx)tx.textContent=msg||'正在更新雲端歷史…';
+    ov.style.display='flex';
+  }
+  function hideHistoryLoading(){let ov=document.getElementById('ww719-history-loading');if(ov)ov.style.display='none';}
+
+  async function refreshHistory(opts){
+    opts=opts||{};
+    if(!isManager()||isMobile())return false;
+    status('🔄 正在更新電腦端雲端歷史紀錄…');
+    try{
+      let x=await getJson('orders'), cloud=sortOrdersNewest(Array.isArray(x.orders)?x.orders:[]);
+      let local=(j(localStorage.getItem(CORE),{})||{}).orders||[];
+      let changed=sig(local)!==sig(cloud) || orderSeq(local)!==orderSeq(cloud);
+      saveCloudOrders(cloud);
+      status('✅ 雲端歷史已更新：'+cloud.length+' 單，已依日期由新到舊排列。');
+      if(opts.reload && changed){
+        let verify=j(localStorage.getItem('ww719_cloud_orders_cache'),[]);
+        if(!Array.isArray(verify)||verify.length!==cloud.length)throw new Error('雲端歷史快取寫入未完成，已停止重新整理');
+        sessionStorage.setItem('ww719_open_history','1');
+        sessionStorage.setItem('ww719_expected_history',String(cloud.length));
+        showHistoryLoading('正在載入 '+cloud.length+' 筆雲端歷史紀錄…');
+        setTimeout(()=>location.reload(),500);
+      }
+      return true;
+    }catch(e){status('❌ 更新雲端歷史失敗：'+e.message);return false}
+  }
+
+  async function updateOrder(order){
+    if(!isManager()){alert('只有系統管理員或超級管理員可以修改請料單');return false}
+    status('☁️ 正在更新雲端請料單 '+order.id+'…');
+    try{
+      await post('updateOrder',{order:order});
+      await new Promise(r=>setTimeout(r,650));
+      if(!(await verifyOrder(order.id,true)))throw new Error('雲端回讀未找到此單');
+      status('✅ 請料單 '+order.id+' 已更新到雲端。');
+      return true;
+    }catch(e){status('❌ 雲端修改失敗：'+e.message);alert('雲端修改失敗，建議重新更新歷史後再試。');return false}
+  }
+
+  async function deleteOrder(id){
+    if(!isManager()){alert('只有系統管理員或超級管理員可以刪除請料單');return false}
+    status('🗑️ 正在將 '+id+' 移到雲端封存區…');
+    try{
+      await post('deleteOrder',{id:id});
+      await new Promise(r=>setTimeout(r,650));
+      if(!(await verifyOrder(id,false)))throw new Error('雲端仍存在此單');
+      status('✅ '+id+' 已從正式歷史移至封存區。');
+      return true;
+    }catch(e){status('❌ 雲端刪除失敗：'+e.message);return false}
+  }
+
+  async function deleteOrders(ids){
+    if(!isManager()||!Array.isArray(ids)||!ids.length)return false;
+    try{await post('deleteOrders',{ids:ids},true);return true}catch(e){return false}
+  }
+
+
+  function filterOfficial(mode){
+    mode=mode||'all';
+    document.querySelectorAll('[data-ww-history-order="1"]').forEach(el=>{
+      let isPhone=(el.getAttribute('data-ww-work-type')||'')==='電話請修';
+      let linked=!!(el.getAttribute('data-ww-official-no')||'').trim();
+      let show=mode==='all'||(mode==='pending'&&isPhone&&!linked)||(mode==='linked'&&isPhone&&linked);
+      el.style.display=show?'':'none';
+    });
+    document.querySelectorAll('[data-ww-official-filter]').forEach(b=>{
+      let active=b.getAttribute('data-ww-official-filter')===mode;
+      b.style.fontWeight=active?'900':'';
+      b.style.boxShadow=active?'0 0 0 2px rgba(59,130,246,.25)':'';
+    });
+  }
+
+  function selectedOfficialIds(){
+    return [...document.querySelectorAll('input[data-ww-official-id]:checked')]
+      .map(x=>String(x.getAttribute('data-ww-official-id')||'')).filter(Boolean);
+  }
+
+  async function promptOfficialOrder(ids,defaultNo){
+    if(!isManager()){alert('只有系統管理員或超級管理員可以補正式工令');return false}
+    ids=[...new Set((ids||[]).map(String).filter(Boolean))];
+    if(!ids.length){alert('沒有選到電話請修');return false}
+
+    let no=prompt(
+      ids.length>1
+        ? '共選擇 '+ids.length+' 張電話請修。\n請輸入這幾張共同對應的正式工令號：'
+        : '請輸入這張電話請修後來補開的正式工令號：',
+      defaultNo||''
+    );
+    if(no===null)return false;
+    no=String(no).trim();
+    if(!no){alert('正式工令號不能空白');return false}
+
+    status('🔗 正在核對電話請修與正式工令 '+no+'…');
+    try{
+      // 永遠以系統唯一 ID 從「最新雲端正式歷史」抓原單，不靠日期、姓名或地點猜測。
+      let x=await getJson('orders');
+      let all=Array.isArray(x.orders)?x.orders:[];
+      let map={};all.forEach(o=>{if(o&&o.id)map[String(o.id)]=o});
+      let chosen=ids.map(id=>map[id]).filter(Boolean);
+
+      if(chosen.length!==ids.length)throw new Error('有選取的請料單已不在正式雲端歷史，請先更新雲端歷史');
+      if(chosen.some(o=>o.workOrderType!=='電話請修')){
+        alert('只能把「電話請修」關聯正式工令，已停止。');
+        return false;
+      }
+
+      let overwrite=chosen.filter(o=>o.officialWorkOrderNo&&String(o.officialWorkOrderNo)!==no);
+      if(overwrite.length){
+        if(!confirm('其中 '+overwrite.length+' 張已經有正式工令號。\n確定要改成「'+no+'」嗎？'))return false;
+      }
+
+      let actor=(user()||{}).name||'';
+      for(let o of chosen){
+        let updated=Object.assign({},o,{
+          officialWorkOrderNo:no,
+          officialWorkOrderLinkedAt:new Date().toISOString(),
+          officialWorkOrderLinkedBy:actor
+        });
+        await post('updateOrder',{order:updated});
+        // 多張共用同工令時依序寫入，避免同時更新同一份雲端 JSON。
+        await new Promise(r=>setTimeout(r,180));
+      }
+
+      await new Promise(r=>setTimeout(r,700));
+      let verify=await getJson('orders');
+      let va=Array.isArray(verify.orders)?verify.orders:[];
+      let vm={};va.forEach(o=>{if(o&&o.id)vm[String(o.id)]=o});
+      let ok=ids.every(id=>vm[id]&&String(vm[id].officialWorkOrderNo||'')===no);
+      if(!ok)throw new Error('雲端回讀驗證未全部符合，請先按更新雲端歷史確認');
+
+      status('✅ 已將 '+ids.length+' 張電話請修關聯正式工令：'+no);
+      await refreshHistory({reload:true});
+      return true;
+    }catch(e){
+      status('❌ 正式工令關聯失敗：'+e.message);
+      alert('正式工令關聯失敗：'+e.message);
+      return false;
+    }
+  }
+
+  function bulkOfficialFromChecks(){
+    let ids=selectedOfficialIds();
+    if(ids.length<2){
+      alert('「合併補正式工令」只在少數多張電話請修共用同一工令時使用。\n請至少勾選 2 張；單張直接按該筆的「補正式工令」。');
+      return;
+    }
+    return promptOfficialOrder(ids,'');
+  }
+
+  function excelFromOrders(orders,prefix){
+    if(!window.XLSX)throw new Error('Excel 元件尚未載入');
+    let summary=[],rows=[];
+    (orders||[]).forEach(o=>{
+      summary.push({單號:o.id||'',日期:o.date||'',領料人:o.applicant||'',工令類型:o.workOrderType||'',工令單號:o.workOrderNo||'',正式工令號:o.officialWorkOrderNo||'',正式工令補登人:o.officialWorkOrderLinkedBy||'',正式工令補登時間:o.officialWorkOrderLinkedAt||'',單位地點:o.location||'',材料項數:Array.isArray(o.items)?o.items.length:0,狀態:o.status||'',封存原因:o.archiveReason||''});
+      (Array.isArray(o.items)?o.items:[]).forEach(it=>rows.push({單號:o.id||'',日期:o.date||'',領料人:o.applicant||'',工令單號:o.workOrderNo||'',正式工令號:o.officialWorkOrderNo||'',單位地點:o.location||'',原始編號:it.orig_code||'',SKU:it.sku||'',品名:it.name||'',規格:it.spec||'',單位:it.unit||'',動作:it.action||'',數量:it.qty??''}));
+    });
+    let wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'請料單');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'請料明細');
+    let d=new Date(),p=n=>String(n).padStart(2,'0'),fn=prefix+'_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.xlsx';
+    XLSX.writeFile(wb,fn);
+    return {orders:summary.length,rows:rows.length};
+  }
+
+  async function exportArchive(){
+    if(!isManager())return;
+    try{
+      let x=await getJson('archived'),a=Array.isArray(x.orders)?x.orders:[];
+      if(!a.length){alert('封存區目前沒有資料');return}
+      let c=excelFromOrders(a,'雲端請料封存');
+      status('✅ 封存 Excel 已下載：'+c.orders+' 單 / '+c.rows+' 筆明細。');
+    }catch(e){status('❌ 封存匯出失敗：'+e.message)}
+  }
+
+  async function archiveBefore(){
+    if(!isSuper()){alert('只有超級管理員可以大量封存舊請料單');return}
+    let cutoff=prompt('輸入封存截止日期（YYYY-MM-DD）\\n例如：2026-08-31\\n截止日以前（含當日）的正式請料單會移到封存區。');
+    if(!cutoff)return;
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(cutoff)){alert('日期格式錯誤');return}
+    if(!confirm('確定封存 '+cutoff+' 以前（含當日）的雲端請料單？\\n封存後仍可匯出，不是永久刪除。'))return;
+    try{
+      await post('archiveBefore',{cutoff:cutoff});
+      await new Promise(r=>setTimeout(r,800));
+      await refreshHistory({reload:true});
+    }catch(e){status('❌ 封存失敗：'+e.message)}
+  }
+
+  async function purgeArchive(){
+    if(!isSuper()){alert('只有超級管理員可以永久清除封存區');return}
+    if(!confirm('⚠️ 這會永久清除「封存區」全部資料。\\n請先使用「匯出封存 Excel」備份。'))return;
+    let token=prompt('最後確認：請輸入 DELETE 才會永久清除封存區');
+    if(token!=='DELETE'){alert('已取消');return}
+    try{
+      await post('purgeArchive',{confirmToken:'DELETE'});
+      status('✅ 已送出封存區永久清除。建議稍後再匯出封存確認為 0。');
+    }catch(e){status('❌ 清除封存區失敗：'+e.message)}
+  }
+
+  function tune(){
+    let row=document.getElementById('ww719-history-row'), ar=document.getElementById('ww719-archive-row');
+    let r=role();
+    let roleBox=document.getElementById('ww76-role');
+    let roleText=(roleBox&&roleBox.textContent)||'';
+    let superFromUI=roleText.indexOf('超級管理員')>=0;
+    let managerFromUI=superFromUI||roleText.indexOf('系統管理員')>=0;
+    let managerOnly=(managerFromUI||r==='超級管理員'||r==='系統管理員')&&!isMobile();
+    let superOnly=(superFromUI||r==='超級管理員')&&!isMobile();
+    if(row)row.style.display=managerOnly?'grid':'none';
+    if(ar)ar.style.display=superOnly?'grid':'none';
+    let purge=document.getElementById('ww719-purge-archive'), arch=document.getElementById('ww719-archive-before');
+    if(purge)purge.style.display=superOnly?'':'none';
+    if(arch)arch.style.display=superOnly?'':'none';
+  }
+  function wire(){
+    let b=document.getElementById('ww719-history-refresh');if(b)b.onclick=()=>refreshHistory({reload:true});
+    b=document.getElementById('ww719-archive-export');if(b)b.onclick=exportArchive;
+    b=document.getElementById('ww719-archive-before');if(b)b.onclick=archiveBefore;
+    b=document.getElementById('ww719-purge-archive');if(b)b.onclick=purgeArchive;
+    tune();
+  }
+
+  window.WW719={refreshHistory,updateOrder,deleteOrder,deleteOrders,exportArchive,archiveBefore,purgeArchive,filterOfficial,promptOfficialOrder,bulkOfficialFromChecks};
+
+  // 電腦管理員每次開新瀏覽器工作階段自動抓一次正式雲端歷史。
+  async function autoSync(){
+    wire();
+    if(!isManager()||isMobile())return;
+    if(sessionStorage.getItem('ww719_auto_done')==='1')return;
+    sessionStorage.setItem('ww719_auto_done','1');
+    await refreshHistory({reload:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(autoSync,500));
+  else setTimeout(autoSync,500);
+
+  // 重載後回到歷史紀錄頁。
+  window.addEventListener('load',()=>{
+    if(sessionStorage.getItem('ww719_open_history')==='1'){
+      let cached=j(localStorage.getItem('ww719_cloud_orders_cache'),[]);
+      if(Array.isArray(cached)&&cached.length){
+        let c=j(localStorage.getItem(CORE),{})||{};c.orders=cached;
+        if(!Array.isArray(c.personnel))c.personnel=[];
+        localStorage.setItem(CORE,JSON.stringify(c));
+        localStorage.setItem('hist',JSON.stringify(cached));
+      }
+      let expected=sessionStorage.getItem('ww719_expected_history')||'';
+      showHistoryLoading(expected?'正在載入 '+expected+' 筆雲端歷史紀錄…':'正在載入雲端歷史紀錄…');
+      sessionStorage.removeItem('ww719_open_history');sessionStorage.removeItem('ww719_expected_history');
+      setTimeout(()=>{
+        let b=[...document.querySelectorAll('button')].find(x=>(x.textContent||'').trim()==='歷史紀錄');
+        if(b)b.click();
+        setTimeout(hideHistoryLoading,450);
+      },900);
+    }
+  });
+})();
+</script>
+
+
+<script>
+// === V7.6.9.47 管理員歷史啟動修復 ===
+(function(){
+  try{
+    var u=JSON.parse(localStorage.getItem('v7_loginUser')||'null')||{};
+    var r=String(u.role||'');
+    var isMgr=r.indexOf('超級')>=0||r.indexOf('系統')>=0;
+    if(!isMgr)return;
+    var cached=JSON.parse(localStorage.getItem('ww719_cloud_orders_cache')||'[]');
+    if(!Array.isArray(cached)||!cached.length)return;
+    var core=JSON.parse(localStorage.getItem('v7_4_22')||'{}')||{};
+    if(!Array.isArray(core.personnel))core.personnel=[];
+    core.orders=cached;
+    localStorage.setItem('v7_4_22',JSON.stringify(core));
+    localStorage.setItem('hist',JSON.stringify(cached));
+  }catch(e){}
+})();
+</script>
+
+
+
+<script>
+// === V7.6.9.47 唯一正式歷史封存工具列 ===
+(function(){
+  'use strict';
+
+  function currentRole(){
+    try{
+      var u=JSON.parse(localStorage.getItem('v7_loginUser')||'null')||{};
+      var r=String(u.role||'');
+      if(r.indexOf('超級')>=0)return '超級管理員';
+      if(r.indexOf('系統')>=0)return '系統管理員';
+    }catch(e){}
+    return '';
+  }
+  function canBulkArchive(){ return currentRole()==='超級管理員'; }
+
+  function cards(){
+    return [...document.querySelectorAll('div.p-4.space-y-2')].filter(function(card){
+      return !!card.querySelector('div.font-mono.font-bold');
+    });
+  }
+  function cardId(card){
+    var e=card&&card.querySelector('div.font-mono.font-bold');
+    var id=e?(e.textContent||'').trim():'';
+    return /^M-/.test(id)?id:'';
+  }
+  function removeOldTools(){
+    ['bulk-del-toolbar','ww76923-archive-selected','ww76924-archive-selected'].forEach(function(id){
+      var e=document.getElementById(id);if(e)e.remove();
+    });
+    document.querySelectorAll('.history-chk,.ww730-history-chk').forEach(function(e){e.remove()});
+  }
+
+  function inject(){
+    if(!canBulkArchive()){ removeOldTools(); return; }
+    var cs=cards();
+    if(!cs.length)return;
+
+    // Remove any legacy toolbar only once, then create our unique toolbar.
+    var legacy=document.getElementById('bulk-del-toolbar');if(legacy)legacy.remove();
+    if(document.getElementById('ww730-archive-toolbar')){ update(); return; }
+
+    var list=cs[0].parentElement;
+    if(!list||!list.parentElement)return;
+    var bar=document.createElement('div');
+    bar.id='ww730-archive-toolbar';
+    bar.style.cssText='position:sticky;top:0;z-index:40;background:#fff;border:2px solid #111;border-radius:16px;padding:10px 14px;margin:8px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.12)';
+    bar.innerHTML=
+      '<label style="display:flex;align-items:center;gap:7px;font-weight:900"><input id="ww730-all" type="checkbox" style="width:21px;height:21px"> 全選 (<span id="ww730-total">0</span>)</label>'+
+      '<button type="button" id="ww730-selected" style="padding:8px 16px;border-radius:999px;background:#e11d48;color:#fff;border:0;font-weight:900">📦 封存選取 (<span id="ww730-count">0</span>)</button>'+
+      '<button type="button" id="ww730-allbtn" style="padding:8px 16px;border-radius:999px;background:#111;color:#fff;border:0;font-weight:900">📦 全部封存</button>'+
+      '<span style="font-size:12px;color:#71717a">封存可匯出備份，不是永久刪除</span>';
+    list.parentElement.insertBefore(bar,list);
+
+    bar.querySelector('#ww730-all').addEventListener('change',function(e){
+      e.stopPropagation();
+      document.querySelectorAll('.ww730-history-chk').forEach(function(chk){chk.checked=e.target.checked});
+      update();
+    });
+    bar.querySelector('#ww730-selected').addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();archiveSelected(this);
+    });
+    bar.querySelector('#ww730-allbtn').addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();archiveAll(this);
+    });
+    addChecks();
+    update();
+  }
+
+  function addChecks(){
+    cards().forEach(function(card){
+      if(card.querySelector('.ww730-history-chk'))return;
+      var id=cardId(card);if(!id)return;
+      var chk=document.createElement('input');
+      chk.type='checkbox';chk.className='ww730-history-chk';chk.dataset.id=id;
+      chk.style.cssText='width:22px;height:22px;accent-color:#e11d48;cursor:pointer;flex:0 0 auto';
+      chk.addEventListener('change',update);
+      var head=card.querySelector('div.flex.justify-between');
+      if(head)head.insertBefore(chk,head.firstChild);
+    });
+  }
+  function selectedIds(){
+    return [...document.querySelectorAll('.ww730-history-chk:checked')].map(function(x){return x.dataset.id}).filter(Boolean);
+  }
+  function update(){
+    addChecks();
+    var total=cards().length, sel=selectedIds().length;
+    var t=document.getElementById('ww730-total'),c=document.getElementById('ww730-count'),all=document.getElementById('ww730-all');
+    if(t)t.textContent=total;if(c)c.textContent=sel;
+    if(all){all.checked=total>0&&sel===total;all.indeterminate=sel>0&&sel<total}
+  }
+
+  async function archiveIds(ids,btn){
+    if(!ids.length){alert('請先勾選要封存的請料單');return}
+    if(!(window.WW719&&typeof window.WW719.deleteOrder==='function')){
+      alert('雲端封存功能尚未載入，請重新整理後再試');return;
+    }
+    var old=btn.textContent;btn.disabled=true;btn.textContent='☁️ 封存中 0/'+ids.length;
+    var ok=0, failed=[];
+    try{
+      for(var i=0;i<ids.length;i++){
+        btn.textContent='☁️ 封存中 '+(i+1)+'/'+ids.length;
+        var one=await window.WW719.deleteOrder(ids[i]);
+        if(one)ok++;else failed.push(ids[i]);
+      }
+      if(failed.length){
+        alert('⚠️ 已成功封存 '+ok+' 筆；'+failed.length+' 筆失敗。\n失敗單號：'+failed.join('、')+'\n請先不要重複操作失敗單。');
+      }else{
+        alert('✅ 已成功封存 '+ok+' 筆到雲端封存區。\n接著按「更新雲端歷史」即可確認正式歷史筆數。');
+      }
+      document.querySelectorAll('.ww730-history-chk').forEach(function(chk){chk.checked=false});
+      update();
+    }finally{
+      btn.disabled=false;btn.textContent=old;update();
+    }
+  }
+  async function archiveSelected(btn){
+    var ids=selectedIds();
+    if(!ids.length){alert('請先勾選要封存的請料單');return}
+    if(!confirm('確定將選取的 '+ids.length+' 筆請料單移到雲端封存區？\n資料不會永久刪除，可由「匯出封存 Excel」備份。'))return;
+    await archiveIds(ids,btn);
+  }
+  async function archiveAll(btn){
+    var ids=cards().map(cardId).filter(Boolean);
+    if(!ids.length)return;
+    if(!confirm('確定將目前全部 '+ids.length+' 筆正式歷史移到雲端封存區？'))return;
+    if(!confirm('再次確認：這是「全部封存」，不是永久刪除。'))return;
+    await archiveIds(ids,btn);
+  }
+
+  // Only a lightweight scheduled injector; no DOM-wide continuous delete observer.
+  var queued=false;
+  function schedule(){
+    if(queued)return;queued=true;
+    requestAnimationFrame(function(){queued=false;inject()});
+  }
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.textContent||'').trim();
+    if(t==='歷史紀錄')setTimeout(schedule,120);
+  },true);
+  window.addEventListener('load',function(){setTimeout(schedule,700)});
+  var mo=new MutationObserver(function(){
+    if(document.getElementById('ww730-archive-toolbar'))return;
+    if(cards().length)schedule();
+  });
+  mo.observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
+
+<script>
+// === V7.6.9.47 穩定化啟動層 ===
+(function(){
+  'use strict';
+  function current(){
+    try{return JSON.parse(localStorage.getItem('v7_loginUser')||'null')}catch(e){return null}
+  }
+  function fire(){
+    try{window.dispatchEvent(new CustomEvent('ww:ui-ready',{detail:{user:current()}}))}catch(e){}
+    try{if(window.WW719&&window.WW719.tune)window.WW719.tune()}catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(fire,80));
+  else setTimeout(fire,80);
+  window.addEventListener('load',()=>setTimeout(fire,100));
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.textContent||'').trim();
+    if(t.indexOf('登入')>=0||t.indexOf('登出')>=0||t==='歷史紀錄'||t==='人員設定')
+      setTimeout(fire,100);
+  },true);
+
+  // 手機材料管理用一次性 CSS 隱藏，不再用舊版 0.5/0.8 秒輪詢移除 DOM。
+  if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    var st=document.createElement('style');
+    st.textContent='#mat-admin-btn{display:none !important}';
+    document.head.appendChild(st);
+  }
+})();
+</script>
+
+
+<script>
+// === V7.6.9.47 歷史紀錄領料人姓名醒目化 ===
+(function(){
+  'use strict';
+
+  function emphasizeApplicant(){
+    try{
+      // 歷史紀錄卡片容器
+      var root=document.querySelector('div.p-4.space-y-2');
+      if(!root)return;
+
+      root.querySelectorAll('div').forEach(function(d){
+        var txt=(d.textContent||'').trim();
+        // 精準抓「領料人：姓名」這一列，避免影響其他內容
+        if(!txt || txt.indexOf('領料人')!==0 || txt.length>80) return;
+
+        // 若這個 div 還包含多層大量內容就略過
+        if(d.querySelectorAll('div').length>3) return;
+
+        // 先嘗試找 span / strong 等實際姓名節點
+        var children=[].slice.call(d.children||[]);
+        var target=null;
+        for(var i=children.length-1;i>=0;i--){
+          var ct=(children[i].textContent||'').trim();
+          if(ct && ct!=='領料人' && ct!=='領料人：' && ct!=='領料人:'){
+            target=children[i];
+            break;
+          }
+        }
+
+        if(target){
+          target.style.setProperty('font-weight','900','important');
+          target.style.setProperty('font-size','1.12rem','important');
+          target.style.setProperty('line-height','1.35','important');
+        }else{
+          // 如果是純文字節點，整列放大加粗；標籤一起加粗也比原本更清楚
+          d.style.setProperty('font-weight','800','important');
+          d.style.setProperty('font-size','1.08rem','important');
+          d.style.setProperty('line-height','1.4','important');
+        }
+      });
+    }catch(e){}
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(emphasizeApplicant,120)});
+  }else{
+    setTimeout(emphasizeApplicant,120);
+  }
+
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.textContent||'').trim();
+    if(t==='歷史紀錄' || t.indexOf('更新雲端歷史')>=0){
+      setTimeout(emphasizeApplicant,120);
+      setTimeout(emphasizeApplicant,500);
+    }
+  },true);
+
+  new MutationObserver(function(){setTimeout(emphasizeApplicant,40)})
+    .observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+
+<script>
+// === V7.6.9.47 歷史正式工令與地點跟隨工令單號字體 ===
+(function(){
+  'use strict';
+
+  function syncWorkOrderFonts(){
+    try{
+      document.querySelectorAll('[data-ww-history-order="1"]').forEach(function(card){
+        var workNo=card.querySelector('[data-ww-workorder-no="1"]');
+        if(!workNo)return;
+
+        var cs=getComputedStyle(workNo);
+        var fs=cs.fontSize;
+        var fw=cs.fontWeight;
+        var lh=cs.lineHeight;
+        var ff=cs.fontFamily;
+
+        card.querySelectorAll('[data-ww-official-label="1"],[data-ww-location-label="1"]').forEach(function(el){
+          el.style.setProperty('font-size',fs,'important');
+          el.style.setProperty('font-weight',fw,'important');
+          el.style.setProperty('line-height',lh,'important');
+          el.style.setProperty('font-family',ff,'important');
+        });
+      });
+    }catch(e){}
+  }
+
+  function run(){
+    setTimeout(syncWorkOrderFonts,30);
+    setTimeout(syncWorkOrderFonts,180);
+    setTimeout(syncWorkOrderFonts,600);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',run);
+  }else{
+    run();
+  }
+
+  document.addEventListener('click',function(e){
+    var t=(e.target&&e.target.textContent||'').trim();
+    if(t==='歷史紀錄'||t.indexOf('待補工令')>=0||t.indexOf('已補工令')>=0||t.indexOf('更新雲端歷史')>=0){
+      run();
+    }
+  },true);
+
+  new MutationObserver(function(muts){
+    for(var i=0;i<muts.length;i++){
+      if(muts[i].addedNodes&&muts[i].addedNodes.length){
+        setTimeout(syncWorkOrderFonts,40);
+        break;
+      }
+    }
+  }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 
